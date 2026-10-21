@@ -21,14 +21,14 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePracticeSession } from "@/hooks/queries/use-practice";
 import { templatesKeys } from "@/hooks/queries/use-templates";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStepProgress } from "@/hooks/use-step-progress";
 import { useTemplateStore } from "@/stores/template-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import { useFeedback } from "@/lib/use-feedback";
+import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { getTopicsByDomain } from "@/lib/mock/sprint";
 import { getTemplatesByDomain } from "@/services/templates";
@@ -36,7 +36,7 @@ import RendererRouter from "@/components/renderers/renderer-router";
 import type { Question } from "@/lib/types/sprint-session";
 import type { SolveAlongTemplate, RenderMode } from "@/lib/types/template";
 import { DOMAIN_LABELS } from "@/lib/types/template";
-import { CTA_04, CTA_06, CTA_12, CTA_20, CTA_30, GLASS_015, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme-tokens";
+import { CTA_04, CTA_06, CTA_12, CTA_20, CTA_30, GLASS_015, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
 
 type PracticeType = "mcq" | "templates";
 type Phase = "config" | "active" | "done";

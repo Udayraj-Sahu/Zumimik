@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BLACK_06, CYAN, EMERALD_12, GLASS_05, GLASS_BORDER, RED_SOFT_12, SOLID_BLACK } from "@/lib/theme-tokens";
+import { BLACK_06, CYAN, EMERALD_12, GLASS_05, GLASS_BORDER, RED_SOFT_12, SOLID_BLACK } from "@/lib/theme";
 import gsap from "gsap";
 import {
   Check,

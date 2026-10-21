@@ -1,5 +1,5 @@
 import { WallRegion } from "@/components/landing/wall-region";
-import { AMBER, GLASS_05, LIME_BRIGHT, LIME_BRIGHT_40, RED } from "@/lib/theme-tokens";
+import { AMBER, GLASS_05, LIME_BRIGHT, LIME_BRIGHT_40, RED } from "@/lib/theme";
 import { Achievement } from "@/components/landing/achievement";
 import { AIScanLine } from "@/components/landing/ai-scan-line";
 

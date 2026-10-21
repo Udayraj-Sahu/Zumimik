@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { LIME_BRIGHT } from "@/lib/theme-tokens";
+import { LIME_BRIGHT } from "@/lib/theme";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";

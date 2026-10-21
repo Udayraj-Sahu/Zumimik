@@ -3,8 +3,8 @@ import Dexie from "dexie";
 
 import { db } from "./db";
 import { cacheQueryData, getCachedQueryData, clearExpiredCache } from "./sync";
-import { resetAppState } from "@/lib/reset-app-state";
-import { safeLocalStorage } from "@/lib/browser";
+import { resetAppState } from "@/lib/platform";
+import { safeLocalStorage } from "@/lib/platform";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useNetworkStore } from "@/stores/network-store";

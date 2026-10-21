@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { apiUrl } from "@/lib/config";
-import { resetAppState } from "@/lib/reset-app-state";
+import { apiUrl } from "@/lib/platform";
+import { resetAppState } from "@/lib/platform";
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 

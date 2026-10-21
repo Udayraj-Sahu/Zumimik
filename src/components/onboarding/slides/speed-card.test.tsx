@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { SpeedCard } from "@/components/onboarding/speed-card";
+import { SpeedCard } from "@/components/onboarding/slides/speed-card";
 
 describe("SpeedCard", () => {
   it("renders the default speed copy", () => {

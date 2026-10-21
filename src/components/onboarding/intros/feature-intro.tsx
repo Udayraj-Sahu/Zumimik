@@ -8,7 +8,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { CYAN_251, LIME } from "@/lib/theme-tokens";
+import { CYAN_251, LIME } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {
@@ -29,7 +29,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import HabitCard from "@/components/onboarding/habit-card";
+import HabitCard from "@/components/onboarding/slides/habit-card";
 
 const ACCENT = LIME;
 

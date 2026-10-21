@@ -1,7 +1,7 @@
 import type { Topic, RadarAxis, Metric, DashboardStats, StreakData, UpcomingEvent, LeaderboardEntry, HomeRecentActivityItem } from "@/lib/types/dashboard";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getTopicMastery(domain?: string): Promise<Topic[]> {
   if (IS_MOCK) {

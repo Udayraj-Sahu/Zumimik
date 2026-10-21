@@ -5,11 +5,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Monitor, Smartphone, Globe, LogOut, Plus, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useLinkedDevices, useRevokeDevice } from "@/hooks/queries/use-linked-devices";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { LinkedDevice, LinkedDevicePlatform } from "@/lib/types/linked-devices";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 
 const PLATFORM_META: Record<LinkedDevicePlatform, { label: string; Icon: typeof Smartphone }> = {
   android: { label: "Android", Icon: Smartphone },

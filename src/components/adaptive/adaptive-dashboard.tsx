@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CYAN, EMERALD, GLASS_BG, GLASS_BORDER, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme-tokens";
+import { CYAN, EMERALD, GLASS_BG, GLASS_BORDER, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme";
 import { useAccentHex } from "@/hooks/use-accent-hex";
 import { isNativeRuntime } from "@/lib/native/is-native";
 import { useState } from "react";

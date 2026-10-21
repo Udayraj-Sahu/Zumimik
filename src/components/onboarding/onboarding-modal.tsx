@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { CYAN, EMERALD, GLASS_03, GLASS_06, GLASS_30, GLASS_BG, GREEN_SOLID, MUTED_GREEN, OVERLAY, PURPLE, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme-tokens";
+import { CYAN, EMERALD, GLASS_03, GLASS_06, GLASS_30, GLASS_BG, GREEN_SOLID, MUTED_GREEN, OVERLAY, PURPLE, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
 import {
@@ -30,14 +30,14 @@ import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
 import { useOnboardingStore, examIdForGoal } from "@/stores/onboarding-store";
 import { VEDIC_USE_CASES, DRILLS, PLANS, type VedicUseCaseId } from "@/lib/types/onboarding";
-import { FeatureIntro } from "@/components/onboarding/feature-intro";
-import { FamilyIntro } from "@/components/onboarding/family-intro";
-import { FamilyHubIntro } from "@/components/onboarding/family-hub-intro";
-import { SeatBuilderIntro } from "@/components/onboarding/seat-builder-intro";
-import { StoryIntro } from "@/components/onboarding/story-intro";
-import { ArenaIntro } from "@/components/onboarding/arena-intro";
-import { PitchIntro } from "@/components/onboarding/pitch-intro";
-import { PlanIntro } from "@/components/onboarding/plan-intro";
+import { FeatureIntro } from "@/components/onboarding/intros/feature-intro";
+import { FamilyIntro } from "@/components/onboarding/intros/family-intro";
+import { FamilyHubIntro } from "@/components/onboarding/intros/family-hub-intro";
+import { SeatBuilderIntro } from "@/components/onboarding/intros/seat-builder-intro";
+import { StoryIntro } from "@/components/onboarding/intros/story-intro";
+import { ArenaIntro } from "@/components/onboarding/intros/arena-intro";
+import { PitchIntro } from "@/components/onboarding/intros/pitch-intro";
+import { PlanIntro } from "@/components/onboarding/intros/plan-intro";
 
 const PERSONA_OPTIONS = [
   { label: "Student", icon: GraduationCap, color: EMERALD, desc: "Currently studying" },

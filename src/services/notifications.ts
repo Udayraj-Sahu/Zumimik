@@ -1,7 +1,7 @@
 import type { NotificationItem } from "@/lib/types/notifications";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getNotifications(): Promise<NotificationItem[]> {
   if (IS_MOCK) {

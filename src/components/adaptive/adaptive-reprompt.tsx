@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GLASS_03, GLASS_35, GLASS_BG, LIME, LIME_125, OVERLAY } from "@/lib/theme-tokens";
+import { GLASS_03, GLASS_35, GLASS_BG, LIME, LIME_125, OVERLAY } from "@/lib/theme";
 import gsap from "gsap";
 import {
   ChevronLeft,
@@ -19,15 +19,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore, goalForExam } from "@/stores/onboarding-store";
-import { StoryCommitmentMatrix } from "@/components/onboarding/story-intro";
+import { StoryCommitmentMatrix } from "@/components/onboarding/intros/story-intro";
 import { applyStoryNotifications } from "@/lib/notifications/story-reminders";
-import { PlanSelector } from "@/components/onboarding/plan-intro";
-import { SeatBuilderSelector } from "@/components/onboarding/seat-builder-intro";
-import { ArenaIntro } from "@/components/onboarding/arena-intro";
-import { PitchIntro } from "@/components/onboarding/pitch-intro";
-import { FamilyIntro } from "@/components/onboarding/family-intro";
-import { FamilyHubIntro } from "@/components/onboarding/family-hub-intro";
-import { FeatureIntro } from "@/components/onboarding/feature-intro";
+import { PlanSelector } from "@/components/onboarding/intros/plan-intro";
+import { SeatBuilderSelector } from "@/components/onboarding/intros/seat-builder-intro";
+import { ArenaIntro } from "@/components/onboarding/intros/arena-intro";
+import { PitchIntro } from "@/components/onboarding/intros/pitch-intro";
+import { FamilyIntro } from "@/components/onboarding/intros/family-intro";
+import { FamilyHubIntro } from "@/components/onboarding/intros/family-hub-intro";
+import { FeatureIntro } from "@/components/onboarding/intros/feature-intro";
 import { Dialog } from "@/components/ui/dialog";
 import { VEDIC_USE_CASES } from "@/lib/types/onboarding";
 import type { PlanId, StoryCommitment, VedicUseCaseId } from "@/lib/types/onboarding";

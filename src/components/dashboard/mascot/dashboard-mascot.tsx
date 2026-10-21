@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 /**
  * The avatar engine (which lives in the AGPL-licensed `@bible-strong/avatar-react`

@@ -1,7 +1,7 @@
 "use client";
 
 import { useThemeStore } from "@/stores/theme-store";
-import { accentThemes } from "@/lib/theme-tokens";
+import { accentThemes } from "@/lib/theme";
 
 /**
  * Resolved hex for the active accent in the active mode.

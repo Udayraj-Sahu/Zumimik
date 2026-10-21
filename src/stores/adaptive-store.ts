@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
+import { safeLocalStorage } from "@/lib/platform";
 import type { AdaptiveDomainState, SessionOutcome } from "@/lib/types/adaptive";
 import { applyOutcome, initialDomainState } from "@/lib/adaptive/engine";
 

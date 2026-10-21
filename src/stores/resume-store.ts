@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
+import { safeLocalStorage } from "@/lib/platform";
 import type { Question } from "@/lib/types/sprint-session";
 import type { AnswerEntry } from "@/stores/sprint-store";
 

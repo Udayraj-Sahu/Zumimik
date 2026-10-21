@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { useSprintSession } from "@/hooks/queries/use-sprint-session";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
-import { useFeedback } from "@/lib/use-feedback";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useFeedback } from "@/hooks/use-feedback";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import type { Question } from "@/lib/types/sprint-session";
@@ -19,8 +19,8 @@ import ContentFeedback from "@/components/ui/content-feedback";
 import { Button } from "@/components/ui/button";
 import { ExamShell } from "@/components/exam/exam-shell";
 import { QuestionNavigator } from "@/components/exam/question-navigator";
-import { GLASS_02, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme-tokens";
-import { formatTime } from "@/lib/format";
+import { GLASS_02, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
+import { formatTime } from "@/lib/text";
 
 function SprintContent() {
   usePageMeta("Sprint — Zuzumik");

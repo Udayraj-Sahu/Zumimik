@@ -1,4 +1,4 @@
-import { createAudioContext } from "@/lib/browser";
+import { createAudioContext } from "@/lib/platform";
 
 let ctx: AudioContext | null = null;
 

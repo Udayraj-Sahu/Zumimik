@@ -1,7 +1,7 @@
 import type { TopicNode, TopicEdge } from "@/lib/types/technique";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getSubjectTree(domain: string): Promise<TopicNode[]> {
   if (IS_MOCK) {

@@ -5,14 +5,14 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Clock, Award, ChevronRight, Filter, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useHistory } from "@/hooks/queries/use-history";
 import { getTopicFilters, DIFFICULTY_FILTER } from "@/lib/mock/history";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import type { HistoryEntry } from "@/lib/types/history";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { GLASS_BG } from "@/lib/theme-tokens";
-import { formatTime } from "@/lib/format";
+import { GLASS_BG } from "@/lib/theme";
+import { formatTime } from "@/lib/text";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);

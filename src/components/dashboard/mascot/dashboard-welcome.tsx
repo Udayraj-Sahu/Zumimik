@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { DashboardMascot, MASCOT_WALK_MS, type MascotState } from "./dashboard-mascot";
 import { WelcomeCloud } from "./welcome-cloud";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 /** Short beat after the dashboard mounts before the mascot entrance starts. The
  *  dashboard only mounts this component once its data is ready, so the walk

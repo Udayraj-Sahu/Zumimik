@@ -1,4 +1,4 @@
-import { CYAN, EMERALD, LIME, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme-tokens";
+import { CYAN, EMERALD, LIME, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme";
 export type JourneyModeId =
   | "exam_ready"
   | "gap_closer"

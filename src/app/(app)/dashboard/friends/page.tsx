@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Users, UserPlus, Swords, Zap, Award, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useFriends } from "@/hooks/queries/use-friends";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
-import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme-tokens";
+import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 
 export default function FriendsPage() {
   usePageMeta("Friends — Zuzumik");

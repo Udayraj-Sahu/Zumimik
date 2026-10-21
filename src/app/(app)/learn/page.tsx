@@ -37,7 +37,7 @@ import { ResumeProtocolCard } from "@/components/adaptive/resume-protocol-card";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 import { usePlanStore } from "@/stores/plan-store";
 import { usePaywallStore } from "@/stores/paywall-store";
-import { CYAN, EMERALD, GLASS_45, GLASS_55, GLASS_BG, GLASS_BORDER, ROSE, VIOLET_PURPLE, YELLOW, hueText } from "@/lib/theme-tokens";
+import { CYAN, EMERALD, GLASS_45, GLASS_55, GLASS_BG, GLASS_BORDER, ROSE, VIOLET_PURPLE, YELLOW, hueText } from "@/lib/theme";
 import { useAccentHex } from "@/hooks/use-accent-hex";
 
 const tabVariants: Variants = {

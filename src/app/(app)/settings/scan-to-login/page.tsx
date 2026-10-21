@@ -1,6 +1,6 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
-import { EMERALD, EMERALD_12, EMERALD_SOLID, GLASS_BORDER, RED_SOFT_12 } from "@/lib/theme-tokens";
+import { EMERALD, EMERALD_12, EMERALD_SOLID, GLASS_BORDER, RED_SOFT_12 } from "@/lib/theme";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useScanPairingCode, useApprovePairing } from "@/hooks/queries/use-pairing";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { cn } from "@/lib/utils";
 
 const STEP_ICON = { phone: Smartphone, web: Globe, check: Check };

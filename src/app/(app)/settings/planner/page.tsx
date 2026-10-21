@@ -4,10 +4,10 @@ import { PageContainer } from "@/components/ui/page-container";
 import { useRef, useEffect } from "react";
 import { Calendar, Zap, Flame, Target, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePlanner } from "@/hooks/queries/use-planner";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 
 export default function PlannerPage() {

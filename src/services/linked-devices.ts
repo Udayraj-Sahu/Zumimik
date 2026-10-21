@@ -1,7 +1,7 @@
 import type { LinkedDevice } from "@/lib/types/linked-devices";
 import { apiGet, apiPost } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getLinkedDevices(): Promise<LinkedDevice[]> {
   if (IS_MOCK) {

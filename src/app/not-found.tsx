@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { LIME_BRIGHT, LIME_BRIGHT_RGB } from "@/lib/theme-tokens";
+import { LIME_BRIGHT, LIME_BRIGHT_RGB } from "@/lib/theme";
 import Link from "next/link";
 
 export default function NotFound() {

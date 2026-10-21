@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { BLUE, BLUE_LIGHT, LIME_BRIGHT, LIME_BRIGHT_03, MUTED, NEAR_WHITE_BLACK, WHITE } from "@/lib/theme-tokens";
+import { BLUE, BLUE_LIGHT, LIME_BRIGHT, LIME_BRIGHT_03, MUTED, NEAR_WHITE_BLACK, WHITE } from "@/lib/theme";
 import { motion, useScroll, useTransform } from "motion/react";
 import { SectionHeading } from "@/components/landing/section-heading";
 

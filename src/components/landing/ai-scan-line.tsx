@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AMBER, LIME_BRIGHT, LIME_BRIGHT_04, RED, WHITE } from "@/lib/theme-tokens";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { AMBER, LIME_BRIGHT, LIME_BRIGHT_04, RED, WHITE } from "@/lib/theme";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 interface Insight {
   label: string;

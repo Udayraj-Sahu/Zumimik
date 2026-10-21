@@ -5,11 +5,11 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ChevronDown, HelpCircle, Mail, FileText, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useHelpData } from "@/hooks/queries/use-help";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { FaqItem } from "@/lib/types/help";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 
 function FaqAccordion({ items }: { items: FaqItem[] }) {
   const [openId, setOpenId] = useState<string | null>(null);

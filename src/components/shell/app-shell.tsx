@@ -13,7 +13,7 @@ import { MOBILE_NAV } from "@/lib/mock/dashboard";
 import { useAuthStore } from "@/stores/auth-store";
 import { useThemeStore } from "@/stores/theme-store";
 import { useSidebarStore } from "@/stores/sidebar-store";
-import { resetAppState } from "@/lib/reset-app-state";
+import { resetAppState } from "@/lib/platform";
 import { Toaster } from "@/components/ui/toaster";
 
 const Walkthrough = dynamic(

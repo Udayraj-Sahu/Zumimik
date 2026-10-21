@@ -1,7 +1,7 @@
 import type { DuelTopic, DuelOpponent, DuelResult } from "@/lib/types/duel";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getDuelTopics(domain?: string): Promise<DuelTopic[]> {
   if (IS_MOCK) {

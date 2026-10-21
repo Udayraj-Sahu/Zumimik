@@ -7,7 +7,7 @@ import { ChevronLeft, Check, X, TrendingUp, Lightbulb, BookOpen } from "lucide-r
 import { useSprintStore } from "@/stores/sprint-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { SprintResult } from "@/lib/types/sprint-session";
-import { GLASS_BG, RED_04, RED_06, RED_30 } from "@/lib/theme-tokens";
+import { GLASS_BG, RED_04, RED_06, RED_30 } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 

@@ -3,7 +3,7 @@
 import { TrendingUp } from "lucide-react";
 import { useAnalyticsData } from "@/hooks/queries/use-analytics";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";

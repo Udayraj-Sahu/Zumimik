@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, Play, Clock, Sparkles, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 import { FEED_HERO, FEED_CATEGORIES, FEED_STORIES, FEED_VIDEOS } from "@/lib/mock/feed";
 
 

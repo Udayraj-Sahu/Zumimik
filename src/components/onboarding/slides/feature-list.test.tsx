@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { FeatureList } from "@/components/onboarding/feature-list";
+import { FeatureList } from "@/components/onboarding/slides/feature-list";
 
 describe("FeatureList", () => {
   it("renders the eyebrow and all four feature titles", () => {

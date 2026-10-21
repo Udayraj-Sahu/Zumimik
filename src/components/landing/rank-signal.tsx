@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LIME_BRIGHT, LIME_BRIGHT_05, LIME_BRIGHT_RGB, NEAR_BLACK, NEAR_WHITE_BLACK } from "@/lib/theme-tokens";
+import { LIME_BRIGHT, LIME_BRIGHT_05, LIME_BRIGHT_RGB, NEAR_BLACK, NEAR_WHITE_BLACK } from "@/lib/theme";
 import { motion, useMotionValue, useSpring } from "motion/react";
-import { AuthModal } from "@/components/onboarding/auth-modal";
+import { AuthModal } from "@/components/onboarding/auth/auth-modal";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 const RINGS = [
   { delay: 0, size: 180, opacity: 0.4 },

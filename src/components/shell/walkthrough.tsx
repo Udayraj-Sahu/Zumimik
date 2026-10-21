@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BG_BLACK } from "@/lib/theme-tokens";
+import { BG_BLACK } from "@/lib/theme";
 import { usePathname } from "next/navigation";
 import type { DriveStep } from "driver.js";
 import { useOnboardingStore } from "@/stores/onboarding-store";

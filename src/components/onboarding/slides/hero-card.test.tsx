@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { HeroCard } from "@/components/onboarding/hero-card";
+import { HeroCard } from "@/components/onboarding/slides/hero-card";
 
 describe("HeroCard", () => {
   it("renders the default hero copy", () => {

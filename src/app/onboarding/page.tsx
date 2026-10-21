@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CYAN, LIME_BRIGHT, PURPLE, YELLOW } from "@/lib/theme-tokens";
+import { CYAN, LIME_BRIGHT, PURPLE, YELLOW } from "@/lib/theme";
 import gsap from "gsap";
 import { Globe, Smartphone, Zap, Target, Trophy } from "lucide-react";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";

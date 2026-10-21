@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import { GLASS_BG, GLASS_BORDER } from "@/lib/theme-tokens";
+import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 
 interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   radius?: "2xl" | "3xl";

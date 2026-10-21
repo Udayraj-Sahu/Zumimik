@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { AMBER, AMBER_30, BLUE, DEEP_BLACK, GLASS_30, LIME_BRIGHT, LIME_BRIGHT_30, MUTED, RED, RED_30, SOLID_BLACK, WHITE } from "@/lib/theme-tokens";
+import { AMBER, AMBER_30, BLUE, DEEP_BLACK, GLASS_30, LIME_BRIGHT, LIME_BRIGHT_30, MUTED, RED, RED_30, SOLID_BLACK, WHITE } from "@/lib/theme";
 import { motion, AnimatePresence } from "motion/react";
 import { SectionHeading } from "@/components/landing/section-heading";
 

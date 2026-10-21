@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { useMockPaperSession } from "@/hooks/queries/use-mock-exam";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
-import { useFeedback } from "@/lib/use-feedback";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useFeedback } from "@/hooks/use-feedback";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { Question } from "@/lib/types/sprint-session";
 import TrustBadge from "@/components/ui/trust-badge";
@@ -18,8 +18,8 @@ import ContentFeedback from "@/components/ui/content-feedback";
 import { Button } from "@/components/ui/button";
 import { ExamShell } from "@/components/exam/exam-shell";
 import { QuestionNavigator } from "@/components/exam/question-navigator";
-import { CTA_06, CTA_30, GLASS_02, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme-tokens";
-import { formatTime } from "@/lib/format";
+import { CTA_06, CTA_30, GLASS_02, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
+import { formatTime } from "@/lib/text";
 
 function MockRunContent() {
   usePageMeta("Mock Test — Zuzumik");

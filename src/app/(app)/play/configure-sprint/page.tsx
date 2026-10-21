@@ -5,15 +5,15 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { useTemplatesByCategory } from "@/hooks/queries/use-templates";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore } from "@/stores/resume-store";
-import { getTemplateCategoriesForTopic } from "@/lib/topic-template-map";
-import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme-tokens";
+import { getTemplateCategoriesForTopic } from "@/lib/content";
+import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 
 export default function ConfigureSprintPage() {

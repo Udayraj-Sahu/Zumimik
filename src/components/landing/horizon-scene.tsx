@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GLASS_02, GLASS_025, GLASS_06, GLASS_10, GLASS_30, LIME_BRIGHT, LIME_BRIGHT_06, LIME_BRIGHT_15, LIME_BRIGHT_18, LIME_BRIGHT_25, MUTED, NEAR_BLACK, WHITE } from "@/lib/theme-tokens";
+import { GLASS_02, GLASS_025, GLASS_06, GLASS_10, GLASS_30, LIME_BRIGHT, LIME_BRIGHT_06, LIME_BRIGHT_15, LIME_BRIGHT_18, LIME_BRIGHT_25, MUTED, NEAR_BLACK, WHITE } from "@/lib/theme";
 import { motion, useMotionValue, animate } from "motion/react";
 
 const DISTANT_SIGNALS = [

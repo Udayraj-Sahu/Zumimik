@@ -11,7 +11,7 @@ Status: `[x]` = verified, `(~)` = partial (evidence-cited), `[ ]` = open.
 
 ### Color & token architecture
 - [x] **One source of truth for colors/tokens**
-  - `src/lib/theme-tokens.ts` + `globals.css :root` (.light overrides in globals).
+  - `src/lib/theme/theme-tokens.ts` + `globals.css :root` (.light overrides in globals).
   - Note: header comment claims "AUTO-GENERATED from palette-map.json", but no
     `palette-map.json` exists in the repo — two files must stay manually in sync.
 - [x] **Light theme completely implemented** (Phase 1 QA-AUDIT completed)
@@ -147,7 +147,7 @@ Status: `[x]` = verified, `(~)` = partial (evidence-cited), `[ ]` = open.
 Automated coverage: `src/services/offline/offline-storage.test.ts` (vitest + jsdom +
 `fake-indexeddb`). All 11 scenarios pass (14/14 total suite incl. `src/lib/utils.test.ts`).
 Covers the Dexie offline DB (`src/services/offline/db.ts`, `sync.ts`), persisted zustand
-stores (`safeLocalStorage`), and `resetAppState`/`purgeUserData` (`src/lib/reset-app-state.ts`).
+stores (`safeLocalStorage`), and `resetAppState`/`purgeUserData` (`src/lib/platform/reset-app-state.ts`).
 
 - [x] **First installation** — fresh env exposes empty DB tables + store defaults; `resetAppState` is a no-op.
 - [x] **Existing data** — persisted stores and DB rows round-trip on load (settings rehydrate; cached query data and queued feedback readable).
@@ -194,7 +194,7 @@ plus `resetAppState` invariants.
 
 Automated coverage: `src/lib/date-time.test.tsx` (vitest + jsdom + Testing Library).
 All 23 checks pass (56/56 total suite across 4 files). Exercises the real date paths in
-`src/lib/stats.ts` (`computeStreak`, `computeRecent`) and the exam-date picker
+`src/lib/text/stats.ts` (`computeStreak`, `computeRecent`) and the exam-date picker
 `src/components/dashboard/exam-date-modal.tsx` (rendered via jsdom with an
 `Element.scrollTo` polyfill and a stubbed `gsap`). Timing is pinned with
 `vi.useFakeTimers()`/`vi.setSystemTime`; assertions derive expected dates from the same
@@ -221,7 +221,7 @@ constructors the app uses, so they hold in any timezone.
 Automated coverage: `src/lib/text-input-empty.test.ts` (vitest). All 17 checks pass
 (109/109 total suite across 8 files). Exercises the zod schemas in
 `src/lib/types/template.ts` (SolveAlongTemplate, TemplateExample, Session) and the
-empty-data paths in `src/lib/stats.ts`.
+empty-data paths in `src/lib/text/stats.ts`.
 
 - [x] **Very long text** - 50k-char strings pass; no max-length cap is enforced (min(1) only).
 - [x] **Short text / one word** - single characters meet the min(1) boundary.

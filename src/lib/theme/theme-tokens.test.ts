@@ -11,7 +11,7 @@ import {
   isAccentId,
   type AccentId,
   type AccentTokenSet,
-} from "@/lib/theme-tokens";
+} from "@/lib/theme";
 
 /* ------------------------------------------------------------------ */
 /*  Contrast helpers (WCAG 2.1 relative luminance)                     */

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface NumberTickerProps extends Omit<React.ComponentPropsWithRef<"span">, "children"> {
   /** Target value to count up to. */

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EMERALD_LIGHT, LIME, LIME_LIGHT, NEAR_BLACK_60, YELLOW } from "@/lib/theme-tokens";
+import { EMERALD_LIGHT, LIME, LIME_LIGHT, NEAR_BLACK_60, YELLOW } from "@/lib/theme";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AMBER, BLUE, DEEP_BLACK, GLASS_BORDER, LIME_BRIGHT, RED } from "@/lib/theme-tokens";
+import { AMBER, BLUE, DEEP_BLACK, GLASS_BORDER, LIME_BRIGHT, RED } from "@/lib/theme";
 import { motion } from "motion/react";
-import { usePrefersReducedMotion } from "@/lib/use-reduced-motion";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 const STARS = [
   { x: 50, y: 20, label: "Mechanics", type: "strength", size: 6 },

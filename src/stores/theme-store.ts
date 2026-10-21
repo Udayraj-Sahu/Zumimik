@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
-import { DEFAULT_ACCENT, isAccentId, type AccentId } from "@/lib/theme-tokens";
+import { safeLocalStorage } from "@/lib/platform";
+import { DEFAULT_ACCENT, isAccentId, type AccentId } from "@/lib/theme";
 
 export type Theme = "dark" | "light";
 

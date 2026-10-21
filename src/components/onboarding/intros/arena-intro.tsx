@@ -1,6 +1,6 @@
 "use client";
 
-import { IntroCarousel, useArenaIntroSlides } from "@/components/onboarding/intro-carousel";
+import { IntroCarousel, useArenaIntroSlides } from "@/components/onboarding/intros/intro-carousel";
 
 /**
  * Arena intro — shown when the target exam is later this year. Renders the

@@ -4,7 +4,7 @@ import { Bell, CalendarClock, Lock } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import styles from "@/components/trial-timeline/TrialTimeline.module.css";
-import { ReviewCarousel } from "@/components/onboarding/review-carousel";
+import { ReviewCarousel } from "@/components/onboarding/slides/review-carousel";
 
 export type TrialStepIcon = "lock" | "bell" | "calendar";
 

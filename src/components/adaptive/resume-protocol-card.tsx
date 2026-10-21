@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { GLASS_05, GLASS_BORDER, VIOLET_PURPLE } from "@/lib/theme-tokens";
+import { GLASS_05, GLASS_BORDER, VIOLET_PURPLE } from "@/lib/theme";
 import { Play, X, Clock, Sparkles, ChevronRight } from "lucide-react";
 import { useResumeStore } from "@/stores/resume-store";
 import { useTodayPlan } from "@/hooks/queries/use-adaptive";
 import { cn } from "@/lib/utils";
-import { formatTime } from "@/lib/format";
+import { formatTime } from "@/lib/text";
 
 function timeAgo(ts: number): string {
   const s = Math.max(1, Math.round((Date.now() - ts) / 1000));

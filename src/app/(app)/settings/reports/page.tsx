@@ -4,12 +4,12 @@ import { PageContainer } from "@/components/ui/page-container";
 import { useState, useRef, useEffect } from "react";
 import { FileText, Download, Zap, Target, Clock, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useReports } from "@/hooks/queries/use-reports";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
-import { formatHoursMinutes } from "@/lib/format";
+import { formatHoursMinutes } from "@/lib/text";
 
 export default function ReportsPage() {
   usePageMeta("Reports — Zuzumik");

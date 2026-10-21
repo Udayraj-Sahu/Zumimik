@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trophy, Puzzle, Brain, Zap, Clock, Flame, Gamepad2, type LucideIcon } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { AMBER, BLUE, CTA_LIME, GLASS_BG, GLASS_BORDER, PURPLE, SLATE_SOFT, hueText } from "@/lib/theme-tokens";
+import { AMBER, BLUE, CTA_LIME, GLASS_BG, GLASS_BORDER, PURPLE, SLATE_SOFT, hueText } from "@/lib/theme";
 
 const TABS = [
   { id: "math", label: "Math", icon: Zap, color: AMBER },

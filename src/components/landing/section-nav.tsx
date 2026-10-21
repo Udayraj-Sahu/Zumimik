@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GLASS_BORDER, LIME_BRIGHT, LIME_BRIGHT_15, LIME_BRIGHT_50, MUTED, WHITE } from "@/lib/theme-tokens";
+import { GLASS_BORDER, LIME_BRIGHT, LIME_BRIGHT_15, LIME_BRIGHT_50, MUTED, WHITE } from "@/lib/theme";
 import { motion } from "motion/react";
 
 const NODES = [

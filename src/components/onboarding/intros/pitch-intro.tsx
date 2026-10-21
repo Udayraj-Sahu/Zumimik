@@ -1,6 +1,6 @@
 "use client";
 
-import { IntroCarousel, usePitchIntroSlides } from "@/components/onboarding/intro-carousel";
+import { IntroCarousel, usePitchIntroSlides } from "@/components/onboarding/intros/intro-carousel";
 
 /**
  * Pitch intro — shown when no exam date is set yet ("whenever" / "not sure").

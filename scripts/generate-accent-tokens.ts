@@ -1,9 +1,9 @@
 /**
  * Regenerates the accent token blocks in src/app/globals.css from the
- * accentThemes config in src/lib/theme-tokens.ts.
+ * accentThemes config in src/lib/theme/theme-tokens.ts.
  *
  * `theme-tokens.ts` is the single source of truth. This script only renders it to
- * CSS; src/lib/accent-themes.test.ts asserts the emitted CSS matches the config,
+ * CSS; src/lib/theme/theme-tokens.test.ts asserts the emitted CSS matches the config,
  * so a stale or hand-edited block fails the suite rather than silently drifting.
  *
  * Run with:
@@ -18,7 +18,7 @@ import {
   accentThemes,
   type AccentId,
   type AccentTokenSet,
-} from "../src/lib/theme-tokens.ts";
+} from "../src/lib/theme/theme-tokens.ts";
 
 const ROOT = join(import.meta.dirname, "..");
 const CSS_PATH = join(ROOT, "src", "app", "globals.css");

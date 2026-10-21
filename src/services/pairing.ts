@@ -1,6 +1,6 @@
 import type { PairingSession, PairingApproval } from "@/lib/types/pairing";
 import { apiGet, apiPost } from "./api";
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function createPairingSession(): Promise<PairingSession> {
   if (IS_MOCK) {

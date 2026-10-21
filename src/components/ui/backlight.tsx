@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { LIME_14 } from "@/lib/theme-tokens";
+import { LIME_14 } from "@/lib/theme";
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import { cn } from "@/lib/utils";
 

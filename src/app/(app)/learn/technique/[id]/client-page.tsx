@@ -3,12 +3,12 @@ import { PageContainer } from "@/components/ui/page-container";
 
 import { useParams, useRouter } from "next/navigation";
 import { Lightbulb } from "lucide-react";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useTechnique } from "@/hooks/queries/use-technique";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { QuickReferenceCard } from "@/components/technique/quick-reference-card";
 import { DifficultyTabs } from "@/components/technique/difficulty-tabs";
-import { GLASS_BG, GLASS_BORDER } from "@/lib/theme-tokens";
+import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 
 export function ClientTechniquePage() {
   const params = useParams<{ id: string }>();

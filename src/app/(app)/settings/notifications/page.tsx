@@ -4,11 +4,11 @@ import { PageContainer } from "@/components/ui/page-container";
 import { useState, useRef, useEffect } from "react";
 import { Bell, Zap, Award, Swords, Info, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useNotifications } from "@/hooks/queries/use-notifications";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { NotificationItem } from "@/lib/types/notifications";
-import { BG, GLASS_BG } from "@/lib/theme-tokens";
+import { BG, GLASS_BG } from "@/lib/theme";
 
 const TYPE_ICON: Record<NotificationItem["type"], typeof Bell> = {
   sprint_reminder: Zap,

@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { useNetworkStore, type QueuedMutation } from "@/stores/network-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { apiUrl } from "@/lib/config";
+import { apiUrl } from "@/lib/platform";
 
 const MAX_SYNC_RETRIES = 3;
 

@@ -1,7 +1,7 @@
 import type { FaqItem } from "@/lib/types/help";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getFaqItems(): Promise<FaqItem[]> {
   if (IS_MOCK) {

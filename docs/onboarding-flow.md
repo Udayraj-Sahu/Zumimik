@@ -34,7 +34,7 @@ Selecting a goal opens an inline `GoalPanel`:
 
 Picking a temporal window calls `handleTemporal()` → `setFeatureHookVariant(v)` → **`FeatureIntro` opens as a full-screen overlay immediately** (the wizard pauses underneath). Picking a Vedic use case calls `handleVedicUseCase()`.
 
-## 3. `FeatureIntro` (`src/components/onboarding/feature-intro.tsx`)
+## 3. `FeatureIntro` (`src/components/onboarding/intros/feature-intro.tsx`)
 
 Shared hook screen for every variant (`this_year` | `whenever` | `not_sure` | `vedic`). Body:
 
@@ -57,9 +57,9 @@ Vedic use-case branch (before FeatureIntro): "Lightning Mental Calc" / "Brain Gy
 
 ## 4. Arena path (exam this year)
 
-### `ArenaIntro` (`src/components/onboarding/arena-intro.tsx`)
+### `ArenaIntro` (`src/components/onboarding/intros/arena-intro.tsx`)
 
-Thin wrapper around `<IntroCarousel layout="split" />` (`src/components/onboarding/intro-carousel.tsx`) with `useArenaIntroSlides()`. Slides, in order:
+Thin wrapper around `<IntroCarousel layout="split" />` (`src/components/onboarding/intros/intro-carousel.tsx`) with `useArenaIntroSlides()`. Slides, in order:
 
 | # | Tag | Body component |
 |---|-----|----------------|
@@ -73,11 +73,11 @@ Thin wrapper around `<IntroCarousel layout="split" />` (`src/components/onboardi
 
 Split (desktop) layout: carousel on the left, **`<ClearanceTiers />`** pricing panel + "ENTER … ARENA" CTA + "Skip for now" on the right (`lg:overflow-y-auto`, scrollbar hidden). `onClose` → **`PlanIntro`**.
 
-### `PlanIntro` (`src/components/onboarding/plan-intro.tsx`)
+### `PlanIntro` (`src/components/onboarding/intros/plan-intro.tsx`)
 
 Paywall. `<PlanSelector />` (plans `initiate` / `single-lane` / `dual-lane`), annual/monthly billing toggle, UPI/wallet/card `PayRow`s. `onClose` → **`StoryIntro`**.
 
-### `StoryIntro` (`src/components/onboarding/story-intro.tsx`)
+### `StoryIntro` (`src/components/onboarding/intros/story-intro.tsx`)
 
 "DECODE YOUR DAY" — single screen around `<DecodeDay />`:
 
@@ -88,7 +88,7 @@ Paywall. `<PlanSelector />` (plans `initiate` / `single-lane` / `dual-lane`), an
 
 ## 5. Pitch path (whenever / not sure)
 
-### `PitchIntro` (`src/components/onboarding/pitch-intro.tsx`)
+### `PitchIntro` (`src/components/onboarding/intros/pitch-intro.tsx`)
 
 Same `IntroCarousel` shell, curated by `usePitchIntroSlides()` (`PITCH_SLIDE_ORDER`):
 
@@ -143,7 +143,7 @@ Dashboard (not onboarded)
 The two tables above describe the original wording; this section records the
 slide sets as they actually ship today, without changing the history above.
 Both flows read the same module-scope slide objects in
-`src/components/onboarding/intro-carousel.tsx`; only the order lists differ
+`src/components/onboarding/intros/intro-carousel.tsx`; only the order lists differ
 (`useArenaIntroSlides` builds its array in place, `PITCH_SLIDE_ORDER` selects
 by id).
 
@@ -193,3 +193,37 @@ and no quote; the shell's own "ENTER … ARENA" button is the only action.
 - The shell CTA ("ENTER … ARENA") calls `exit(onClose)`; there is no in-slide
   CTA wiring today.
 
+## Folder layout (`src/components/onboarding`)
+
+Flat list → three role-based folders; `onboarding-modal.tsx` stays at the root
+as the entry point.
+
+```
+onboarding/
+├── onboarding-modal.tsx      wizard + step machine, branches to every intro
+├── intros/                   full-screen intro screens
+│   ├── arena-intro.tsx       exam-this-year path
+│   ├── pitch-intro.tsx       whenever / not-sure path
+│   ├── plan-intro.tsx        paywall
+│   ├── story-intro.tsx       decode-your-day (+ .module.css)
+│   ├── feature-intro.tsx     every variant's hook screen
+│   ├── family-intro.tsx      vedic family path
+│   ├── family-hub-intro.tsx
+│   ├── seat-builder-intro.tsx
+│   └── intro-carousel.tsx    shared carousel shell + both slide lists (+ .test)
+├── slides/                   bodies rendered inside the carousel
+│   ├── hero-card.tsx         legacy opener (no longer mounted)
+│   ├── feature-list.tsx      legacy Arena slide (no longer mounted)
+│   ├── habit-card.tsx
+│   ├── habit-protocol.tsx    legacy Arena slide (no longer mounted)
+│   ├── speed-card.tsx        legacy Arena slide (no longer mounted)
+│   ├── how-it-works.tsx      (+ .module.css)
+│   └── review-carousel.tsx   (+ .module.css)
+└── auth/
+    ├── auth-modal.tsx
+    └── auth-panel.tsx
+```
+
+Imports always use the `@/components/onboarding/<folder>/<file>` form, so the
+only relative import left is `story-intro.tsx` → `./story-intro.module.css`.
+Tests sit next to their component in the same folder.

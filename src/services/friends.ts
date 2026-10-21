@@ -1,7 +1,7 @@
 import type { Friend, FriendActivity } from "@/lib/types/friends";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getFriends(): Promise<Friend[]> {
   if (IS_MOCK) {

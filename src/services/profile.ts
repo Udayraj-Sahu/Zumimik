@@ -1,7 +1,7 @@
 import type { ProfileData, ProfileStat, Achievement } from "@/lib/types/profile";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getProfile(): Promise<ProfileData> {
   if (IS_MOCK) {

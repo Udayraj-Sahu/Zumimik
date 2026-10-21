@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 import type { HistoryEntry } from "@/lib/types/history";
 import { ExamDateModal } from "@/components/dashboard/exam-date-modal";
-import { computeRecent, computeStreak } from "@/lib/stats";
+import { computeRecent, computeStreak } from "@/lib/text";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 
 vi.mock("gsap", () => ({

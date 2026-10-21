@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { AuthModal } from "@/components/onboarding/auth-modal";
+import { AuthModal } from "@/components/onboarding/auth/auth-modal";
 import { useAuthStore } from "@/stores/auth-store";
 
 export function FloatingActions() {

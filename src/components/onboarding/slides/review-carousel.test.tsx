@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { ReviewCarousel } from "@/components/onboarding/review-carousel";
+import { ReviewCarousel } from "@/components/onboarding/slides/review-carousel";
 
 describe("ReviewCarousel", () => {
   it("renders the supporting quote and the aggregate rating", () => {

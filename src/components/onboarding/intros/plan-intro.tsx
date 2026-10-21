@@ -6,7 +6,7 @@ import {
   FOREST,
   GLASS_BORDER,
   PANEL,
-} from "@/lib/theme-tokens";
+} from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import { MotionConfig, motion } from "motion/react";

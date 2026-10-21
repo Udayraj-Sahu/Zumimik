@@ -176,7 +176,7 @@ Updated as work progresses. `[x]` = implemented and re-verified on this branch;
   page chunks, e.g. the 56 KB techniques mock ships as a 47 KB on-demand chunk.)
 - [x] **#6 Dashboard fallback data** — real loading/empty/error states instead of fabricated data.
   (`FALLBACK_*` arrays replaced with `EMPTY_*` neutral defaults; fabricated trend chips removed.)
-- [~] **#7 `src/lib/format.ts`** — single source for `formatTime`, `formatDuration`, `formatDate`/`timeAgo`, `formatMembers`, `clamp`, `todayStr`; delete duplicates.
+- [~] **#7 `src/lib/text/format.ts`** — single source for `formatTime`, `formatDuration`, `formatDate`/`timeAgo`, `formatMembers`, `clamp`, `todayStr`; delete duplicates.
   (Partial: `formatTime`, `formatHoursMinutes`, `formatMinutes`, `todayStr` added and
   5×/2× duplicates removed. `SectionLabel` unification skipped — three different markup
   shapes, visual-regression risk. `clamp`/`formatMembers`/`timeAgo` duplicates remain.)

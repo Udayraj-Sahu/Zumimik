@@ -1,5 +1,5 @@
 import type { MockPaper } from "@/lib/types/mock-exam";
-import { CYAN, EMERALD, LIME, VIOLET_PURPLE, YELLOW } from "@/lib/theme-tokens";
+import { CYAN, EMERALD, LIME, VIOLET_PURPLE, YELLOW } from "@/lib/theme";
 
 function buildPaper(
   base: Omit<MockPaper, "totalQuestions" | "durationMinutes">,

@@ -5,7 +5,7 @@ import {
   TemplateSessionSchema,
   StepProgressSchema,
 } from "@/lib/types/template";
-import { computeStats, computeRecent, computeStreak, computeTopicMastery } from "@/lib/stats";
+import { computeStats, computeRecent, computeStreak, computeTopicMastery } from "@/lib/text";
 
 const validSolutionStep = () => ({
   step_num: 1,

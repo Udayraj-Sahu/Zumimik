@@ -7,7 +7,7 @@ import { useWelcomeStore } from "@/stores/welcome-store";
 // decision path reads `prefers-reduced-motion` through window.matchMedia
 // directly (configured by `setReducedMotion` below).
 const { reducedFlag } = vi.hoisted(() => ({ reducedFlag: { value: false } }));
-vi.mock("@/lib/use-reduced-motion", () => ({
+vi.mock("@/hooks/use-reduced-motion", () => ({
   usePrefersReducedMotion: () => reducedFlag.value,
 }));
 

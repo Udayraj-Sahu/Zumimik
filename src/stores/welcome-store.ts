@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { safeSessionStorage } from "@/lib/browser";
+import { safeSessionStorage } from "@/lib/platform";
 
 /**
  * Tracks whether the dashboard welcome (the mascot walking in + the cloud

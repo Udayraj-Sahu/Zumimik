@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AMBER, AMBER_14, CTA_14, CTA_LIME, CYAN, CYAN_14, GLASS_025, GLASS_14, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14 } from "@/lib/theme-tokens";
+import { AMBER, AMBER_14, CTA_14, CTA_LIME, CYAN, CYAN_14, GLASS_025, GLASS_14, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14 } from "@/lib/theme";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { BookOpen, ChevronDown, Layers, Lock } from "lucide-react";

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { BG_MOSS, FOREST, GLASS_BORDER, LIME, LIME_LIGHT, LIME_TINT, PANEL } from "@/lib/theme-tokens";
+import { BG_MOSS, FOREST, GLASS_BORDER, LIME, LIME_LIGHT, LIME_TINT, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {
@@ -24,8 +24,8 @@ import {
 import { cn } from "@/lib/utils";
 import StockVideoAd from "@/components/ads/stock-video-ad";
 import FirstGhostCta from "@/components/first-ghost-cta/FirstGhostCta";
-import { ReviewCarousel } from "@/components/onboarding/review-carousel";
-import { HowItWorks } from "@/components/onboarding/how-it-works";
+import { ReviewCarousel } from "@/components/onboarding/slides/review-carousel";
+import { HowItWorks } from "@/components/onboarding/slides/how-it-works";
 import { ClearanceTiers } from "@/components/paywall/clearance-tiers";
 import AlgorithmPitch from "@/components/algorithm-pitch/AlgorithmPitch";
 import FirstMoveTimes from "@/components/first-move-times/FirstMoveTimes";

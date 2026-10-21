@@ -1,7 +1,7 @@
 import type { Technique } from "@/lib/types/technique";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getTechnique(id: string): Promise<Technique | null> {
   if (IS_MOCK) {

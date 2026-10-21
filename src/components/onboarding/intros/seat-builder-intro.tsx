@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { BG_MOSS, FOREST, LIME, LIME_LIGHT, LIME_MID_2, PANEL } from "@/lib/theme-tokens";
+import { BG_MOSS, FOREST, LIME, LIME_LIGHT, LIME_MID_2, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {

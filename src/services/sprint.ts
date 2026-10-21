@@ -1,7 +1,7 @@
 import type { SprintTopic, SprintConfig } from "@/lib/types/sprint";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getSprintTopics(domain?: string): Promise<SprintTopic[]> {
   if (IS_MOCK) {

@@ -7,8 +7,8 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { Target } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
+import { GLASS_BG } from "@/lib/theme";
 
 export default function MasteryPage() {
   usePageMeta("Topic Mastery — Zuzumik");

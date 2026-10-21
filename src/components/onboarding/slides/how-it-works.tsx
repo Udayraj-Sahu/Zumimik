@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import styles from "@/components/onboarding/how-it-works.module.css";
+import styles from "@/components/onboarding/slides/how-it-works.module.css";
 
 type Tone = "cyan" | "violet" | "neon";
 

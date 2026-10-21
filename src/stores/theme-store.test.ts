@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ACCENT_IDS, DEFAULT_ACCENT, isAccentId } from "@/lib/theme-tokens";
+import { ACCENT_IDS, DEFAULT_ACCENT, isAccentId } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 
 const STORAGE_KEY = "zuzumik-theme";

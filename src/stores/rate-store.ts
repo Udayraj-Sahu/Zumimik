@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
+import { safeLocalStorage } from "@/lib/platform";
 
 type RateState = {
   sprintCount: number;

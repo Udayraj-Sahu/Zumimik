@@ -1,7 +1,7 @@
 import type { AnalyticsStats, WeeklyDatum, RecentActivityItem } from "@/lib/types/analytics";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getAnalyticsStats(): Promise<AnalyticsStats> {
   if (IS_MOCK) {

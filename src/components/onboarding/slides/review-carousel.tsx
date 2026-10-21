@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { BadgeCheck, User } from "lucide-react";
 
-import styles from "@/components/onboarding/review-carousel.module.css";
+import styles from "@/components/onboarding/slides/review-carousel.module.css";
 import {
   STUDENT_REVIEW_QUOTE,
   STUDENT_REVIEW_RATING,

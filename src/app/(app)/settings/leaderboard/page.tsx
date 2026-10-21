@@ -5,11 +5,11 @@ import { useState, useCallback } from "react";
 import gsap from "gsap";
 import { Trophy, Medal, ArrowUp, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useLeaderboard } from "@/hooks/queries/use-leaderboard";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { LeaderboardEntry } from "@/lib/types/dashboard";
-import { GLASS_06, GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_06, GLASS_BG } from "@/lib/theme";
 
 const PERIODS = ["all", "week", "month"] as const;
 

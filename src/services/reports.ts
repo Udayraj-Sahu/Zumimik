@@ -1,7 +1,7 @@
 import type { ReportSummary, ReportTopic } from "@/lib/types/reports";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getReportSummary(): Promise<ReportSummary> {
   if (IS_MOCK) {

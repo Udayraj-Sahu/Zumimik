@@ -7,11 +7,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useAchievements } from "@/hooks/queries/use-achievements";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import type { AchievementItem, AchievementTier, AchievementCategory } from "@/lib/types/achievements";
-import { AMBER, AMBER_15, BRONZE, BRONZE_15, CTA_15, CTA_LIME, GLASS_02, GLASS_03, GLASS_BG, SLATE_40, SLATE_60, SLATE_SOFT, SLATE_SOFT_15, hueText } from "@/lib/theme-tokens";
+import { AMBER, AMBER_15, BRONZE, BRONZE_15, CTA_15, CTA_LIME, GLASS_02, GLASS_03, GLASS_BG, SLATE_40, SLATE_60, SLATE_SOFT, SLATE_SOFT_15, hueText } from "@/lib/theme";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Flame, Target, Zap, Swords, Medal, Trophy, LayoutGrid, Timer, Users,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { HowItWorks } from "@/components/onboarding/how-it-works";
+import { HowItWorks } from "@/components/onboarding/slides/how-it-works";
 
 describe("HowItWorks", () => {
   it("renders the header defaults and the title as a heading", () => {

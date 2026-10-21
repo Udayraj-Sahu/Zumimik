@@ -1,7 +1,7 @@
 import type { PlannerDay, PlannerStats } from "@/lib/types/planner";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getPlannerDays(): Promise<PlannerDay[]> {
   if (IS_MOCK) {

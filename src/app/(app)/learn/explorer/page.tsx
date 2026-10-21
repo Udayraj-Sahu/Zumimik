@@ -1,6 +1,6 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
-import { BG, CTA_35, CYAN, CYAN_14, CYAN_18, CYAN_85, GLASS_02, GLASS_03, GLASS_07, GLASS_50, GLASS_55, GLASS_BG, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14, VIOLET_DEEP_18, VIOLET_TEXT } from "@/lib/theme-tokens";
+import { BG, CTA_35, CYAN, CYAN_14, CYAN_18, CYAN_85, GLASS_02, GLASS_03, GLASS_07, GLASS_50, GLASS_55, GLASS_BG, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14, VIOLET_DEEP_18, VIOLET_TEXT } from "@/lib/theme";
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -14,7 +14,7 @@ import { Compass, GraduationCap, Lock, Plus, ArrowRight, Layers, ClipboardList, 
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { getTechniqueIdsForTopic } from "@/lib/mock/topic-node-map";
 import type { TopicNode } from "@/lib/types/technique";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 

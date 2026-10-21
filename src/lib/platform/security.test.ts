@@ -95,7 +95,7 @@ describe("security surface", () => {
     vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.example.com/");
     vi.resetModules();
-    const mod = await import("@/lib/config");
+    const mod = await import("@/lib/platform");
     expect(mod.IS_MOCK).toBe(false);
     expect(mod.API_BASE_URL).toBe("https://api.example.com");
     expect(mod.apiUrl("sync/foo")).toBe("https://api.example.com/api/v1/sync/foo");
@@ -105,7 +105,7 @@ describe("security surface", () => {
   it("7. mock mode is the safe default when NEXT_PUBLIC_API_MOCK is unset", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_MOCK", undefined as never);
     vi.resetModules();
-    const mod = await import("@/lib/config");
+    const mod = await import("@/lib/platform");
     expect(mod.IS_MOCK).toBe(true);
   });
 
@@ -142,7 +142,7 @@ describe("security surface", () => {
 
 describe("keyboard & mobile input attributes (static)", () => {
   it("10. phone sign-in uses a numeric tel keyboard", () => {
-    const text = readFileSync(join(SRC, "components", "onboarding", "auth-panel.tsx"), "utf8");
+    const text = readFileSync(join(SRC, "components", "onboarding", "auth", "auth-panel.tsx"), "utf8");
     expect(text).toContain('type="tel"');
   });
 

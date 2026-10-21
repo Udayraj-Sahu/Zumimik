@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
-import { IS_MOCK, apiUrl } from "@/lib/config";
+import { safeLocalStorage } from "@/lib/platform";
+import { IS_MOCK, apiUrl } from "@/lib/platform";
 
 type User = {
   id: string;

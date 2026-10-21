@@ -7,7 +7,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import gsap from "gsap";
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEntranceAnimations } from "@/lib/use-entrance-animations";
+import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useRateStore } from "@/stores/rate-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -15,10 +15,10 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { recordAdaptiveSession } from "@/services/adaptive";
 import type { SessionOutcome } from "@/lib/types/adaptive";
 import type { SprintResult, Question } from "@/lib/types/sprint-session";
-import { GLASS_BG } from "@/lib/theme-tokens";
+import { GLASS_BG } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import { formatTime } from "@/lib/format";
+import { formatTime } from "@/lib/text";
 
 export default function SprintResultsPage() {
   return (

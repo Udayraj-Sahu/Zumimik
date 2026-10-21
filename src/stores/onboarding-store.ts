@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
+import { safeLocalStorage } from "@/lib/platform";
 import type { FocusMode, PlanId, VedicUseCaseId, DrillId, ReclaimConfig } from "@/lib/types/onboarding";
 
 export const DEFAULT_RECLAIM_CONFIGS: Record<string, ReclaimConfig> = {

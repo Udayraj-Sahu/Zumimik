@@ -3,7 +3,7 @@ import { apiPost } from "./api";
 import { useNetworkStore } from "@/stores/network-store";
 import { db } from "./offline/db";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 let feedbackIdCounter = 0;
 

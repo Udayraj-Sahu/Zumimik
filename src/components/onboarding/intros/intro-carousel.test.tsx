@@ -7,8 +7,8 @@ vi.mock("@/hooks/queries/use-dashboard", () => ({
   useDashboardData: () => ({ data: { upcoming: [{ id: "next-1" }] } }),
 }));
 
-import { ArenaIntro } from "@/components/onboarding/arena-intro";
-import { PitchIntro } from "@/components/onboarding/pitch-intro";
+import { ArenaIntro } from "@/components/onboarding/intros/arena-intro";
+import { PitchIntro } from "@/components/onboarding/intros/pitch-intro";
 
 // jsdom has no Web Animations API; the carousel uses it for the entrance/exit.
 beforeAll(() => {

@@ -6,7 +6,7 @@ import { Globe, Smartphone, ArrowRight, Loader2, AlertCircle, RefreshCw } from "
 import { cn } from "@/lib/utils";
 import { isFirebaseConfigured, getFirebaseAuth, getFirebaseGoogleProvider } from "@/lib/firebase/client";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 type AuthPanelProps = {
   onAuthSuccess: (data: {

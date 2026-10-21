@@ -1,7 +1,7 @@
 import type { HistoryEntry } from "@/lib/types/history";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getHistory(domain?: string): Promise<HistoryEntry[]> {
   if (IS_MOCK) {

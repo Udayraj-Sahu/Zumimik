@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 
-import { resetAppState } from "@/lib/reset-app-state";
+import { resetAppState } from "@/lib/platform";
 import { db } from "@/services/offline/db";
 import { useAdaptiveStore } from "@/stores/adaptive-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -62,7 +62,7 @@ function persistedNamesFromFiles(): string[] {
 }
 
 function resetKeysFromSource(): string[] {
-  const src = fs.readFileSync(path.join(process.cwd(), "src", "lib", "reset-app-state.ts"), "utf8");
+  const src = fs.readFileSync(path.join(process.cwd(), "src", "lib", "platform", "reset-app-state.ts"), "utf8");
   const block = src.match(/const STORAGE_KEYS = \[([\s\S]*?)\];/);
   expect(block).toBeTruthy();
   return [...(block![1].matchAll(/"([^"]+)"/g))].map((m) => m[1]);

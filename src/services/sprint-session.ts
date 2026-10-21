@@ -1,7 +1,7 @@
 import type { SprintSession } from "@/lib/types/sprint-session";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getSprintQuestions(
   topic: string,

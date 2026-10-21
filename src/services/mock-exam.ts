@@ -2,7 +2,7 @@ import type { MockPaper } from "@/lib/types/mock-exam";
 import type { SprintSession } from "@/lib/types/sprint-session";
 import { apiGet } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getMockPapers(domain?: string): Promise<MockPaper[]> {
   if (IS_MOCK) {

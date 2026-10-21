@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import { HabitProtocol } from "@/components/onboarding/habit-protocol";
+import { HabitProtocol } from "@/components/onboarding/slides/habit-protocol";
 
 describe("HabitProtocol", () => {
   it("renders the heading, pipeline label and all three feature titles", () => {

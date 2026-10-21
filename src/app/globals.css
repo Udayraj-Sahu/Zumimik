@@ -52,7 +52,7 @@
   /* Accent axis. These are the lime (default) values so any surface that never
      receives a [data-accent] attribute still resolves the brand hue. The
      [data-accent="<id>"] blocks near the end of this file override them.
-     Mirrored from accentThemes.lime.dark in src/lib/theme-tokens.ts. */
+     Mirrored from accentThemes.lime.dark in src/lib/theme/theme-tokens.ts. */
   --accent-soft: rgba(200, 255, 90, 0.12);
   --accent-muted: rgba(200, 255, 90, 0.05);
   --accent-border: rgba(200, 255, 90, 0.28);
@@ -102,7 +102,7 @@
   --sat: max(env(safe-area-inset-top, 0px), 24px);
 }
 
-/* Design palette (single source of truth; mirrors src/lib/theme-tokens.ts) */
+/* Design palette (single source of truth; mirrors src/lib/theme/theme-tokens.ts) */
 :root {
   --on-accent: #0A0C0A;
   --lime-solid: #C8FF4D;
@@ -693,7 +693,7 @@
 /* ==== ACCENT THEMES ==== */
 /* User-selectable brand hue, independent of the light/dark axis.
  *
- * These blocks are the runtime half of `accentThemes` in src/lib/theme-tokens.ts.
+ * These blocks are the runtime half of `accentThemes` in src/lib/theme/theme-tokens.ts.
  * `src/lib/accent-themes.test.ts` asserts the values below match that config
  * exactly, so edit both together or the test fails.
  *

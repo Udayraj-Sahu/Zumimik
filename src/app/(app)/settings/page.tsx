@@ -31,14 +31,14 @@ import {
 } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useThemeStore } from "@/stores/theme-store";
-import { resetAppState } from "@/lib/reset-app-state";
+import { resetAppState } from "@/lib/platform";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { cn } from "@/lib/utils";
-import { GLASS_BG, GLASS_BORDER, RED_SOFT_06, RED_SOFT_25, accentThemes, ACCENT_IDS } from "@/lib/theme-tokens";
+import { GLASS_BG, GLASS_BORDER, RED_SOFT_06, RED_SOFT_25, accentThemes, ACCENT_IDS } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 
 /* ------------------------------------------------------------------ */

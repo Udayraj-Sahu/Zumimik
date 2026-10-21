@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GLASS_12, GLASS_15, GLASS_25, GLASS_35, LIME_BRIGHT, LIME_BRIGHT_30, WHITE } from "@/lib/theme-tokens";
+import { GLASS_12, GLASS_15, GLASS_25, GLASS_35, LIME_BRIGHT, LIME_BRIGHT_30, WHITE } from "@/lib/theme";
 
 interface AchievementProps {
   label: string;

@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { AMBER, CTA_LIME, CYAN, ROSE, VIOLET_PURPLE } from "@/lib/theme-tokens";
+import { AMBER, CTA_LIME, CYAN, ROSE, VIOLET_PURPLE } from "@/lib/theme";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { safeLocalStorage } from "@/lib/browser";
-import { todayStr } from "@/lib/format";
+import { safeLocalStorage } from "@/lib/platform";
+import { todayStr } from "@/lib/text";
 import type { Habit, HabitLog, HabitStats, HabitWithLog } from "@/lib/types/habit-tracker";
 
 function dateStr(d: Date): string {

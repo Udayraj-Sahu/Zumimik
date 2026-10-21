@@ -1,7 +1,7 @@
 import type { SolveAlongTemplate, TemplateSession } from "@/lib/types/template";
 import { apiGet, apiPost } from "./api";
 
-import { IS_MOCK } from "@/lib/config";
+import { IS_MOCK } from "@/lib/platform";
 
 export async function getTemplate(id: string): Promise<SolveAlongTemplate | null> {
   if (IS_MOCK) {
