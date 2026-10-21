@@ -545,8 +545,8 @@ export function FeatureIntro({ variant, onDone, onClose, preloaded = false }: Pr
 
               {/* Row: What's included | Core systems (side by side on md+, stacked on mobile) */}
               <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-                {/* Left column: What's included */}
-                <div className={cn("flex-1 min-h-0 overflow-y-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[359px]:px-4 md:px-8 md:py-6", theme === "light" ? "pb-5" : "pb-6")}>
+                {/* Left column: What's included (below Core systems on mobile, left on md+) */}
+                <div className={cn("order-2 md:order-none flex-1 min-h-0 overflow-y-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[359px]:px-4 md:px-8 md:py-6", theme === "light" ? "pb-5" : "pb-6")}>
                   <motion.section
                     variants={itemVariants}
                     aria-labelledby="facts-heading"
@@ -562,8 +562,8 @@ export function FeatureIntro({ variant, onDone, onClose, preloaded = false }: Pr
                   </motion.section>
                 </div>
 
-                {/* Right column: single carousel instance (stacks below on mobile) */}
-                <div className="flex w-full md:w-1/2 lg:w-[48%] min-h-0 flex-col justify-start px-5 md:px-6 md:py-6">
+                {/* Right column: single carousel instance (above What's included on mobile, right on md+) */}
+                <div className="order-1 md:order-none flex w-full md:w-1/2 lg:w-[48%] min-h-0 flex-col justify-start px-5 md:px-6 md:py-6">
                   <motion.section variants={itemVariants} aria-labelledby="core-heading">
                     <h2
                       id="core-heading"

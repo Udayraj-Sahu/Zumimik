@@ -1347,7 +1347,7 @@ const ddGroups = (): DDGroup[] => {
   return groups;
 };
 
-const DD_OPEN = [true, false, false, false, false, false];
+const DD_OPEN = [false, false, false, false, false, false];
 
 const ddGroupWeekly = (g: DDGroup) =>
   g.items.reduce(

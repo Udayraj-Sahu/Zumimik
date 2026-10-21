@@ -620,7 +620,7 @@ export function IntroCarousel({
           <div
             className={cn(
               "relative mx-auto flex w-full max-w-[400px] shrink-0 flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4",
-              split && "lg:mx-0 lg:w-[460px] lg:min-h-0 lg:overflow-y-auto lg:px-6 lg:pb-6 lg:pt-4 xl:w-[520px]",
+              split && "lg:mx-0 lg:w-[460px] lg:min-h-0 lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:px-6 lg:pb-6 lg:pt-4 xl:w-[520px]",
             )}
           >
             <div className={cn(split && "lg:my-auto")}>
