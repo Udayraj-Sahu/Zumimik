@@ -34,14 +34,25 @@ describe("ArenaIntro", () => {
     render(<ArenaIntro onClose={() => {}} />);
 
     expect(slideLabels()).toEqual([
-      "1 of 7: ACTIVE LANES",
-      "2 of 7: FEATURES",
+      "1 of 7: FIRST 3 SECONDS",
+      "2 of 7: FIRST MOVE",
       "3 of 7: SPONSOR REEL",
-      "4 of 7: SPEED",
-      "5 of 7: HABIT",
+      "4 of 7: THE TRAP",
+      "5 of 7: THE STALL",
       "6 of 7: REVIEWS",
       "7 of 7: HOW IT WORKS",
     ]);
+  });
+
+  it("opens on the first-three-seconds hook", () => {
+    render(<ArenaIntro onClose={() => {}} />);
+
+    expect(
+      screen.getByRole("heading", { name: "Win the first 3 seconds.", hidden: true }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("lost to stalls")).toBeInTheDocument();
+    expect(screen.getByText("after the radar")).toBeInTheDocument();
+    expect(screen.queryByText("Race your first ghost")).toBeNull();
   });
 
   it("keeps the Arena badge and hero heading", () => {

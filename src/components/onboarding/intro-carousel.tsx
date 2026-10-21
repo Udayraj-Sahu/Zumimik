@@ -10,10 +10,8 @@ import {
   Calendar,
   CalendarClock,
   Flame,
-  Layers,
   Megaphone,
   Play,
-  Repeat,
   Skull,
   Star,
   Swords,
@@ -25,10 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StockVideoAd from "@/components/ads/stock-video-ad";
-import { HeroCard } from "@/components/onboarding/hero-card";
-import { FeatureList } from "@/components/onboarding/feature-list";
-import { SpeedCard } from "@/components/onboarding/speed-card";
-import { HabitProtocol } from "@/components/onboarding/habit-protocol";
+import FirstGhostCta from "@/components/first-ghost-cta/FirstGhostCta";
 import { ReviewCarousel } from "@/components/onboarding/review-carousel";
 import { HowItWorks } from "@/components/onboarding/how-it-works";
 import { ClearanceTiers } from "@/components/paywall/clearance-tiers";
@@ -39,7 +34,6 @@ import StallTimer from "@/components/stall-timer/StallTimer";
 import TrialTimeline from "@/components/trial-timeline/TrialTimeline";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { DOMAIN_LABELS } from "@/lib/types/template";
-import { useDashboardData } from "@/hooks/queries/use-dashboard";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -97,15 +91,14 @@ export type IntroSlide = {
 };
 
 /**
- * The Arena intro slide set, in order: hero, feature list, sponsor reel (video
- * only), speed, habit, reviews, how it works. Empty ones are skipped.
+ * The Arena intro slide set, in order: the first-three-seconds hook, the move
+ * chart, the sponsor reel (video only), the trap results, the stall timer, the
+ * reviews and how it works. The hook is skipped until a lane exists.
  */
 export function useArenaIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
   const theme = useThemeStore((s) => s.theme);
   const { primary, speedLane, second } = useLanes();
-  const { data } = useDashboardData(primary);
 
-  const upcoming = data?.upcoming ?? [];
   const label = (id: string) => DOMAIN_LABELS[id] ?? id.toUpperCase();
 
   /* Every lane lives inside a single card, so this is one flat list. */
@@ -145,32 +138,44 @@ export function useArenaIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
     });
   }
 
-  /** Slides: hero, feature list, sponsor reel (video only), up next. Empty ones are skipped. */
+  /**
+   * Slides: the first-three-seconds hook, then the four Pitch slides (move,
+   * sponsor reel, trap results, stall timer) and finally the reviews and the
+   * how-it-works walkthrough. The hook and the review/walkthrough slides are
+   * skipped when they have nothing to show.
+   */
   const slides: IntroSlide[] = [
     ...(lanes.length > 0
       ? [
           {
             id: "lanes",
             num: "01",
-            tag: "ACTIVE LANES",
+            tag: "FIRST 3 SECONDS",
             title: "",
             sub: "",
             Icon: Flame,
             full: true,
-            body: <HeroCard />,
+            fill: true,
+            body: () => (
+              <FirstGhostCta
+                title="Win the first 3 seconds."
+                tagline="Quant. LRDI. VARC. One arena."
+                stats={[
+                  { value: "9 min", label: "lost to stalls", tone: "bad" },
+                  { value: "3 min", label: "after the radar", tone: "good" },
+                ]}
+                points={[
+                  "Know exactly where your seconds leak.",
+                  "See the trap that fooled the field.",
+                  "Race the ghost until you\u2019re the benchmark.",
+                ]}
+                note="Works offline. Sample data shown."
+              />
+            ),
           },
         ]
       : []),
-    {
-      id: "features",
-      num: "02",
-      tag: "FEATURES",
-      title: "",
-      sub: "",
-      Icon: Layers,
-      full: true,
-      body: <FeatureList />,
-    },
+    FIRST_MOVE_SLIDE,
     {
       id: "sponsor",
       num: "03",
@@ -190,30 +195,8 @@ export function useArenaIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
         </div>
       ),
     },
-    ...(upcoming.length > 0
-      ? [
-          {
-            id: "next",
-            num: "04",
-            tag: "SPEED",
-            title: "",
-            sub: "",
-            Icon: Calendar,
-            full: true,
-            body: <SpeedCard />,
-          },
-        ]
-      : []),
-    {
-      id: "habit",
-      num: "05",
-      tag: "HABIT",
-      title: "",
-      sub: "",
-      Icon: Repeat,
-      full: true,
-      body: <HabitProtocol />,
-    },
+    TRAP_RESULTS_SLIDE,
+    STALL_TIMER_SLIDE,
     {
       id: "reviews",
       num: "06",

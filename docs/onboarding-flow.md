@@ -137,3 +137,59 @@ Dashboard (not onboarded)
              ├─ whenever/not_sure → PitchIntro → PlanIntro → StoryIntro → wizard → done
              └─ vedic (mental calc) → FamilyHubIntro → SeatBuilderIntro → StoryIntro → wizard → done
 ```
+
+## Current slide sets (what the code uses now)
+
+The two tables above describe the original wording; this section records the
+slide sets as they actually ship today, without changing the history above.
+Both flows read the same module-scope slide objects in
+`src/components/onboarding/intro-carousel.tsx`; only the order lists differ
+(`useArenaIntroSlides` builds its array in place, `PITCH_SLIDE_ORDER` selects
+by id).
+
+### Arena — `useArenaIntroSlides()` (7 slides)
+
+| # | Tag | Body component | Notes |
+|---|-----|----------------|-------|
+| 01 | FIRST 3 SECONDS | `<FirstGhostCta />` (`src/components/first-ghost-cta/FirstGhostCta.tsx`) | `full` + `fill`; only rendered while at least one lane exists |
+| 02 | FIRST MOVE | `<FirstMoveTimes />` (`first-move-times/FirstMoveTimes.tsx`) | `FIRST_MOVE_SLIDE`, same object the Pitch uses |
+| 03 | SPONSOR REEL | `<StockVideoAd src="/media/stock-ad.mp4" poster="/media/stock-ad-poster.webp" />` | `bare` |
+| 04 | THE TRAP | `<TrapResults />` (`trap-results/TrapResults.tsx`) | `TRAP_RESULTS_SLIDE`, same object the Pitch uses |
+| 05 | THE STALL | `<StallTimer isActive={…} />` (`stall-timer/StallTimer.tsx`) | `STALL_TIMER_SLIDE`; count-up runs only while active |
+| 06 | REVIEWS | `<ReviewCarousel />` (`onboarding/review-carousel.tsx`) | |
+| 07 | HOW IT WORKS | `<HowItWorks />` (`onboarding/how-it-works.tsx`) | |
+
+Removed from the Arena set: `FEATURES` (`FeatureList`), `SPEED` (`SpeedCard`,
+which also dropped the `useDashboardData().upcoming` lookup) and `HABIT`
+(`HabitProtocol`). Those components still exist but are no longer mounted by
+either intro.
+
+`FirstGhostCta` props: `title`, `tagline`, `stats` (tuple of
+`{ value, label, tone: "bad" | "good" }`), `points`, `note`. It renders no CTA
+and no quote; the shell's own "ENTER … ARENA" button is the only action.
+
+### Pitch — `usePitchIntroSlides()` / `PITCH_SLIDE_ORDER` (6 slides)
+
+| # | Tag | Body component | Notes |
+|---|-----|----------------|-------|
+| 01 | TACTICAL EFFICIENCY | `<AlgorithmPitch />` (`algorithm-pitch/AlgorithmPitch.tsx`) | `stop-feeding` |
+| 02 | FIRST MOVE | `<FirstMoveTimes />` | `manifesto` |
+| 03 | SPONSOR REEL | `<StockVideoAd />` | reused Arena slide |
+| 04 | THE TRAP | `<TrapResults />` | `compound-chart` |
+| 05 | THE STALL | `<StallTimer isActive={…} />` | `stall-timer` |
+| 06 | TRIAL | `<TrialTimeline />` (`trial-timeline/TrialTimeline.tsx`) | `trial-timeline`; reuses `<ReviewCarousel showSummary={false} compact />` for its review marquee |
+
+`REVIEWS` and `HOW IT WORKS` are not part of the Pitch order.
+
+### Shell contract used by the slides
+
+- `body` may be a node or `(isActive: boolean) => ReactNode`; only the active
+  slide gets `isActive === true`.
+- `full: true` means the slide owns its card surface (no carousel header);
+  `fill: true` adds `self-stretch`; `bare: true` is full-bleed (the sponsor
+  video).
+- Inactive slides render with `aria-hidden="true"` — tests must query with
+  `{ hidden: true }` or plain text queries.
+- The shell CTA ("ENTER … ARENA") calls `exit(onClose)`; there is no in-slide
+  CTA wiring today.
+
