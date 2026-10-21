@@ -5,8 +5,8 @@ import { IntroCarousel, usePitchIntroSlides } from "@/components/onboarding/intr
 /**
  * Pitch intro — shown when no exam date is set yet ("whenever" / "not sure").
  * It reuses the same carousel, design and interactions as the Arena intro and
- * opens on the StopFeeding hook and the Manifesto, then the sponsor reel, the
- * compound-interest chart, reviews and how-it-works slides. Curate the Pitch
+ * opens on the AlgorithmPitch hook and the FirstMoveTimes chart, then the sponsor reel, the
+ * trap-results panel, the stall timer and the trial timeline. Curate the Pitch
  * slide set in `usePitchIntroSlides`; the Arena flow is unaffected.
  */
 export function PitchIntro({

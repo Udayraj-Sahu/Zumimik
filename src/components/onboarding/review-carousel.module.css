@@ -102,15 +102,51 @@
 }
 
 .text {
-  display: -webkit-box;
   margin: 5px 0 0;
-  overflow: hidden;
+  overflow-wrap: break-word;
   font-size: 11px;
   line-height: 1.45;
   color: var(--muted-foreground);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+}
+
+/* Tight surfaces (the trial card): the same copy, a little less bulk. */
+.compact {
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.compact .group {
+  gap: 8px;
+  padding-right: 8px;
+}
+
+.compact .card {
+  width: 190px;
+  border-radius: 10px;
+  padding: 9px;
+}
+
+.compact .avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  font-size: 9px;
+}
+
+.compact .name {
+  font-size: 11px;
+}
+
+.compact .title {
+  margin-top: 6px;
+  font-size: 10px;
+}
+
+.compact .text {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .rating {

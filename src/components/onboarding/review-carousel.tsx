@@ -4,44 +4,27 @@ import type { CSSProperties } from "react";
 import { BadgeCheck, User } from "lucide-react";
 
 import styles from "@/components/onboarding/review-carousel.module.css";
+import {
+  STUDENT_REVIEW_QUOTE,
+  STUDENT_REVIEW_RATING,
+  STUDENT_REVIEWS,
+  type StudentReview,
+} from "@/lib/mock/reviews";
 
-interface Review {
-  name: string;
-  initials: string;
-  title: string;
-  text: string;
-}
+const REVIEWS = STUDENT_REVIEWS;
 
-const REVIEWS: Review[] = [
-  {
-    name: "Arnav James",
-    initials: "AJ",
-    title: "Finally cracked DI",
-    text: "The data interpretation drills felt brutal for two weeks, then everything clicked. My sectional accuracy jumped from 61% to 88% before the mains.",
-  },
-  {
-    name: "Priya Nair",
-    initials: "PN",
-    title: "Solid with a few quirks",
-    text: "Adaptive sets read my weak areas accurately. Occasionally the difficulty spikes faster than expected, but that pressure is exactly what exam day feels like.",
-  },
-  {
-    name: "Rahul Verma",
-    initials: "RV",
-    title: "Built a daily habit",
-    text: "Spaced revision reminders kept me consistent for 90 plus days straight. I stopped cramming the night before and started trusting the schedule.",
-  },
-];
-
-const QUOTE =
-  "Arena replaced my scattered note apps with one system that actually adapts to how I study. The mock analytics alone were worth switching for.";
+const QUOTE = STUDENT_REVIEW_QUOTE;
 
 interface ReviewCarouselProps {
   seconds?: number;
   className?: string;
+  /** The closing quote + aggregate score under the marquee. */
+  showSummary?: boolean;
+  /** Slightly tighter cards for tight surfaces (e.g. the trial card). */
+  compact?: boolean;
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review }: { review: StudentReview }) {
   return (
     <article className={styles.card}>
       <div className={styles.head}>
@@ -60,10 +43,17 @@ function ReviewCard({ review }: { review: Review }) {
   );
 }
 
-export function ReviewCarousel({ seconds = 28, className }: ReviewCarouselProps) {
+export function ReviewCarousel({
+  seconds = 28,
+  className,
+  showSummary = true,
+  compact = false,
+}: ReviewCarouselProps) {
   return (
     <section
-      className={[styles.wrap, className].filter(Boolean).join(" ")}
+      className={[styles.wrap, compact ? styles.compact : null, className]
+        .filter(Boolean)
+        .join(" ")}
       style={{ "--loop": `${seconds}s` } as CSSProperties}
       aria-label="Student reviews"
     >
@@ -82,10 +72,14 @@ export function ReviewCarousel({ seconds = 28, className }: ReviewCarouselProps)
         </div>
       </div>
 
-      <div className={styles.rating}>
-        <blockquote className={styles.quote}>{QUOTE}</blockquote>
-        <p className={styles.score}>User rating 4.9/5</p>
-      </div>
+      {showSummary && (
+        <div className={styles.rating}>
+          <blockquote className={styles.quote}>{QUOTE}</blockquote>
+          <p className={styles.score}>
+            User rating {STUDENT_REVIEW_RATING.value}/{STUDENT_REVIEW_RATING.outOf}
+          </p>
+        </div>
+      )}
     </section>
   );
 }

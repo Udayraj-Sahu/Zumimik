@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 // The carousel reads live dashboard data for the "up next" slide; a non-empty
-// list keeps every Arena slide in the flow (Arena 7, Pitch 3 + 3 Pitch-only).
+// list keeps every Arena slide in the flow (Arena 7, Pitch 6: sponsor + 5 Pitch-only).
 vi.mock("@/hooks/queries/use-dashboard", () => ({
   useDashboardData: () => ({ data: { upcoming: [{ id: "next-1" }] } }),
 }));
@@ -53,32 +53,36 @@ describe("ArenaIntro", () => {
 });
 
 describe("PitchIntro", () => {
-  it("opens on StopFeeding, Manifesto, the sponsor reel, the chart, reviews and how it works", () => {
+  it("opens on the algorithm pitch, first-move times, the sponsor reel, the trap results, the stall timer and the trial timeline", () => {
     render(<PitchIntro onClose={() => {}} />);
 
     expect(slideLabels()).toEqual([
       "1 of 6: TACTICAL EFFICIENCY",
-      "2 of 6: MANIFESTO",
+      "2 of 6: FIRST MOVE",
       "3 of 6: SPONSOR REEL",
-      "4 of 6: COMPOUND EFFECT",
-      "5 of 6: REVIEWS",
-      "6 of 6: HOW IT WORKS",
+      "4 of 6: THE TRAP",
+      "5 of 6: THE STALL",
+      "6 of 6: TRIAL",
     ]);
 
-    expect(screen.getByText("Stop feeding")).toBeInTheDocument();
-    expect(screen.getByText("The algorithm")).toBeInTheDocument();
+    expect(screen.getByText("Stop feeding the algorithm.")).toBeInTheDocument();
+    expect(screen.getByText("Six hours scrolled. Six minutes that count.")).toBeInTheDocument();
     expect(
-      screen.getByText("Stop letting TikTok lobotomize you. Reclaim your focus."),
+      screen.getByText("Free with ads. Works offline. You set the time. We pick the drills."),
     ).toBeInTheDocument();
   });
 
-  it("does not start the chart animation on load", () => {
+  it("does not start the stall timer count-up on load", () => {
     render(<PitchIntro onClose={() => {}} />);
 
     // The overlay portals into document.body, so query the document.
-    expect(document.querySelector("section.play")).toBeNull();
-    expect(document.body.textContent).toContain("+0%");
-    expect(document.body.textContent).not.toContain("+312%");
+    const timer = screen.getByRole("group", {
+      name: "Compare time lost to stalls",
+      hidden: true,
+    });
+    const card = timer.closest("section") as HTMLElement;
+    expect(within(card).getByText("0")).toBeInTheDocument();
+    expect(within(card).queryByText("9")).toBeNull();
   });
 
   it("shows the Pitch badge and hero heading instead of the Arena ones", () => {

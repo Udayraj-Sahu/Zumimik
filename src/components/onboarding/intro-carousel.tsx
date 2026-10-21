@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import {
   ArrowRight,
   Calendar,
+  CalendarClock,
   Flame,
   Layers,
   Megaphone,
@@ -16,6 +17,7 @@ import {
   Skull,
   Star,
   Swords,
+  Timer,
   TrendingUp,
   Workflow,
   Zap,
@@ -30,9 +32,11 @@ import { HabitProtocol } from "@/components/onboarding/habit-protocol";
 import { ReviewCarousel } from "@/components/onboarding/review-carousel";
 import { HowItWorks } from "@/components/onboarding/how-it-works";
 import { ClearanceTiers } from "@/components/paywall/clearance-tiers";
-import StopFeeding from "@/components/stop-feeding/StopFeeding";
-import Manifesto from "@/components/manifesto/Manifesto";
-import CompoundChart from "@/components/compound-chart/CompoundChart";
+import AlgorithmPitch from "@/components/algorithm-pitch/AlgorithmPitch";
+import FirstMoveTimes from "@/components/first-move-times/FirstMoveTimes";
+import TrapResults from "@/components/trap-results/TrapResults";
+import StallTimer from "@/components/stall-timer/StallTimer";
+import TrialTimeline from "@/components/trial-timeline/TrialTimeline";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { useDashboardData } from "@/hooks/queries/use-dashboard";
@@ -78,6 +82,13 @@ export type IntroSlide = {
   bare?: boolean;
   /** Renders the body full-bleed: the slide owns its own card surface. */
   full?: boolean;
+  /**
+   * Stretches the slide to the full height of the track instead of letting it
+   * size to its content. A `full` slide whose body can shrink (a chart that
+   * flexes, a card that scrolls internally) sets this so the slide never
+   * overflows the carousel and forces the page to scroll.
+   */
+  fill?: boolean;
   /**
    * Slide body. A function form receives the live active state so a body can
    * drive entrance work (e.g. chart draw-in) only while its slide is active.
@@ -240,46 +251,84 @@ const STOP_FEEDING_SLIDE: IntroSlide = {
   sub: "",
   Icon: Skull,
   full: true,
-  body: <StopFeeding />,
+  fill: true,
+  body: <AlgorithmPitch />,
 };
 
 /**
- * Pitch-only second slide. Like StopFeeding it is a `full` slide (it owns its
+ * Pitch-only second slide. Like AlgorithmPitch it is a `full` slide (it owns its
  * card surface), so it carries no carousel header — only the carousel tag for
  * its dot.
  */
-const MANIFESTO_SLIDE: IntroSlide = {
+const FIRST_MOVE_SLIDE: IntroSlide = {
   id: "manifesto",
   num: "02",
-  tag: "MANIFESTO",
+  tag: "FIRST MOVE",
   title: "",
   sub: "",
   Icon: Megaphone,
   full: true,
-  body: <Manifesto />,
+  fill: true,
+  body: <FirstMoveTimes />,
 };
 
 /**
- * Pitch-only compound-interest chart slide. Like the two hooks before it, a
- * `full` slide that owns its card surface and drives its own entrance animation
- * from the live active state (never from being mounted).
+ * Pitch-only trap-results slide. Like the hooks before it, a `full` slide that
+ * owns its card surface and drives its own bar animation from mount.
  */
-const COMPOUND_CHART_SLIDE: IntroSlide = {
+const TRAP_RESULTS_SLIDE: IntroSlide = {
   id: "compound-chart",
   num: "04",
-  tag: "COMPOUND EFFECT",
+  tag: "THE TRAP",
   title: "",
   sub: "",
   Icon: TrendingUp,
   full: true,
-  body: (isActive) => <CompoundChart isActive={isActive} />,
+  fill: true,
+  body: <TrapResults />,
+};
+
+/**
+ * Pitch-only stall-timer slide. Like the hooks before it, a `full` slide that
+ * owns its card surface; the body receives the live slide state so the
+ * count-up only runs while this slide is the active one.
+ */
+const STALL_TIMER_SLIDE: IntroSlide = {
+  id: "stall-timer",
+  num: "05",
+  tag: "THE STALL",
+  title: "",
+  sub: "",
+  Icon: Timer,
+  full: true,
+  fill: true,
+  body: (isActive) => <StallTimer isActive={isActive} />,
+};
+
+/**
+ * Pitch-only trial-timeline slide. A `full` slide like the hooks before it: the
+ * card lays out the 7-day trial steps, the cancel-before readout and the
+ * verified student reviews on its own surface.
+ */
+const TRIAL_TIMELINE_SLIDE: IntroSlide = {
+  id: "trial-timeline",
+  num: "06",
+  tag: "TRIAL",
+  title: "",
+  sub: "",
+  Icon: CalendarClock,
+  full: true,
+  fill: true,
+  body: <TrialTimeline />,
 };
 
 /** The Pitch-only slides, keyed by id so the order list below stays declarative. */
 const PITCH_ONLY_SLIDES: Record<string, IntroSlide> = {
   "stop-feeding": STOP_FEEDING_SLIDE,
-  manifesto: MANIFESTO_SLIDE,
-  "compound-chart": COMPOUND_CHART_SLIDE,
+  manifesto: FIRST_MOVE_SLIDE,
+  "compound-chart": TRAP_RESULTS_SLIDE,
+  "stall-timer": STALL_TIMER_SLIDE,
+  "trial-timeline": TRIAL_TIMELINE_SLIDE,
 };
 
 /**
@@ -293,13 +342,13 @@ const PITCH_SLIDE_ORDER = [
   "manifesto",
   "sponsor",
   "compound-chart",
-  "reviews",
-  "how-it-works",
+  "stall-timer",
+  "trial-timeline",
 ];
 
 /**
- * The Pitch intro slide set: the StopFeeding hook, the Manifesto, the sponsor
- * reel, the compound-interest chart, reviews and how-it-works.
+ * The Pitch intro slide set: the AlgorithmPitch hook, the FirstMoveTimes chart, the sponsor
+ * reel, the trap-results panel, the stall timer and the trial timeline.
  */
 export function usePitchIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
   const { slides, lanes } = useArenaIntroSlides();
@@ -555,7 +604,7 @@ export function IntroCarousel({
                     aria-hidden={i !== active ? "true" : undefined}
                     className={cn(
                       "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden",
-                      card.bare && "self-stretch",
+                      (card.bare || card.fill) && "self-stretch",
                     )}
                   >
                     <div
