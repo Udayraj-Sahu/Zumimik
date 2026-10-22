@@ -2779,7 +2779,7 @@ export function StoryIntro({
         aria-labelledby="story-hook-title"
       >
         <div
-          className="relative w-full min-h-full sm:min-h-0 sm:max-w-md sm:max-h-[92vh] sm:flex sm:flex-col sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl lg:max-w-5xl xl:max-w-[1180px]"
+          className="relative w-full min-h-full sm:min-h-0 sm:max-w-md sm:max-h-[92vh] sm:flex sm:flex-col sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl md:max-w-3xl md:max-h-[85vh] lg:max-w-4xl xl:max-w-[1080px]"
           style={{
             borderColor: GLASS_BORDER,
             background:

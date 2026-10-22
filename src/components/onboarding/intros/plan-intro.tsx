@@ -113,7 +113,7 @@ export function PlanSelector({
   onLaneChange: (lane: string) => void;
   lane: string;
   billing?: "annual" | "monthly";
-  /** "row" lays the three plans side by side on wide viewports. */
+  /** "row" lays the three plans side by side from the `md` breakpoint up. */
   layout?: "stack" | "row";
 }) {
   const theme = useThemeStore((s) => s.theme);
@@ -133,7 +133,7 @@ export function PlanSelector({
   return (
     <div
       className={cn(
-        layout === "row" ? "grid grid-cols-1 gap-3 lg:grid-cols-3" : "flex flex-col gap-3",
+        layout === "row" ? "grid grid-cols-1 gap-3 md:grid-cols-3" : "flex flex-col gap-3",
       )}
     >
       {PLANS.map((p, idx) => {
@@ -361,7 +361,7 @@ export function PlanIntro({
         aria-labelledby="plan-hook-title"
       >
       <div
-        className="relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl lg:max-w-5xl xl:max-w-[1180px]"
+        className="relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl md:max-w-3xl md:max-h-[85vh] lg:max-w-4xl xl:max-w-[1080px]"
         style={{
           borderColor: GLASS_BORDER,
           background:
@@ -380,6 +380,10 @@ export function PlanIntro({
         />
 
         <div className="relative mx-auto flex w-full max-w-[400px] min-h-0 flex-1 flex-col px-[18px] pt-[max(1rem,var(--sat))] sm:max-w-none max-[359px]:px-4">
+          {/* The headline block ("Pick your pace." + the one-pass line) stays
+              centred, with the annual/monthly switch directly beneath it and
+              the plan cards + pay-with rows running across the full width
+              below. Mobile keeps exactly the same source order. */}
           <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* centered brand */}
           <FadeUp className="flex flex-col items-center gap-3.5 text-center">
@@ -407,13 +411,14 @@ export function PlanIntro({
             </p>
           </FadeUp>
 
-          {/* billing switch */}
+          {/* billing switch - directly under the headline block, centred */}
           <div
             className={cn(
-              "relative mt-5 grid grid-cols-2 rounded-[14px] border p-1",
+              "relative mt-5 grid grid-cols-2 rounded-[14px] border p-1 mx-auto w-full max-w-[420px]",
               tone.surface,
             )}
           >
+
             <motion.span
               aria-hidden
               className="absolute bottom-1 left-1 top-1 w-[calc(50%-4px)] rounded-[10px] bg-[var(--lime-solid)]"
@@ -453,7 +458,8 @@ export function PlanIntro({
             })}
           </div>
 
-          {/* plan cards — same component the adaptive reprompt "Select your plan" step uses */}
+          {/* plan cards — same component the adaptive reprompt "Select your plan" step uses.
+              One row of three from md up, matching the pay-with row below. */}
           <div className="mt-3.5">
             <PlanSelector
               value={planId}

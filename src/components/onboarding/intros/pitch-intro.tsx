@@ -8,6 +8,9 @@ import { IntroCarousel, usePitchIntroSlides } from "@/components/onboarding/intr
  * opens on the AlgorithmPitch hook and the FirstMoveTimes chart, then the sponsor reel, the
  * trap-results panel, the stall timer and the trial timeline. Curate the Pitch
  * slide set in `usePitchIntroSlides`; the Arena flow is unaffected.
+ *
+ * It uses the same `split` shell as Arena, so both flows show the same
+ * horizontal two-column rectangle from `md` up and stay stacked on mobile.
  */
 export function PitchIntro({
   onClose,
@@ -31,6 +34,7 @@ export function PitchIntro({
       titleId="pitch-hook-title"
       badge="TACTICAL FOCUS"
       heading={{ lead: "Your focus", highlight: "compounds." }}
+      layout="split"
     />
   );
 }

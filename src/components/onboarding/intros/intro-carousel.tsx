@@ -405,10 +405,11 @@ export function IntroCarousel({
   /** Hero heading: plain lead text plus the gradient-highlighted tail. */
   heading?: { lead: string; highlight: string };
   /**
-   * Shell arrangement. `stacked` (default) is the single narrow column used by
-   * Pitch. `split` lays the carousel and the clearance tiers side by side from
-   * `lg` up — tiers on the left, carousel on the right — and keeps the stacked
-   * column below that so mobile and tablet stay untouched.
+   * Shell arrangement. `stacked` (default) is the single narrow column.
+   * `split` lays the clearance tiers and the carousel side by side from `md` up
+   * (768px, the same breakpoint Feature Intro switches to its two-column
+   * rectangle) — tiers on the left, carousel on the right — and keeps the
+   * stacked column below `md` so mobile stays untouched.
    */
   layout?: "stacked" | "split";
 }) {
@@ -512,7 +513,7 @@ export function IntroCarousel({
       <div
         className={cn(
           "relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl",
-          split && "lg:max-w-5xl xl:max-w-[1180px]",
+          split && "md:max-w-3xl md:max-h-[85vh] lg:max-w-4xl xl:max-w-[1080px]",
         )}
         style={{
           borderColor: GLASS_BORDER,
@@ -558,11 +559,11 @@ export function IntroCarousel({
           </h1>
         </div>
 
-        {/* panels: stacked column by default; side-by-side from lg in split mode */}
+        {/* panels: stacked column by default; side-by-side from md in split mode */}
         <div
           className={cn(
             "relative flex min-h-0 flex-1 flex-col",
-            split && "lg:flex-row-reverse",
+            split && "md:flex-row-reverse",
           )}
         >
           <section
@@ -570,7 +571,7 @@ export function IntroCarousel({
             aria-label="Arena overview"
             className={cn(
               "flex min-h-0 flex-1 flex-col px-5 pt-3",
-              split && "lg:min-w-0 lg:px-6 lg:pt-4 lg:pb-2",
+              split && "md:min-w-0 md:px-5 md:pt-4 md:pb-2 lg:px-6",
             )}
           >
             <div
@@ -652,10 +653,10 @@ export function IntroCarousel({
           <div
             className={cn(
               "relative mx-auto flex w-full max-w-[400px] shrink-0 flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4",
-              split && "lg:mx-0 lg:w-[460px] lg:min-h-0 lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:px-6 lg:pb-6 lg:pt-4 xl:w-[520px]",
+              split && "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]",
             )}
           >
-            <div className={cn(split && "lg:my-auto")}>
+            <div className={cn(split && "md:my-auto")}>
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
               <div className="mt-3 shrink-0">
                 <ClearanceTiers value={tier} onChange={setTier} />

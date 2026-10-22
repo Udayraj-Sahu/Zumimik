@@ -209,10 +209,25 @@ function SystemCarousel() {
   );
 }
 
-const FACTS: { value: string; label: string; valueClass: string }[] = [
-  { value: "Live", label: "Accuracy tracker", valueClass: "text-[#C8FF4D]" },
-  { value: "Auto", label: "Adaptive difficulty", valueClass: "text-cyan-400" },
-  { value: "Daily", label: "Weak-topic review", valueClass: "text-fuchsia-400" },
+const FACTS: { value: string; label: string; valueClass: string; valueClassLight: string }[] = [
+  {
+    value: "Live",
+    label: "Accuracy tracker",
+    valueClass: "text-[var(--lime)]",
+    valueClassLight: "text-[var(--lime)]",
+  },
+  {
+    value: "Auto",
+    label: "Adaptive difficulty",
+    valueClass: "text-cyan-400",
+    valueClassLight: "text-cyan-700",
+  },
+  {
+    value: "Daily",
+    label: "Weak-topic review",
+    valueClass: "text-fuchsia-400",
+    valueClassLight: "text-fuchsia-700",
+  },
 ];
 
 const VARIANT_COPY: Record<
@@ -288,7 +303,7 @@ function CountValue({ value, className }: { value: string; className?: string })
 function IncludedFactsCard() {
   const theme = useThemeStore((s) => s.theme);
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-2xl border border-[var(--lime-40)] bg-[var(--panel-warm)] p-4 shadow-[0_0_40px_var(--lime-15)]">
       <motion.dl
         className="grid grid-cols-3 gap-2"
         variants={{
@@ -296,25 +311,20 @@ function IncludedFactsCard() {
           show: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
         }}
       >
-        {FACTS.map(({ value, label, valueClass }) => (
+        {FACTS.map(({ value, label, valueClass, valueClassLight }) => (
           <motion.div
             key={label}
             variants={cardVariants}
-            className="keep-white flex flex-col-reverse justify-end gap-1 rounded-lg border border-white/10 bg-black/60 px-3 py-3"
+            className="flex flex-col-reverse justify-end gap-1 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-06)] px-3 py-3"
           >
-            <dt
-              className={cn(
-                " text-[9px] uppercase leading-3 tracking-wider",
-                theme === "light" ? "text-white/60" : "text-muted-foreground",
-              )}
-            >
+            <dt className="text-[9px] uppercase leading-3 tracking-wider text-muted-foreground">
               {label}
             </dt>
-            <CountValue value={value} className={valueClass} />
+            <CountValue value={value} className={theme === "light" ? valueClassLight : valueClass} />
           </motion.div>
         ))}
       </motion.dl>
-      <p className={cn(" mt-3 text-[9px] uppercase tracking-wider", theme === "light" ? "text-black/60" : "text-white/60")}>
+      <p className="mt-3 text-[9px] uppercase tracking-wider text-muted-foreground">
         Accuracy tracked per topic · Missed questions resurface · Harder sets as you improve
       </p>
     </div>
@@ -564,7 +574,14 @@ export function FeatureIntro({ variant, onDone, onClose, preloaded = false }: Pr
 
                 {/* Right column: single carousel instance (above What's included on mobile, right on md+) */}
                 <div className="order-1 md:order-none flex w-full md:w-1/2 lg:w-[48%] min-h-0 flex-col justify-start px-5 md:px-6 md:py-6">
-                  <motion.section variants={itemVariants} aria-labelledby="core-heading">
+                  {/* Mobile only: breathing room above the "Core systems" heading
+                      and below the section. From md up the column padding handles
+                      the spacing instead. */}
+                  <motion.section
+                    variants={itemVariants}
+                    aria-labelledby="core-heading"
+                    className="mt-5 mb-4 md:mt-0 md:mb-0"
+                  >
                     <h2
                       id="core-heading"
                       className="mb-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground"

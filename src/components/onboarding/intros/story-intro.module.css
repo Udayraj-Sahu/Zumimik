@@ -845,6 +845,71 @@
   display: none;
 }
 
+/* Tablet (md, 768px and up): the summary shares the first row with "tell us
+   about your day", "where does time slip away?" shares the second row with
+   "keep it moving", and "what you'll see" plus the footer span both columns.
+   The 1024px block below refines this into the six-column desktop layout. */
+@media (min-width: 768px) {
+  .pg {
+    align-items: start;
+    column-gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gHero,
+  .gTell,
+  .gWhere,
+  .gKeep,
+  .gWhat,
+  .gFoot {
+    display: block;
+  }
+
+  /* Row 1: summary + "tell us about your day". */
+  .gHero {
+    grid-column: 1 / 2;
+  }
+
+  .gTell {
+    align-self: stretch;
+    grid-column: 2 / 3;
+  }
+
+  .gTell .card {
+    height: 100%;
+  }
+
+  /* Row 2: "where does time slip away?" + "keep it moving". */
+  .gWhere {
+    grid-column: 1 / 2;
+  }
+
+  .gKeep {
+    grid-column: 2 / 3;
+  }
+
+  /* Rows 3 and 4: "what you'll see" and the footer span both columns. */
+  .gWhat {
+    grid-column: 1 / -1;
+  }
+
+  .gFoot {
+    grid-column: 1 / -1;
+  }
+
+  /* Both panels sit next to each other, so their heading boxes are matched
+     (the "where does time slip away?" row is 34px tall because of its round
+     + button) and their cards start on the same line. */
+  .gWhere .hh,
+  .gKeep > h2 {
+    align-items: center;
+    display: flex;
+    height: 34px;
+    margin: 16px 0 8px;
+  }
+}
+
 @media (min-width: 1024px) {
   .pg {
     align-items: start;
