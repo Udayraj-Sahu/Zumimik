@@ -46,6 +46,7 @@ import { ArenaIntro } from "@/components/onboarding/intros/arena-intro";
 import { PitchIntro } from "@/components/onboarding/intros/pitch-intro";
 import { HabitTrackerModal } from "@/components/dashboard/habit-tracker-modal";
 import { DashboardWelcome } from "@/components/dashboard/mascot/dashboard-welcome";
+import { StreakXpPill } from "@/components/dashboard/streak-xp-pill";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { InviteCard } from "@/components/dashboard/invite-card";
 import { ResumeProtocolCard } from "@/components/adaptive/resume-protocol-card";
@@ -284,6 +285,10 @@ export default function DashboardPage() {
   const radarAxes = data?.radarAxes ?? EMPTY_RADAR;
   const stats = data?.stats ?? EMPTY_STATS;
   const streak = data?.streak ?? EMPTY_STREAK;
+  // The week strip is Monday-first, so today's completion is the streak day at
+  // the matching index (the same data the weekly dots on the card render).
+  const todayIndex = (new Date().getDay() + 6) % 7;
+  const goalDoneToday = streak.days[todayIndex] ?? false;
   const upcoming = data?.upcoming ?? EMPTY_UPCOMING;
   const leaderboard = data?.leaderboard ?? EMPTY_LEADERBOARD;
   const recent = data?.recent ?? EMPTY_RECENT;
@@ -381,7 +386,7 @@ export default function DashboardPage() {
           <div aria-hidden="true" className="inline-flex items-center gap-2 pill px-2 py-1.5 min-[1025px]:hidden">
             <ZuzumikMark className="size-4" />
           </div>
-          <div className="order-last mt-5 w-full min-w-0 md:order-none md:mt-0 md:mr-2 md:w-auto md:flex-1">
+          <div className="order-last mt-5 w-full min-w-0 min-[1025px]:order-none min-[1025px]:mt-0 min-[1025px]:mr-2 min-[1025px]:w-auto min-[1025px]:flex-1">
             <DashboardWelcome
               enabled={!welcomeBlocked}
               greeting={
@@ -401,18 +406,11 @@ export default function DashboardPage() {
               }
             />
           </div>
-          <div data-tour-streak className="ml-auto flex items-center gap-1">
-            <div className="flex items-center gap-1.5 pill px-2.5 py-1.5 max-[359px]:px-2">
-              <Flame size={12} className="text-[var(--orange)]" strokeWidth={2.5} />
-              <span className="text-[11px] font-semibold tracking-[-0.01em] text-[var(--orange)]">{streak.current} Day</span>
+          <div data-tour-streak className="ml-auto flex items-center gap-1.5">
+            <StreakXpPill streak={streak.current} xp={streak.xp} done={goalDoneToday} />
+            <div className="flex shrink-0">
+              <ThemeToggle />
             </div>
-            <div className="flex items-center gap-1.5 pill px-2.5 py-1.5 max-[359px]:px-2">
-              <Zap size={12} className="text-primary" strokeWidth={2.5} />
-              <span className="text-[11px] font-semibold tracking-[-0.01em] text-primary">{streak.xp.toLocaleString()} XP</span>
-            </div>
-          </div>
-          <div className="flex shrink-0">
-            <ThemeToggle />
           </div>
         </div>
         <div className="hidden md:block">

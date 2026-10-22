@@ -1,17 +1,21 @@
-/* Circular appearance trigger: quiet glass pill-sized circle that matches the
-   dashboard header's other icon buttons. */
+/* Circular appearance trigger: inset surface in the header's status language,
+   with the active accent on the glyph and focus ring so accent changes read
+   here immediately. */
 .trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background-color: var(--glass-03);
+  background-color: var(--surface);
   color: var(--foreground);
-  box-shadow: inset 0 1px 0 var(--glass-07);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition:
     background-color 160ms ease,
@@ -22,7 +26,6 @@
 
 .trigger:hover {
   border-color: var(--glass-15);
-  background-color: var(--glass-07);
 }
 
 .trigger:active {
@@ -31,7 +34,7 @@
 
 .trigger[aria-expanded="true"] {
   border-color: var(--glass-15);
-  background-color: var(--glass-07);
+  background-color: var(--surface-hover);
 }
 
 /* The glyph pops in on mount and on every mode change (React keys it by theme),
