@@ -101,6 +101,8 @@
   line-height: 0.9;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
+  /* The width is animated per frame; only the red/lime tone cross-fades. */
+  transition: color 180ms ease;
 }
 
 .red {
@@ -138,6 +140,8 @@
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: 999px;
+  /* Width is driven frame by frame; the red/lime tone cross-fades. */
+  transition: background-color 180ms ease;
 }
 
 .fillRed {

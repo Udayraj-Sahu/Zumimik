@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import StallTimer from "@/components/stall-timer/StallTimer";
@@ -24,6 +24,7 @@ function withReducedMotion() {
 const readout = (container: HTMLElement) => container.querySelector("b") as HTMLElement;
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -136,13 +137,124 @@ describe("StallTimer", () => {
     );
   });
 
-  it("counts up when motion is allowed", async () => {
+  it("counts up when motion is allowed, then settles on the assisted run", async () => {
     const { container } = render(<StallTimer />);
 
     expect(readout(container)).toHaveTextContent("0");
-    await waitFor(() => expect(readout(container)).toHaveTextContent("9"), {
+    await waitFor(
+      () => expect(Number(readout(container).textContent)).toBeGreaterThan(0),
+      { timeout: 1000 },
+    );
+    await waitFor(() => expect(readout(container)).toHaveTextContent("3"), {
       timeout: 2000,
     });
+  });
+
+  it("hands off to the assisted run on its own after the reading beat", () => {
+    vi.useFakeTimers();
+    withReducedMotion();
+    const { container } = render(<StallTimer />);
+
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(readout(container)).toHaveTextContent("9");
+
+    act(() => {
+      vi.advanceTimersByTime(499);
+    });
+
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(readout(container)).toHaveTextContent("3");
+    expect(
+      screen.getByRole("heading", { name: "Stalls found. Time back." }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "aria-label",
+      "3 of 9 minutes lost to stalls",
+    );
+  });
+
+  it("keeps a manual pick and cancels the auto hand-off", () => {
+    vi.useFakeTimers();
+    withReducedMotion();
+    const { container } = render(<StallTimer />);
+
+    fireEvent.click(screen.getByRole("button", { name: "With zuzumik" }));
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(readout(container)).toHaveTextContent("3");
+
+    fireEvent.click(screen.getByRole("button", { name: "Today" }));
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(readout(container)).toHaveTextContent("9");
+  });
+
+  it("clears the hand-off when the slide goes inactive and restarts on return", () => {
+    vi.useFakeTimers();
+    withReducedMotion();
+    const { container, rerender } = render(<StallTimer isActive />);
+
+    rerender(<StallTimer isActive={false} />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(readout(container)).toHaveTextContent("0");
+
+    rerender(<StallTimer isActive />);
+
+    expect(screen.getByRole("button", { name: "Today" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(readout(container)).toHaveTextContent("9");
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("survives rapid mode changes", async () => {

@@ -6,6 +6,12 @@ import styles from "./StallTimer.module.css";
 
 const COUNT_MS = 650;
 
+/**
+ * Reading beat after the card becomes active. Half a second is enough for the
+ * Today readout to settle on its value before the assisted run takes over.
+ */
+const AUTO_SWITCH_MS = 500;
+
 type ModeId = "today" | "zuzumik";
 
 type Mode = {
@@ -131,6 +137,29 @@ export default function StallTimer({
   isActive = true,
 }: StallTimerProps) {
   const [modeId, setModeId] = useState<ModeId>("today");
+  /** Set once the reader picks a run by hand; holds that pick, no auto hand-off. */
+  const [manual, setManual] = useState(false);
+
+  // Reset while the card is off-screen, so every visit replays Today ->
+  // With zuzumik instead of flashing the run left over from last time.
+  useEffect(() => {
+    if (isActive) return;
+    setModeId("today");
+    setManual(false);
+  }, [isActive]);
+
+  // The demo hand-off: after a short reading beat the assisted run takes over.
+  // A manual pick (or leaving the slide) clears the pending timer.
+  useEffect(() => {
+    if (!isActive || manual) return;
+    const timer = window.setTimeout(() => setModeId("zuzumik"), AUTO_SWITCH_MS);
+    return () => window.clearTimeout(timer);
+  }, [isActive, manual]);
+
+  const pickMode = (id: ModeId) => {
+    setModeId(id);
+    setManual(true);
+  };
 
   const minutes = Number.isFinite(sectionMinutes)
     ? Math.max(0, Math.floor(sectionMinutes))
@@ -163,7 +192,7 @@ export default function StallTimer({
               key={m.id}
               type="button"
               aria-pressed={on}
-              onClick={() => setModeId(m.id)}
+              onClick={() => pickMode(m.id)}
               className={`${styles.chip} ${on ? styles.chipOn : ""}`}
             >
               {m.label}
