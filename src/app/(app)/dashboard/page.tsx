@@ -637,7 +637,7 @@ export default function DashboardPage() {
 
           {/* Slide 3: This Week + Daily Habits */}
           <div className={cn("snap-center shrink-0 w-full h-[420px] sm:h-[380px] transition-all duration-500 ease-out origin-center", carouselIndex === 2 ? "scale-100 opacity-100" : "scale-[0.94] opacity-40")}>
-            <div data-carousel-card className="w-full relative overflow-hidden rounded-3xl border backdrop-blur-xl p-4 sm:p-4 h-full flex flex-col" style={{ borderColor: GLASS_BORDER, background: "linear-gradient(160deg, var(--emerald-06) 0%, var(--glass-02) 100%)" }}>
+            <div data-carousel-card onClick={() => setHabitModalOpen(true)} className="w-full relative overflow-hidden rounded-3xl border backdrop-blur-xl p-4 sm:p-4 h-full flex flex-col cursor-pointer" style={{ borderColor: GLASS_BORDER, background: "linear-gradient(160deg, var(--emerald-06) 0%, var(--glass-02) 100%)" }}>
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20" style={{ background: "radial-gradient(circle, var(--emerald-30), transparent)" }} />
                 <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-10" style={{ background: "radial-gradient(circle, var(--emerald-40), transparent)" }} />
 
@@ -937,18 +937,16 @@ export default function DashboardPage() {
                 key={q.label}
                 type="button"
                 onClick={() => router.push(q.href)}
-                className="tile-shine group flex flex-col items-center gap-3 rounded-2xl border border-[var(--glass-07)] py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex flex-col items-center gap-3 rounded-2xl border border-[var(--glass-07)] py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <div className="relative">
-                  <div className="relative h-11 w-11 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110" style={{ background: q.bg }}>
-                    <q.icon size={18} color={hueText(q.color)} />
-                  </div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-full" style={{ background: q.bg }}>
+                  <q.icon size={18} color={hueText(q.color)} />
                 </div>
                 <span className="text-micro font-medium text-foreground/55 text-center leading-tight tracking-[0.01em]">{label}</span>
               </button>
               );
             })}
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--glass-07)] bg-transparent py-4 opacity-35">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--glass-07)] py-4 opacity-35">
               <div className="h-11 w-11 rounded-full flex items-center justify-center border border-dashed border-[var(--glass-10)]">
                 <Plus size={15} className="text-muted-foreground" />
               </div>
