@@ -141,6 +141,13 @@ export function PlanSelector({
         const unit = billing === "monthly" ? "mo" : "yr";
         const shown = p.billing[billing ?? "annual"];
         const tracks = p.id === "dual-lane" && dualTracks ? dualTracks : p.tracks;
+        const isFree = shown === 0;
+        const trialLabel =
+          p.id === "single-lane"
+            ? "7-DAY FREE TRIAL"
+            : p.id === "dual-lane"
+              ? "14-DAY FREE TRIAL"
+              : null;
         return (
           <motion.button
             key={p.id}
@@ -150,117 +157,121 @@ export function PlanSelector({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + idx * 0.05, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              "relative w-full border p-3.5 text-left transition",
+              "relative flex w-full flex-col border p-3.5 text-left transition",
               theme === "light" ? "rounded-[16px]" : "rounded-[20px]",
               selected
                 ? "border-[var(--lime-55)] bg-[var(--lime-06)] shadow-[0_0_24px_var(--lime-12)]"
-                : "border-white/[0.07] hover:border-white/[0.16]",
+                : "border-[var(--glass-07)] hover:border-[var(--lime-40)]",
               !selected && (theme === "light" ? "bg-black/[0.04]" : "bg-black/25"),
             )}
           >
-            {p.badge && selected && (
-              <span className="absolute -top-2 right-3 rounded-full bg-[var(--lime-solid)] px-2 py-0.5 text-[8px] font-bold tracking-[0.14em] text-[var(--on-accent)]">
-                {p.badge}
-              </span>
+            {selected && (p.badge || trialLabel) && (
+              <div className="absolute -top-2 right-2 flex items-center gap-1">
+                {p.badge && (
+                  <span className="whitespace-nowrap rounded-full bg-[var(--primary)] px-2 py-0.5 text-[8px] font-bold tracking-[0.14em] text-[var(--primary-foreground)]">
+                    {p.badge}
+                  </span>
+                )}
+                {trialLabel && (
+                  <span className="whitespace-nowrap rounded-full border border-[var(--lime-40)] bg-[var(--panel-warm)] px-2 py-0.5 text-[8px] font-bold tracking-[0.14em] text-[var(--lime)]">
+                    {trialLabel}
+                  </span>
+                )}
+              </div>
             )}
 
-            <div className="flex items-start gap-3">
+            <div className="flex flex-1 items-stretch gap-3">
               <span
                 className={cn(
                   "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border-2 transition-colors",
                   selected
                     ? "border-[var(--lime-solid)] bg-[var(--lime-solid)] shadow-[0_0_10px_var(--lime-40)]"
-                    : "border-white/20 bg-transparent",
+                    : "border-[var(--glass-25)] bg-transparent",
                 )}
               >
                 {selected && <Check size={9} className="text-[var(--on-accent)]" strokeWidth={3.5} />}
               </span>
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "text-[13px] font-bold",
-                          selected ? "text-foreground" : "text-white/80",
-                        )}
-                      >
-                        {p.name}
-                      </span>
-                      {p.id === "single-lane" && (
-                        <span className="rounded bg-[var(--lime-15)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.1em] text-[var(--lime)]">
-                          {laneLabel(lane).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-0.5 text-[11px] leading-snug text-white/55">
-                      {p.desc}
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right text-[13px] font-bold text-[var(--lime)]">
-                    {inr(shown)}
-                    <span className="text-[10px] font-normal text-white/45">
-                      /{unit}
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="text-[13px] font-bold leading-tight text-foreground">
+                    {p.name}
+                  </span>
+                  {p.id === "single-lane" && (
+                    <span className="rounded bg-[var(--lime-15)] px-1.5 py-0.5 text-[8px] font-bold tracking-[0.1em] text-[var(--lime)]">
+                      {laneLabel(lane).toUpperCase()}
                     </span>
-                  </div>
+                  )}
                 </div>
 
-                {tracks && (
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] tracking-[0.14em] text-white/50">
-                        UNLOCKED TRACKS:
-                      </span>
-                      <span
-                        className={cn(
-                          "text-[9px] font-bold",
-                          theme === "light" ? "text-[var(--cyan)]" : "text-cyan-400",
-                        )}
-                      >
-                        {p.lanes} Lanes Active
-                      </span>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {tracks.map((t) =>
-                        t.startsWith("+") ? (
-                          <span
-                            key={t}
-                            className="rounded border border-dashed border-white/15 px-2 py-1 text-[10px] text-white/50"
-                          >
-                            {t}
-                          </span>
-                        ) : (
-                          <span
-                            key={t}
-                            className={cn(
-                              "inline-flex items-center gap-1 rounded border border-cyan-400/40 bg-cyan-400/10 px-2 py-1 text-[10px]",
-                              theme === "light" ? "text-[var(--cyan)]" : "text-cyan-300",
-                            )}
-                          >
-                            <Check size={10} /> {t}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-[15px] font-bold leading-none text-[var(--lime)]">
+                    {isFree ? "Free" : inr(shown)}
+                  </span>
+                  <span className="text-[10px] font-normal text-muted-foreground">
+                    {isFree ? "forever" : `/${unit}`}
+                  </span>
+                </div>
 
-                {!p.tracks && !(p.id === "dual-lane" && dualTracks) && (
-                  <ul className="mt-2.5 flex flex-col gap-1.5">
-                    {p.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-center gap-2 text-[11px] font-medium text-white/50"
-                      >
-                        <span className="grid size-4 shrink-0 place-items-center rounded-full bg-[var(--lime-12)] text-[var(--lime)]">
-                          <Check size={9} strokeWidth={3.5} />
+                <span className="mt-1.5 block min-h-[2.75em] text-[11px] leading-snug text-muted-foreground">
+                  {p.desc}
+                </span>
+
+                <div className="mt-2.5 flex-1">
+                  {tracks ? (
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[9px] tracking-[0.14em] text-muted-foreground">
+                          UNLOCKED TRACKS:
                         </span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                        <span
+                          className={cn(
+                            "shrink-0 text-[9px] font-bold",
+                            theme === "light" ? "text-[var(--cyan)]" : "text-cyan-400",
+                          )}
+                        >
+                          {p.lanes} Lanes Active
+                        </span>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {tracks.map((t) =>
+                          t.startsWith("+") ? (
+                            <span
+                              key={t}
+                              className="rounded border border-dashed border-[var(--glass-18)] px-2 py-1 text-[10px] text-muted-foreground"
+                            >
+                              {t}
+                            </span>
+                          ) : (
+                            <span
+                              key={t}
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded border border-cyan-400/40 bg-cyan-400/10 px-2 py-1 text-[10px]",
+                                theme === "light" ? "text-[var(--cyan)]" : "text-cyan-300",
+                              )}
+                            >
+                              <Check size={10} /> {t}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <ul className="flex flex-col gap-1.5">
+                      {p.features.map((f) => (
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-[11px] font-medium leading-snug text-muted-foreground"
+                        >
+                          <span className="mt-px grid size-4 shrink-0 place-items-center rounded-full bg-[var(--lime-12)] text-[var(--lime)]">
+                            <Check size={9} strokeWidth={3.5} />
+                          </span>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             </div>
           </motion.button>
