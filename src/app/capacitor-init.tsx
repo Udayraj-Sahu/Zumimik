@@ -61,7 +61,9 @@ export function CapacitorInit() {
         const { useThemeStore } = await import("@/stores/theme-store");
 
         const syncSystemBars = () => {
-          void applySystemBars(useThemeStore.getState().theme);
+          // Study is a warm variant of the dark axis, so it keeps light icons.
+          const theme = useThemeStore.getState().theme;
+          void applySystemBars(theme === "light" ? "light" : "dark");
         };
 
         // Covers the very first frame after the splash, where native still has

@@ -14,7 +14,8 @@ import { accentThemes } from "@/lib/theme";
 export function useAccentHex(): string {
   const theme = useThemeStore((s) => s.theme);
   const accent = useThemeStore((s) => s.accent);
-  return accentThemes[accent][theme].primary;
+  // Study is a warm variant of the dark axis, so it resolves the dark token set.
+  return accentThemes[accent][theme === "light" ? "light" : "dark"].primary;
 }
 
 /**

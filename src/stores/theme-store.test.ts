@@ -81,6 +81,12 @@ describe("mode and accent are independent", () => {
     expect(useThemeStore.getState().accent).toBe("red");
   });
 
+  it("treats study as a toggle destination back to light", () => {
+    useThemeStore.getState().setTheme("study");
+    useThemeStore.getState().toggleTheme();
+    expect(useThemeStore.getState().theme).toBe("light");
+  });
+
   it("setAccent is idempotent and accepts every supported accent", () => {
     for (const accent of ACCENT_IDS) {
       useThemeStore.getState().setAccent(accent);
@@ -102,6 +108,11 @@ describe("persistence", () => {
   it("keeps the storage key stable", () => {
     expect(useThemeStore.persist.getOptions().name).toBe(STORAGE_KEY);
   });
+
+  it("persists the study mode like any other mode", () => {
+    useThemeStore.getState().setTheme("study");
+    expect(readPersisted()?.state?.theme).toBe("study");
+  });
 });
 
 describe("validation and migration", () => {
@@ -119,6 +130,14 @@ describe("validation and migration", () => {
     expect(useThemeStore.getState().theme).toBe("dark");
     // The valid accent is preserved rather than discarded with the invalid mode.
     expect(useThemeStore.getState().accent).toBe("violet");
+  });
+
+  it("restores the study mode from storage", () => {
+    writePersisted({ state: { theme: "study", accent: "blue" }, version: 0 });
+    useThemeStore.persist.rehydrate();
+
+    expect(useThemeStore.getState().theme).toBe("study");
+    expect(useThemeStore.getState().accent).toBe("blue");
   });
 
   it("survives corrupt JSON without throwing", () => {
@@ -145,6 +164,87 @@ describe("validation and migration", () => {
   });
 });
 
+describe("screen filters", () => {
+  it("defaults to no warm tint and full brightness", () => {
+    const state = useThemeStore.getState();
+    expect(state.warmTint).toBe(0);
+    expect(state.brightness).toBe(100);
+  });
+
+  it("reset() restores both filters alongside the theme axes", () => {
+    useThemeStore.getState().setWarmTint(60);
+    useThemeStore.getState().setBrightness(65);
+    useThemeStore.getState().reset();
+
+    const state = useThemeStore.getState();
+    expect(state.warmTint).toBe(0);
+    expect(state.brightness).toBe(100);
+  });
+
+  it("clamps the warm tint to 0-100 and rounds it", () => {
+    useThemeStore.getState().setWarmTint(-10);
+    expect(useThemeStore.getState().warmTint).toBe(0);
+
+    useThemeStore.getState().setWarmTint(240);
+    expect(useThemeStore.getState().warmTint).toBe(100);
+
+    useThemeStore.getState().setWarmTint(33.6);
+    expect(useThemeStore.getState().warmTint).toBe(34);
+  });
+
+  it("clamps brightness to 50-100 and falls back on non-numbers", () => {
+    useThemeStore.getState().setBrightness(20);
+    expect(useThemeStore.getState().brightness).toBe(50);
+
+    useThemeStore.getState().setBrightness(140);
+    expect(useThemeStore.getState().brightness).toBe(100);
+
+    useThemeStore.getState().setBrightness(Number.NaN);
+    expect(useThemeStore.getState().brightness).toBe(100);
+  });
+
+  it("persists both filters next to the theme axes", () => {
+    useThemeStore.getState().setWarmTint(25);
+    useThemeStore.getState().setBrightness(80);
+
+    const persisted = readPersisted();
+    expect(persisted?.state?.warmTint).toBe(25);
+    expect(persisted?.state?.brightness).toBe(80);
+  });
+
+  it("sanitizes persisted filters on rehydrate", () => {
+    writePersisted({
+      state: { theme: "dark", accent: "lime", warmTint: 150, brightness: 10 },
+      version: 0,
+    });
+    useThemeStore.persist.rehydrate();
+
+    expect(useThemeStore.getState().warmTint).toBe(100);
+    expect(useThemeStore.getState().brightness).toBe(50);
+  });
+
+  it("defaults a legacy payload with no filters to Off and 100%", () => {
+    writePersisted({ state: { theme: "light", accent: "cyan" }, version: 0 });
+    useThemeStore.persist.rehydrate();
+
+    expect(useThemeStore.getState().warmTint).toBe(0);
+    expect(useThemeStore.getState().brightness).toBe(100);
+  });
+
+  it("writes both filters to the document root for the CSS overlays", () => {
+    useThemeStore.getState().setWarmTint(40);
+    useThemeStore.getState().setBrightness(75);
+
+    const root = document.documentElement.style;
+    expect(root.getPropertyValue("--app-warmth")).toBe("40");
+    expect(root.getPropertyValue("--app-brightness")).toBe("75");
+
+    useThemeStore.persist.rehydrate();
+    expect(root.getPropertyValue("--app-warmth")).toBe("40");
+    expect(root.getPropertyValue("--app-brightness")).toBe("75");
+  });
+});
+
 describe("DOM application", () => {
   it("applies the light class and accent attribute to every themed scope", () => {
     const a = mountScope("a");
@@ -167,6 +267,20 @@ describe("DOM application", () => {
 
     expect(el.classList.contains("light")).toBe(false);
     expect(el.getAttribute("data-accent")).toBe("cyan");
+  });
+
+  it("marks study scopes on the dark axis and clears study on light", () => {
+    const el = mountScope("a");
+
+    useThemeStore.getState().setTheme("study");
+    expect(el.classList.contains("study")).toBe(true);
+    expect(el.classList.contains("light")).toBe(false);
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+
+    useThemeStore.getState().setTheme("light");
+    expect(el.classList.contains("study")).toBe(false);
+    expect(el.classList.contains("light")).toBe(true);
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
   });
 
   it("scopes newly mounted dialogs to the current accent", () => {

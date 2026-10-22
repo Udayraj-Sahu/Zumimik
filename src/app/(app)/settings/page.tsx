@@ -28,6 +28,7 @@ import {
   Trash2,
   Sun,
   Moon,
+  BookOpen,
 } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useThemeStore } from "@/stores/theme-store";
@@ -270,6 +271,8 @@ const theme = useThemeStore((s) => s.theme);
 const accent = useThemeStore((s) => s.accent);
 const setAccent = useThemeStore((s) => s.setAccent);
 const toggleTheme = useThemeStore((s) => s.toggleTheme);
+const modeTitle = theme === "light" ? "Light" : theme === "study" ? "Study" : "Dark";
+const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
 
   const prepExams = useMemo(() => {
     const others = activePreps.filter((id) => id !== targetExam && id in DOMAIN_LABELS);
@@ -351,14 +354,14 @@ const toggleTheme = useThemeStore((s) => s.toggleTheme);
             <SectionLabel>APPEARANCE</SectionLabel>
             <div className="space-y-2.5 md:hidden max-[359px]:space-y-2">
               <Row
-                icon={theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                icon={<ModeIcon className="h-5 w-5" />}
                 title="Theme"
-                subtitle={theme === "light" ? "Light mode — on" : "Dark mode — on"}
+                subtitle={`${modeTitle} mode — on`}
                 onClick={toggleTheme}
               />
             </div>
             <div className="hidden md:grid md:items-stretch">
-              <HeadingTile icon={theme === "light" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />} heading={theme === "light" ? "Light Mode" : "Dark Mode"} onClick={toggleTheme} />
+              <HeadingTile icon={<ModeIcon className="h-5 w-5" />} heading={`${modeTitle} Mode`} onClick={toggleTheme} />
             </div>
             <div className="mt-3">
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">

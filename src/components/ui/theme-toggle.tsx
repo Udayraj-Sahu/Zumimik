@@ -1,257 +1,275 @@
 "use client";
 
-import { SVGProps, useState, useSyncExternalStore } from "react";
-import { motion } from "motion/react";
-import type { Transition, Variants } from "motion/react";
-import { BookOpen } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { BookOpen, Moon, Sun, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useThemeStore } from "@/stores/theme-store";
+import type { AccentId } from "@/lib/theme";
+import {
+  BRIGHTNESS_MAX,
+  BRIGHTNESS_MIN,
+  WARM_TINT_MAX,
+  WARM_TINT_MIN,
+  useThemeStore,
+  type Theme,
+} from "@/stores/theme-store";
+import styles from "./theme-toggle.module.css";
 
-type ToggleSize = "default" | "lg" | "xl";
+/** The three real modes, in the order the reference panel lists them. */
+const MODES: { id: Theme; label: string }[] = [
+  { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
+  { id: "study", label: "Study" },
+];
 
-const Moon = (props: SVGProps<SVGSVGElement>) => {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={cn("text-white dark:text-white", props.className)}
-    >
-      <path
-        fillRule="evenodd"
-        d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-};
+/**
+ * The reference's four palette names map onto the design system's orange/blue/
+ * emerald/amber accent token sets; the remaining four app accents keep their own
+ * names. Together they expose every supported accent exactly once, so the menu
+ * drives the existing `[data-accent]` machinery instead of introducing a second
+ * accent system. Swatch paints come from the shared --swatch-* tokens in
+ * globals.css, never from a literal hex in this component.
+ */
+const ACCENTS: { label: string; accent: AccentId; swatch: string }[] = [
+  { label: "Coral", accent: "orange", swatch: "var(--swatch-coral)" },
+  { label: "Azure", accent: "blue", swatch: "var(--swatch-azure)" },
+  { label: "Mint", accent: "emerald", swatch: "var(--swatch-mint)" },
+  { label: "Gold", accent: "amber", swatch: "var(--swatch-gold)" },
+  { label: "Lime", accent: "lime", swatch: "var(--swatch-lime)" },
+  { label: "Cyan", accent: "cyan", swatch: "var(--swatch-cyan)" },
+  { label: "Violet", accent: "violet", swatch: "var(--swatch-violet)" },
+  { label: "Red", accent: "red", swatch: "var(--swatch-red)" },
+];
 
-const Sun = (props: SVGProps<SVGSVGElement>) => {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 24 24"
-      fill="#F59E0B"
-    >
-      <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
-    </svg>
-  );
-};
+const MENU_WIDTH = 380;
+const VIEWPORT_GAP = 8;
 
-// Three positions: Light (left), Dark (middle), Study (right). Each track is
-// exactly three knobs wide, so `step` (the knob width) is the distance the knob
-// travels per position.
-const toggleSizeMap = {
-  default: {
-    container: "w-[72px] h-6",
-    checkbox: "w-6 h-6",
-    icon: "w-3 h-3",
-    step: 24,
-  },
-  lg: {
-    container: "w-24 h-8",
-    checkbox: "w-8 h-8",
-    icon: "w-4 h-4",
-    step: 32,
-  },
-  xl: {
-    container: "w-36 h-12",
-    checkbox: "w-12 h-12",
-    icon: "w-6 h-6",
-    step: 48,
-  },
-};
+/** Trigger glyph mirrors the active mode, so the button always tells the truth. */
+function modeIcon(theme: Theme): LucideIcon {
+  if (theme === "light") return Sun;
+  if (theme === "study") return BookOpen;
+  return Moon;
+}
 
-const toggleVariants = {
-  light: () => ({
-    x: 0,
-  }),
-  dark: (step: number) => ({
-    x: step,
-  }),
-  study: (step: number) => ({
-    x: step * 2,
-  }),
-} satisfies Variants;
-
-const sunVariants = {
-  light: {
-    y: "0%",
-    x: "0%",
-    opacity: 1,
-  },
-  dark: {
-    y: "-100%",
-    x: "100%",
-    opacity: 0,
-  },
-  study: {
-    y: "-100%",
-    x: "100%",
-    opacity: 0,
-  },
-} satisfies Variants;
-
-const moonVariants = {
-  light: {
-    y: "-100%",
-    x: "-100%",
-    opacity: 0,
-  },
-  dark: {
-    y: "0%",
-    x: "0%",
-    opacity: 1,
-  },
-  study: {
-    y: "-100%",
-    x: "100%",
-    opacity: 0,
-  },
-} satisfies Variants;
-
-// BookOpen (lucide) is the Study Mode position. Study Mode is UI-only for now:
-// selecting it parks the toggle on the right with this icon but applies no
-// light/dark/accent tokens, so its treatment intentionally mirrors dark.
-const bookVariants = {
-  light: {
-    y: "-100%",
-    x: "-100%",
-    opacity: 0,
-  },
-  dark: {
-    y: "-100%",
-    x: "-100%",
-    opacity: 0,
-  },
-  study: {
-    y: "0%",
-    x: "0%",
-    opacity: 1,
-  },
-} satisfies Variants;
-
-const springTransition = {
-  type: "spring",
-  stiffness: 100,
-  damping: 30,
-} satisfies Transition;
-
-const useMounted = () =>
-  useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-
-export function ThemeToggle({
-  size = "default",
-  className,
-}: {
-  size?: ToggleSize;
-  className?: string;
-}) {
+export function ThemeToggle({ className }: { className?: string }) {
   const theme = useThemeStore((s) => s.theme);
+  const accent = useThemeStore((s) => s.accent);
+  const warmTint = useThemeStore((s) => s.warmTint);
+  const brightness = useThemeStore((s) => s.brightness);
   const setTheme = useThemeStore((s) => s.setTheme);
-  const [isStudy, setIsStudy] = useState(false);
-  const mounted = useMounted();
+  const setAccent = useThemeStore((s) => s.setAccent);
+  const setWarmTint = useThemeStore((s) => s.setWarmTint);
+  const setBrightness = useThemeStore((s) => s.setBrightness);
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; right: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const focused = useRef(false);
+  const menuId = useId();
+  const ModeIcon = modeIcon(theme);
+  const activeAccentLabel = ACCENTS.find((option) => option.accent === accent)?.label;
 
-  if (!mounted) {
-    return null;
-  }
+  // Anchor the menu to the trigger, flipping above it when the viewport runs
+  // out of room below and clamping to the horizontal gaps on narrow screens.
+  useEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const width = Math.min(MENU_WIDTH, window.innerWidth - VIEWPORT_GAP * 2);
+      const height = menuRef.current?.offsetHeight ?? 0;
+      const below = rect.bottom + VIEWPORT_GAP;
+      const above = rect.top - height - VIEWPORT_GAP;
+      const top =
+        height > 0 && below + height > window.innerHeight - VIEWPORT_GAP
+          ? Math.max(VIEWPORT_GAP, above)
+          : below;
+      const right = Math.min(
+        Math.max(window.innerWidth - rect.right, VIEWPORT_GAP),
+        window.innerWidth - width - VIEWPORT_GAP,
+      );
+      setCoords({ top, right });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
 
-  // Study Mode is UI-only for now: a third selectable position in the toggle
-  // that applies no tokens (the store's Theme axis stays "light" | "dark").
-  // Selecting it parks the knob on the right with the BookOpen icon until the
-  // full Study Mode behavior lands.
-  const mode: "light" | "dark" | "study" = isStudy ? "study" : theme;
-  const isLight = mode === "light";
-  const selectedSize = toggleSizeMap[size];
-
-  const selectNextMode = () => {
-    if (isStudy) {
-      setIsStudy(false);
-      setTheme("light");
-    } else if (theme === "light") {
-      setTheme("dark");
-    } else {
-      setIsStudy(true);
+  // Focus the active mode once per open, and only after the panel is positioned
+  // (it cannot take focus while still hidden). Rerenders never steal it.
+  useEffect(() => {
+    if (!open) {
+      focused.current = false;
+      setCoords(null);
+      return;
     }
-  };
+    if (!coords || focused.current) return;
+    focused.current = true;
+    const target =
+      menuRef.current?.querySelector<HTMLElement>(`[data-mode="${theme}"]`) ??
+      menuRef.current?.querySelector<HTMLElement>("button, input");
+    target?.focus();
+  }, [open, coords, theme]);
 
-  const ariaLabel =
-    mode === "light"
-      ? "Switch to dark theme"
-      : mode === "dark"
-        ? "Switch to Study Mode"
-        : "Switch to light theme";
+  // Pointer-down closes on any press outside the trigger or the panel; Escape
+  // closes and hands focus back to the trigger from anywhere in the panel.
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const menu =
+    open && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            data-theme-scope
+            data-accent={accent}
+            suppressHydrationWarning
+            className={cn(
+              "contents",
+              theme === "light" && "light",
+              theme === "study" && "study",
+            )}
+          >
+            <div
+              ref={menuRef}
+              id={menuId}
+              role="dialog"
+              aria-label="Appearance settings"
+              onBlur={(event) => {
+                const next = event.relatedTarget as Node | null;
+                if (!next) return;
+                if (menuRef.current?.contains(next) || triggerRef.current?.contains(next)) return;
+                setOpen(false);
+              }}
+              className={cn(
+                styles.menu,
+                styles.panel,
+                theme === "light" && styles.menuLight,
+                !coords && styles.menuHidden,
+              )}
+              style={coords ? { top: coords.top, right: coords.right } : undefined}
+            >
+              <section>
+                <div className={styles.label}>
+                  <span>Mode</span>
+                </div>
+                <div className={styles.seg} role="group" aria-label="Mode">
+                  {MODES.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      data-mode={option.id}
+                      aria-pressed={theme === option.id}
+                      onClick={() => setTheme(option.id)}
+                      className={cn(styles.pill, theme === option.id && styles.pillOn)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <div className={styles.label}>
+                  <span>Accent</span>
+                  <span>{activeAccentLabel ?? "Custom"}</span>
+                </div>
+                <div className={styles.dots} role="group" aria-label="Accent">
+                  {ACCENTS.map((option) => (
+                    <button
+                      key={option.accent}
+                      type="button"
+                      aria-label={option.label}
+                      aria-pressed={accent === option.accent}
+                      onClick={() => setAccent(option.accent)}
+                      className={cn(styles.dot, accent === option.accent && styles.dotOn)}
+                      style={{ backgroundColor: option.swatch }}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <div className={styles.label}>
+                  <span>Warm tint</span>
+                  <span>{warmTint === 0 ? "Off" : `${warmTint}%`}</span>
+                </div>
+                <input
+                  type="range"
+                  min={WARM_TINT_MIN}
+                  max={WARM_TINT_MAX}
+                  step={1}
+                  value={warmTint}
+                  aria-label="Warm tint"
+                  onChange={(event) => setWarmTint(Number(event.target.value))}
+                  className={styles.range}
+                />
+              </section>
+
+              <section>
+                <div className={styles.label}>
+                  <span>Brightness</span>
+                  <span>{brightness}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={BRIGHTNESS_MIN}
+                  max={BRIGHTNESS_MAX}
+                  step={1}
+                  value={brightness}
+                  aria-label="Brightness"
+                  onChange={(event) => setBrightness(Number(event.target.value))}
+                  className={styles.range}
+                />
+              </section>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
-    <button
-      type="button"
-      aria-pressed={mode === "dark"}
-      aria-label={ariaLabel}
-      onClick={selectNextMode}
-      className={cn(
-        "relative inline-flex min-h-11 min-w-11 shrink-0 appearance-none items-center justify-center rounded-full border-0 p-0 align-middle leading-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        className,
-      )}
-    >
-      <span
-        className={cn(
-          "relative inline-flex items-center justify-start overflow-hidden rounded-full",
-          selectedSize.container,
-          isLight ? "bg-gray-200" : "bg-gray-800",
-        )}
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label="Open appearance settings"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((value) => !value)}
+        onKeyDown={(event) => {
+          if (event.key !== "ArrowDown" || open) return;
+          event.preventDefault();
+          setOpen(true);
+        }}
+        className={cn(styles.trigger, className)}
       >
-        <motion.div
-          className={cn(
-            selectedSize.checkbox,
-            "absolute top-0 left-0 rounded-full flex items-center justify-center overflow-hidden",
-            isLight
-              ? "keep-white bg-white shadow-lg shadow-white/50"
-              : "bg-black shadow-lg shadow-black/50",
-          )}
-          animate={mode}
-          variants={toggleVariants}
-          custom={selectedSize.step}
-          transition={springTransition}
-        >
-          <motion.div
-            className="absolute"
-            initial="light"
-            animate={mode}
-            variants={sunVariants}
-            transition={springTransition}
-          >
-            <Sun className={selectedSize.icon} />
-          </motion.div>
-          <motion.div
-            className="absolute"
-            initial="light"
-            animate={mode}
-            variants={moonVariants}
-            transition={springTransition}
-          >
-            <Moon className={cn(selectedSize.icon)} />
-          </motion.div>
-          <motion.div
-            className="absolute"
-            initial="light"
-            animate={mode}
-            variants={bookVariants}
-            transition={springTransition}
-          >
-            <BookOpen className={cn(selectedSize.icon, "text-white")} />
-          </motion.div>
-        </motion.div>
-      </span>
-    </button>
+        <ModeIcon key={theme} size={18} aria-hidden="true" className={styles.triggerIcon} />
+      </button>
+      {menu}
+    </>
   );
 }

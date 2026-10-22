@@ -3,40 +3,88 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { safeLocalStorage } from "@/lib/platform";
 import { DEFAULT_ACCENT, isAccentId, type AccentId } from "@/lib/theme";
 
-export type Theme = "dark" | "light";
+/**
+ * Mode axis. `dark` and `light` are the app's original pair; `study` is a warm,
+ * low-blue reading variant of the dark axis (light text, warm brown surfaces).
+ * It deliberately stays on the dark side of every `theme === "light"` branch so
+ * the existing light-only overrides are never applied to it.
+ */
+export type Theme = "dark" | "light" | "study";
+
+export const THEMES: Theme[] = ["light", "dark", "study"];
+
+export function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && (THEMES as string[]).includes(value);
+}
+
+/** True only for the light theme; `study` shares the dark text palette. */
+export function isLightTheme(theme: Theme): boolean {
+  return theme === "light";
+}
+
+export const WARM_TINT_MIN = 0;
+export const WARM_TINT_MAX = 100;
+export const BRIGHTNESS_MIN = 50;
+export const BRIGHTNESS_MAX = 100;
 
 type ThemeState = {
-  /** Light/dark mode axis. Independent of `accent`. */
+  /** Mode axis. Independent of `accent`. */
   theme: Theme;
   /** User-selectable brand hue. Independent of `theme`. */
   accent: AccentId;
+  /** 0-100 warmth overlay strength; 0 disables it. */
+  warmTint: number;
+  /** 50-100 screen brightness; 100 leaves the surfaces untouched. */
+  brightness: number;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setAccent: (accent: AccentId) => void;
+  setWarmTint: (warmTint: number) => void;
+  setBrightness: (brightness: number) => void;
   reset: () => void;
 };
+
+function clamp(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
 
 const STORAGE_KEY = "zuzumik-theme";
 
 // `.light` is scoped to app-shell subtrees ([data-theme-scope]) so the landing
 // page and onboarding/auth surfaces never flip. Everything outside those
-// subtrees permanently resolves :root (dark) values. The same loop carries
-// `data-accent`, which is what globals.css keys its [data-accent="<id>"] token
-// blocks off, so portaled dialogs follow the user's accent too.
+// subtrees permanently resolves :root (dark) values. `.study` rides the same
+// scopes and only re-warms the dark palette, so it needs no light-only
+// overrides. The same loop carries `data-accent`, which is what globals.css
+// keys its [data-accent="<id>"] token blocks off, so portaled dialogs follow the
+// user's accent too.
 // `documentElement.classList` carries the `dark` class that Tailwind's
 // `darkMode: "class"` keys `dark:` variants off. Portaled dialogs and toasts live
 // outside every `[data-theme-scope]`, so the document root is the only ancestor
 // that covers them.
-function applyThemeToDocument(theme: Theme) {
+function applyAppearanceToDocument(theme: Theme, warmTint: number, brightness: number) {
   if (typeof document === "undefined") return;
-  document.documentElement.classList.toggle("dark", theme === "dark");
+  // `study` is a dark-axis theme, so Tailwind's `dark:` variants stay active
+  // under it. Only light mode drops the class.
+  document.documentElement.classList.toggle("dark", theme !== "light");
+  // The screen filters live on body::before/::after in globals.css; these two
+  // numbers are the whole state they need. Written as unitless strings because
+  // the CSS consumes them inside calc().
+  document.documentElement.style.setProperty("--app-warmth", String(warmTint));
+  document.documentElement.style.setProperty("--app-brightness", String(brightness));
 }
 
-function applyThemeToScopes(theme: Theme, accent: AccentId) {
-  applyThemeToDocument(theme);
+function applyThemeToScopes(
+  theme: Theme,
+  accent: AccentId,
+  warmTint: number,
+  brightness: number,
+) {
+  applyAppearanceToDocument(theme, warmTint, brightness);
   if (typeof document === "undefined") return;
   document.querySelectorAll<HTMLElement>("[data-theme-scope]").forEach((el) => {
     el.classList.toggle("light", theme === "light");
+    el.classList.toggle("study", theme === "study");
     el.setAttribute("data-accent", accent);
   });
 }
@@ -47,7 +95,7 @@ function readInitialTheme(): Theme {
     const raw = safeLocalStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as { state?: { theme?: unknown } };
-      if (parsed?.state?.theme === "light") return "light";
+      if (isTheme(parsed?.state?.theme)) return parsed.state.theme;
     }
   } catch {
     /* ignore */
@@ -72,15 +120,49 @@ function readInitialAccent(): AccentId {
   return DEFAULT_ACCENT;
 }
 
+// Same reasoning as `readInitialTheme`: read the persisted filters at module
+// scope so the first paint already carries the user's warm tint / brightness.
+function readInitialNumber(
+  key: "warmTint" | "brightness",
+  min: number,
+  max: number,
+  fallback: number,
+): number {
+  if (typeof document === "undefined") return fallback;
+  try {
+    const raw = safeLocalStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { state?: Record<string, unknown> };
+      return clamp(parsed?.state?.[key], min, max, fallback);
+    }
+  } catch {
+    /* ignore */
+  }
+  return fallback;
+}
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       theme: readInitialTheme(),
       accent: readInitialAccent(),
+      warmTint: readInitialNumber("warmTint", WARM_TINT_MIN, WARM_TINT_MAX, 0),
+      brightness: readInitialNumber("brightness", BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_MAX),
       setTheme: (theme) => set({ theme }),
-      toggleTheme: () => set({ theme: get().theme === "dark" ? "light" : "dark" }),
+      toggleTheme: () =>
+        set({ theme: get().theme === "light" ? "dark" : "light" }),
       setAccent: (accent) => set({ accent }),
-      reset: () => set({ theme: "dark", accent: DEFAULT_ACCENT }),
+      setWarmTint: (warmTint) =>
+        set({ warmTint: clamp(warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0) }),
+      setBrightness: (brightness) =>
+        set({ brightness: clamp(brightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_MAX) }),
+      reset: () =>
+        set({
+          theme: "dark",
+          accent: DEFAULT_ACCENT,
+          warmTint: 0,
+          brightness: BRIGHTNESS_MAX,
+        }),
     }),
     {
       name: STORAGE_KEY,
@@ -96,26 +178,44 @@ export const useThemeStore = create<ThemeState>()(
         return {
           ...current,
           ...incoming,
-          theme: incoming.theme === "light" ? "light" : "dark",
+          theme: isTheme(incoming.theme) ? incoming.theme : "dark",
           accent: isAccentId(incoming.accent) ? incoming.accent : DEFAULT_ACCENT,
+          warmTint: clamp(incoming.warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0),
+          brightness: clamp(
+            incoming.brightness,
+            BRIGHTNESS_MIN,
+            BRIGHTNESS_MAX,
+            BRIGHTNESS_MAX,
+          ),
         };
       },
       onRehydrateStorage: () => (state) => {
-        if (state) applyThemeToScopes(state.theme, state.accent);
+        if (state) {
+          applyThemeToScopes(state.theme, state.accent, state.warmTint, state.brightness);
+        }
       },
     },
   ),
 );
 
 useThemeStore.subscribe((state, prev) => {
-  if (state.theme !== prev.theme || state.accent !== prev.accent) {
-    applyThemeToScopes(state.theme, state.accent);
+  if (
+    state.theme !== prev.theme ||
+    state.accent !== prev.accent ||
+    state.warmTint !== prev.warmTint ||
+    state.brightness !== prev.brightness
+  ) {
+    applyThemeToScopes(state.theme, state.accent, state.warmTint, state.brightness);
   }
 });
 
 // Persisted value is read synchronously at module scope, so set the root class
-// immediately instead of waiting for the first rehydrate/subscription tick.
-applyThemeToDocument(useThemeStore.getState().theme);
+// and filter variables immediately instead of waiting for the first
+// rehydrate/subscription tick.
+{
+  const { theme, warmTint, brightness } = useThemeStore.getState();
+  applyAppearanceToDocument(theme, warmTint, brightness);
+}
 
 /**
  * Portals (dialogs, onboarding, paywall, habit tracker) mount *after*
@@ -136,12 +236,14 @@ if (typeof document !== "undefined") {
         if (!(node instanceof HTMLElement)) continue;
         if (node.matches("[data-theme-scope]")) {
           node.classList.toggle("light", theme === "light");
+          node.classList.toggle("study", theme === "study");
           node.setAttribute("data-accent", accent);
         }
         node
           .querySelectorAll<HTMLElement>("[data-theme-scope]")
           .forEach((el) => {
             el.classList.toggle("light", theme === "light");
+            el.classList.toggle("study", theme === "study");
             el.setAttribute("data-accent", accent);
           });
       }

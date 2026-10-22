@@ -29,9 +29,6 @@ import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { AMBER, AMBER_DARK, AMBER_LIGHT, AMBER_LIGHT_12, BG_SOFT, BLACK_30, CYAN, CYAN_LIGHT, CYAN_LIGHT_12, EMERALD, EMERALD_12, EMERALD_SOLID, GLASS_03, GLASS_05, GLASS_06, GLASS_15, GLASS_30, GLASS_BG, GLASS_BORDER, GREEN_SOFT, GREEN_SOFT_12, ROSE_PINK, ROSE_PINK_12, SKY, SLATE, SLATE_DARKEST, VIOLET_DARK, VIOLET_DARK_12, VIOLET_PURPLE, VIOLET_PURPLE_2, VIOLET_PURPLE_2_12, YELLOW, hueText } from "@/lib/theme";
 import { useAccentHex } from "@/hooks/use-accent-hex";
-import { motion, useMotionValue, useTransform, animate } from "motion/react";
-import { ACCENT_IDS, accentThemes } from "@/lib/theme";
-import { useThemeStore } from "@/stores/theme-store";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -193,36 +190,6 @@ export default function DashboardPage() {
   usePageMeta("Dashboard — Zuzumik");
   const router = useRouter();
   const accentHex = useAccentHex();
-  const activeAccent = useThemeStore((s) => s.accent);
-  const setAccent = useThemeStore((s) => s.setAccent);
-
-  // The switch previews the *next* accent, so the dot doubles as a hint for
-  // what a tap will do rather than just echoing the current colour.
-  const nextAccentId = ACCENT_IDS[(ACCENT_IDS.indexOf(activeAccent) + 1) % ACCENT_IDS.length];
-  const nextAccent = accentThemes[nextAccentId];
-
-  // Orbit: a satellite in the incoming colour runs one full lap and fades, so
-  // the change reads as the new accent arriving rather than a hard swap.
-  const ORBIT_RADIUS = 15;
-  const orbitAngle = useMotionValue(0);
-  const orbitOpacity = useMotionValue(0);
-  const orbitX = useTransform(orbitAngle, (a) => Math.cos((a * Math.PI) / 180) * ORBIT_RADIUS);
-  const orbitY = useTransform(orbitAngle, (a) => Math.sin((a * Math.PI) / 180) * ORBIT_RADIUS);
-
-  const cycleAccent = useCallback(() => {
-    setAccent(nextAccentId);
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    orbitAngle.set(0);
-    orbitOpacity.set(0);
-    animate(orbitAngle, 360, { duration: 0.75, ease: [0.32, 0.72, 0.3, 1] });
-    animate(orbitOpacity, [0, 1, 1, 0], {
-      duration: 0.75,
-      times: [0, 0.12, 0.65, 1],
-      ease: "easeInOut",
-    });
-  }, [nextAccentId, orbitAngle, orbitOpacity, setAccent]);
 
   const firstName = useOnboardingStore((s) => s.firstName);
   const persona = useOnboardingStore((s) => s.persona);
@@ -444,24 +411,6 @@ export default function DashboardPage() {
               <span className="text-[11px] font-semibold tracking-[-0.01em] text-primary">{streak.xp.toLocaleString()} XP</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={cycleAccent}
-            aria-label={`Switch accent to ${nextAccent.label}`}
-            title={`Switch to ${nextAccent.label}`}
-            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background/60 backdrop-blur-xl transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span
-              aria-hidden="true"
-              className="size-5 rounded-full ring-1 ring-inset ring-black/10 transition-colors duration-500 max-[359px]:size-4"
-              style={{ background: nextAccent.swatch }}
-            />
-            <motion.span
-              aria-hidden="true"
-              className="pointer-events-none absolute size-1.5 rounded-full"
-              style={{ x: orbitX, y: orbitY, opacity: orbitOpacity, background: nextAccent.swatch }}
-            />
-          </button>
           <div className="flex shrink-0">
             <ThemeToggle />
           </div>

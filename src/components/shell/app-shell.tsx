@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <div data-theme-scope data-accent={accent} suppressHydrationWarning className={cn("min-h-screen bg-background text-foreground", theme === "light" && "light")}>
+    <div data-theme-scope data-accent={accent} suppressHydrationWarning className={cn("min-h-screen bg-background text-foreground", theme === "light" && "light", theme === "study" && "study")}>
       <aside
         ref={sidebarRef}
         onMouseEnter={() => setSidebarExpanded(true)}

@@ -105,6 +105,23 @@
 /* Design palette (single source of truth; mirrors src/lib/theme/theme-tokens.ts) */
 :root {
   --on-accent: #0A0C0A;
+  /* Appearance-menu swatch hues (Coral / Azure / Mint / Gold). Constant across
+     themes: the selected dot is ringed with the panel's own text token, so one
+     hue stays legible on light, dark and study panels alike. */
+  --swatch-coral: #E8684A;
+  --swatch-azure: #3B7BF0;
+  --swatch-mint: #1FA971;
+  --swatch-gold: #D4A52A;
+  /* Remaining app accents (reference menu adds these alongside the four above). */
+  --swatch-lime: #C8FF5A;
+  --swatch-cyan: #22D3EE;
+  --swatch-violet: #A78BFA;
+  --swatch-red: #FB7185;
+  /* Appearance menu screen filters. The theme store overwrites these on the
+     document root at runtime; the values here are the Off / full-brightness
+     defaults so the overlays are inert before hydration. */
+  --app-warmth: 0;
+  --app-brightness: 100;
   --lime-solid: #C8FF4D;
   --cta-lime-solid: #C7F252;
   --amber-solid: #F59E0B;
@@ -651,6 +668,121 @@
   --amber-bg: rgba(156, 87, 7, 0.10);
   --amber-border: rgba(156, 87, 7, 0.30);
 }
+
+/* ==== STUDY THEME ==== */
+/* Warm, low-blue reading variant of the dark palette (the "Study" mode in the
+   appearance menu). It deliberately stays on the dark axis: the light text
+   tokens keep their dark-mode contrast, Tailwind's `dark:` variants stay active,
+   and none of the `.light` overrides above apply. Only the surface ladder and
+   the neutral text tier are re-hued; accent tokens keep resolving their dark
+   set from the [data-accent="<id>"] blocks below. */
+.study {
+  color-scheme: dark;
+  --background: #17130D;
+  --foreground: #F2EBDD;
+  --card: #211B12;
+  --card-foreground: #F2EBDD;
+  --popover: #1B1610;
+  --popover-foreground: #F2EBDD;
+  --secondary: #241E15;
+  --secondary-foreground: #F2EBDD;
+  --muted: #2A2318;
+  --muted-foreground: #B6A992;
+  --accent: #241E15;
+  --border: #3A3020;
+  --input: rgba(242, 235, 221, 0.14);
+  --sidebar: #14100B;
+  --sidebar-foreground: #F2EBDD;
+  --sidebar-accent: #241E15;
+  --sidebar-border: rgba(242, 235, 221, 0.08);
+  --surface: #221C13;
+  --surface-hover: #2A2318;
+  --chrome: #15110C;
+  --chrome-raised: #211B12;
+  --chrome-border: #352B1C;
+  --chrome-muted: #A2957F;
+  --chrome-hover: #E7DECD;
+  --chrome-foreground: #EFE7D8;
+  --chrome-active: rgba(255, 235, 200, 0.06);
+  --bg: #17130D;
+  --bg-soft: #16120C;
+  --bg-2: #18140E;
+  --bg-blue: #15120D;
+  --bg-deep: #1A150E;
+  --bg-moss: #16130C;
+  --panel: #221C13;
+  --panel-2: #241E15;
+  --forest: #120F0A;
+  --forest-2: #110E09;
+  --deep-black-2: #1D1710;
+  --near-white-black: #2A2318;
+  --solid-black: #1F1911;
+  --warm-black: #241D10;
+  --blackgreen: #14150D;
+  --bg-black: #0F0C08;
+  --panel-solid: #241E15;
+  --panel-warm: #282115;
+  --glass-bg: rgba(255, 240, 214, 0.045);
+  --glass-border: rgba(255, 240, 214, 0.09);
+  --screen-tint-85: rgba(23, 19, 13, 0.85);
+  --screen-tint: rgba(23, 19, 13, 0.99);
+  --overlay: rgba(26, 21, 14, 0.98);
+  --overlay-solid: rgba(26, 21, 14, 0.99);
+  --blackgreen-90: rgba(32, 26, 16, 0.9);
+  --bg-10: rgba(23, 19, 13, 0.1);
+  --bg-60: rgba(23, 19, 13, 0.6);
+  --bg-blue-95: rgba(21, 18, 13, 0.95);
+  --warm-black-95: rgba(36, 29, 16, 0.95);
+  --deep-black-2-cc: rgba(29, 23, 16, 0.8);
+  --deep-black-2-ee: rgba(29, 23, 16, 0.933);
+  --text-dim: #A99C86;
+  --border-0: rgba(242, 235, 221, 0.08);
+  --border-1: rgba(242, 235, 221, 0.14);
+  --border-2: rgba(242, 235, 221, 0.22);
+  --cloud-shadow-filter:
+    drop-shadow(1px 0 0 var(--border))
+    drop-shadow(-1px 0 0 var(--border))
+    drop-shadow(0 1px 0 var(--border))
+    drop-shadow(0 -1px 0 var(--border))
+    drop-shadow(0 12px 26px rgba(0, 0, 0, 0.65));
+}
+
+/* ==== END STUDY THEME ==== */
+
+/* ==== SCREEN FILTERS (APPEARANCE MENU) ==== */
+/* Warm Tint and Brightness are written to `--app-warmth` (0-100) and
+   `--app-brightness` (50-100) by the theme store. Two fixed overlays apply them
+   without touching layout or stacking contexts inside the app: the black layer
+   dims for brightness, the amber layer warms with soft-light for tint. Both sit
+   above the app (including portaled dialogs) and never intercept input. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+body::before {
+  background-color: #000;
+  opacity: calc((100 - var(--app-brightness, 100)) * 0.006);
+}
+
+body::after {
+  background-color: #ffb061;
+  mix-blend-mode: soft-light;
+  opacity: calc(var(--app-warmth, 0) * 0.0012);
+}
+
+@media print {
+  body::before,
+  body::after {
+    display: none;
+  }
+}
+
+/* ==== END SCREEN FILTERS ==== */
 
 /* Glass cards sit as opaque white on the off-white page; without a shadow the
    white-on-off-white delta alone is too subtle to read as elevation. This lifts
