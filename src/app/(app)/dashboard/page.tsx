@@ -607,7 +607,7 @@ export default function DashboardPage() {
                     const short = day;
                     const full = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i] ?? day;
                     return (
-                      <span key={i} className={cn("h-7 w-full rounded-lg flex items-center justify-center font-mono text-[9px] sm:text-[10px] lg:text-[11px] xl:text-[12px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
+                      <span key={i} className={cn("h-7 w-full rounded-lg flex items-center justify-center font-mono text-[10px] sm:text-[10px] lg:text-[11px] xl:text-[12px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
                         <span className="sm:hidden">{short}</span>
                         <span className="hidden sm:inline">{full}</span>
                       </span>
