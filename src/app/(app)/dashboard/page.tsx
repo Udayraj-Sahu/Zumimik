@@ -383,7 +383,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div ref={animateSection} data-section-index={0} className="relative pt-6 pb-2 text-left min-[1025px]:pt-8 max-[359px]:pt-5">
         <div className="relative mb-3 flex flex-wrap items-center justify-start gap-2">
-          <div aria-hidden="true" className="inline-flex items-center gap-2 pill px-2 py-1.5 min-[1025px]:hidden">
+          <div aria-hidden="true" className="inline-flex size-10 items-center justify-center min-[1025px]:hidden">
             <ZuzumikMark className="size-4" />
           </div>
           <div className="order-last mt-5 w-full min-w-0 min-[1025px]:order-none min-[1025px]:mt-0 min-[1025px]:mr-2 min-[1025px]:w-auto min-[1025px]:flex-1">

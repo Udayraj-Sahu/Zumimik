@@ -1,6 +1,6 @@
-/* Circular appearance trigger: inset surface in the header's status language,
-   with the active accent on the glyph and focus ring so accent changes read
-   here immediately. */
+/* Bare icon trigger: no chrome at rest, so the glyph sits directly on the
+   header backdrop in the active accent. The recessed surface from the odometer
+   reference is reserved for the pressed state only. */
 .trigger {
   display: inline-flex;
   align-items: center;
@@ -8,14 +8,11 @@
   width: 40px;
   height: 40px;
   padding: 0;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background-color: var(--surface);
+  background-color: transparent;
   color: var(--foreground);
-  box-shadow:
-    inset 0 2px 5px rgba(0, 0, 0, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
-    0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: none;
   cursor: pointer;
   transition:
     background-color 160ms ease,
@@ -25,16 +22,38 @@
 }
 
 .trigger:hover {
-  border-color: var(--glass-15);
+  transform: scale(1.04);
 }
 
-.trigger:active {
-  transform: scale(0.94);
+.trigger:active,
+.trigger[data-pressed="true"] {
+  background-color: #080a09;
+  border-color: #1a1e1c;
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 0 rgba(255, 255, 255, 0.07);
+  transform: scale(0.92);
 }
 
-.trigger[aria-expanded="true"] {
-  border-color: var(--glass-15);
-  background-color: var(--surface-hover);
+:global(.light) .trigger:active,
+:global(.light) .trigger[data-pressed="true"] {
+  background-color: #e6e2d8;
+  border-color: #d5d0c3;
+  box-shadow:
+    inset 0 3px 6px rgba(70, 60, 30, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+:global(.study) .trigger:active,
+:global(.study) .trigger[data-pressed="true"] {
+  background-color: #1b150e;
+  border-color: #332817;
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* The glyph pops in on mount and on every mode change (React keys it by theme),

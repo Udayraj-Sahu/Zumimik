@@ -61,6 +61,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   const setWarmTint = useThemeStore((s) => s.setWarmTint);
   const setBrightness = useThemeStore((s) => s.setBrightness);
   const [open, setOpen] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const [coords, setCoords] = useState<{ top: number; right: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -259,11 +260,24 @@ export function ThemeToggle({ className }: { className?: string }) {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={menuId}
-        onClick={() => setOpen((value) => !value)}
+        data-pressed={pressed}
+        onClick={() => {
+          setPressed(false);
+          setOpen((value) => !value);
+        }}
+        onPointerDown={() => setPressed(true)}
+        onPointerUp={() => setPressed(false)}
+        onPointerCancel={() => setPressed(false)}
+        onPointerLeave={() => setPressed(false)}
+        onBlur={() => setPressed(false)}
         onKeyDown={(event) => {
+          if (event.key === " " || event.key === "Enter") setPressed(true);
           if (event.key !== "ArrowDown" || open) return;
           event.preventDefault();
           setOpen(true);
+        }}
+        onKeyUp={(event) => {
+          if (event.key === " " || event.key === "Enter") setPressed(false);
         }}
         className={cn(styles.trigger, className)}
       >

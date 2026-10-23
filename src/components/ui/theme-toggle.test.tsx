@@ -187,6 +187,36 @@ describe("ThemeToggle", () => {
     expect(within(dialog()).queryByText(/^type$/i)).toBeNull();
   });
 
+  it("recesses only while the bare trigger is pressed, then releases", () => {
+    render(<ThemeToggle />);
+
+    expect(trigger()).toHaveAttribute("data-pressed", "false");
+
+    fireEvent.pointerDown(trigger());
+    expect(trigger()).toHaveAttribute("data-pressed", "true");
+
+    fireEvent.pointerUp(trigger());
+    expect(trigger()).toHaveAttribute("data-pressed", "false");
+
+    fireEvent.pointerDown(trigger());
+    fireEvent.pointerLeave(trigger());
+    expect(trigger()).toHaveAttribute("data-pressed", "false");
+  });
+
+  it("recesses on keyboard press and still opens on click", () => {
+    render(<ThemeToggle />);
+
+    fireEvent.keyDown(trigger(), { key: " " });
+    expect(trigger()).toHaveAttribute("data-pressed", "true");
+
+    fireEvent.keyUp(trigger(), { key: " " });
+    expect(trigger()).toHaveAttribute("data-pressed", "false");
+
+    fireEvent.click(trigger());
+    expect(trigger()).toHaveAttribute("aria-expanded", "true");
+    expect(trigger()).toHaveAttribute("data-pressed", "false");
+  });
+
   it("does not change the theme when toggling the panel open and closed", () => {
     useThemeStore.getState().setTheme("dark");
     render(<ThemeToggle />);
