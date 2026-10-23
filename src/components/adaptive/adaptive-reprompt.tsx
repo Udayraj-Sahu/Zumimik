@@ -19,10 +19,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore, goalForExam } from "@/stores/onboarding-store";
-import { StoryCommitmentMatrix } from "@/components/onboarding/intros/story-intro";
-import { applyStoryNotifications } from "@/lib/notifications/story-reminders";
-import { PlanSelector } from "@/components/onboarding/intros/plan-intro";
-import { SeatBuilderSelector } from "@/components/onboarding/intros/seat-builder-intro";
+import { StoryIntro } from "@/components/onboarding/intros/story-intro";
+import { AdaptivePlanScreen } from "@/components/adaptive/adaptive-plan-screen";
 import { ArenaIntro } from "@/components/onboarding/intros/arena-intro";
 import { PitchIntro } from "@/components/onboarding/intros/pitch-intro";
 import { FamilyIntro } from "@/components/onboarding/intros/family-intro";
@@ -47,8 +45,8 @@ const TEMPORAL_OPTIONS = [
 
 const ACCENT = LIME;
 
-const STEP_ICONS = [GraduationCap, Target, Brain, ClipboardList];
-const STEP_LABELS = ["Exam", "When", "Story", "Plan"];
+const STEP_ICONS = [GraduationCap, Target, ClipboardList, Brain];
+const STEP_LABELS = ["Exam", "When", "Plan", "Story"];
 const TOTAL_STEPS = STEP_ICONS.length;
 
 export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
@@ -65,16 +63,6 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   const [exam, setExam] = useState<string | null>(store.targetExam || null);
   const [temporal, setTemporal] = useState<string | null>(store.temporalWindow);
   const [vedicUseCase, setVedicUseCase] = useState<VedicUseCaseId | null>(store.vedicUseCase);
-  const [story, setStory] = useState<StoryCommitment>(() => ({
-    dailyMinutes: store.dailyMinutes ?? 30,
-    reminderTime: store.reminderTime || "00:00",
-    reclaimSlot: store.reclaimSlot,
-    reclaimWindow: store.reclaimWindow || "00:00 - 00:00",
-    reclaimConfigs: store.reclaimConfigs,
-    triggerType: store.triggerType,
-    triggerTime: store.triggerTime || "00:00",
-    weekDays: store.weekDays,
-  }));
   const [plan, setPlan] = useState<PlanId>(store.planId ?? "initiate");
   const [lane, setLane] = useState<string>(store.planLane || store.targetExam || "cat");
   const [featureHookVariant, setFeatureHookVariant] = useState<
@@ -130,13 +118,13 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   const goNext = useCallback(() => {
     setDirection(1);
     prevStepRef.current = step;
-    setStep((s) => Math.min(TOTAL_STEPS, s + 1));
+    setStep((s) => Math.min(TOTAL_STEPS - 1, s + 1));
   }, [step]);
 
   const goToPlan = useCallback(() => {
     setDirection(1);
     prevStepRef.current = step;
-    setStep(TOTAL_STEPS - 1);
+    setStep(2);
   }, [step]);
 
   const goPrev = useCallback(() => {
@@ -156,7 +144,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
           : temporal !== null
         : true;
 
-  const finish = () => {
+  const finish = (v: StoryCommitment) => {
     if (!exam) return;
     store.setTargetExam(exam);
     store.addActivePrep(exam);
@@ -167,34 +155,49 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
     } else {
       store.setTemporalWindow((temporal as "this_year" | "whenever" | "not_sure") ?? "not_sure");
     }
-    store.setDailyMinutes(story.dailyMinutes);
-    store.setReminderTime(story.reminderTime);
-    store.setReclaimSlot(story.reclaimSlot);
-    store.setReclaimWindow(story.reclaimWindow);
-    store.setTriggerType(story.triggerType);
-    store.setTriggerTime(story.triggerTime);
-    store.setWeekDays(story.weekDays);
-    store.setReclaimConfigs(story.reclaimConfigs ?? store.reclaimConfigs);
+    store.setDailyMinutes(v.dailyMinutes);
+    store.setReminderTime(v.reminderTime);
+    store.setReclaimSlot(v.reclaimSlot);
+    store.setReclaimWindow(v.reclaimWindow);
+    store.setTriggerType(v.triggerType);
+    store.setTriggerTime(v.triggerTime);
+    store.setWeekDays(v.weekDays);
+    store.setReclaimConfigs(v.reclaimConfigs ?? store.reclaimConfigs);
     store.setPlanId(plan);
     store.setPlanLane(lane);
     store.setAdaptiveConfigured(true);
-    void applyStoryNotifications(story);
     onDone();
   };
 
-  const finishWithExit = () => {
-    if (overlayRef.current && panelRef.current) {
-      gsap.to(panelRef.current, {
-        opacity: 0,
-        y: 20,
-        scale: 0.97,
-        duration: 0.2,
-        ease: "power2.in",
-      });
-      gsap.to(overlayRef.current, { opacity: 0, duration: 0.2, onComplete: finish });
-    } else {
-      finish();
-    }
+  const closeStory = () => {
+    const v: StoryCommitment = {
+      dailyMinutes: store.dailyMinutes ?? 30,
+      reminderTime: store.reminderTime || "00:00",
+      reclaimSlot: store.reclaimSlot,
+      reclaimWindow: store.reclaimWindow || "00:00 - 00:00",
+      reclaimConfigs: store.reclaimConfigs,
+      triggerType: store.triggerType,
+      triggerTime: store.triggerTime || "00:00",
+      weekDays: store.weekDays,
+    };
+    finish(v);
+  };
+
+  /** "Skip for now" aborts the setup: no goal, nothing configured, ask again. */
+  const cancelSetup = () => {
+    setShowArena(false);
+    setShowPitch(false);
+    setShowFamily(false);
+    setShowFamilyHub(false);
+    setFeatureHookVariant(null);
+    setExam(null);
+    setTemporal(null);
+    setVedicUseCase(null);
+    setPlan(store.planId ?? "initiate");
+    setLane(store.planLane || store.targetExam || "cat");
+    prevStepRef.current = 0;
+    setStep(0);
+    setOpen(false);
   };
 
   if (!open) {
@@ -428,45 +431,6 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
               </div>
             )}
 
-            {step === 2 && (
-              <div className="flex flex-col">
-                <div className="mb-5">
-                  <h2 className="text-[20px] font-black tracking-[-0.03em] text-foreground">
-                    Tell us your story
-                  </h2>
-                  <p className="text-[13px] text-muted-foreground/50 mt-1.5 font-medium">
-                    Lifestyle integration protocol
-                  </p>
-                </div>
-                <StoryCommitmentMatrix
-                  value={story}
-                  onChange={(patch) => setStory((prev) => ({ ...prev, ...patch }))}
-                />
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="flex flex-col">
-                <div className="mb-5">
-                  <h2 className="text-[20px] font-black tracking-[-0.03em] text-foreground">
-                    Select your plan
-                  </h2>
-                  <p className="text-[13px] text-muted-foreground/50 mt-1.5 font-medium">
-                    Choose your training parameters.
-                  </p>
-                </div>
-                {isVedic ? (
-                  <SeatBuilderSelector />
-                ) : (
-                  <PlanSelector
-                    value={plan}
-                    onChange={setPlan}
-                    lane={lane}
-                    onLaneChange={setLane}
-                  />
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -487,8 +451,9 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
             )}
             <button
               type="button"
-              onClick={step === TOTAL_STEPS - 1 ? finishWithExit : goNext}
+              onClick={goNext}
               disabled={!canNext}
+              aria-label="Continue"
               className={cn(
                 "size-10 rounded-full flex items-center justify-center transition-all active:scale-90",
                 canNext
@@ -497,7 +462,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
               )}
               style={canNext ? { background: ACCENT } : undefined}
             >
-              {step === TOTAL_STEPS - 1 ? <Sparkles size={16} /> : <ArrowRight size={16} />}
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>
@@ -508,11 +473,11 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   const featureHookDone = () => {
     const variant = featureHookVariant;
     setFeatureHookVariant(null);
-    if (!isVedic && variant === "this_year" && !store.arenaHookSeen) {
+    if (!isVedic && variant === "this_year") {
       setShowArena(true);
       return;
     }
-    if (!isVedic && (variant === "whenever" || variant === "not_sure") && !store.pitchHookSeen) {
+    if (!isVedic && (variant === "whenever" || variant === "not_sure")) {
       setShowPitch(true);
       return;
     }
@@ -526,6 +491,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   if (showFamilyHub) {
     return (
       <FamilyHubIntro
+        onSkip={cancelSetup}
         onDone={() => {
           setShowFamilyHub(false);
           goToPlan();
@@ -541,6 +507,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   if (showFamily) {
     return (
       <FamilyIntro
+        onSkip={cancelSetup}
         onDone={() => {
           setShowFamily(false);
           setShowFamilyHub(true);
@@ -556,6 +523,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   if (showPitch) {
     return (
       <PitchIntro
+        onSkip={cancelSetup}
         onClose={() => {
           setShowPitch(false);
           store.setPitchHookSeen(true);
@@ -568,6 +536,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
   if (showArena) {
     return (
       <ArenaIntro
+        onSkip={cancelSetup}
         onClose={() => {
           setShowArena(false);
           store.setArenaHookSeen(true);
@@ -575,6 +544,32 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
         }}
       />
     );
+  }
+
+  if (step === 2) {
+    return (
+      <AdaptivePlanScreen
+        isVedic={isVedic}
+        plan={plan}
+        onPlanChange={setPlan}
+        lane={lane}
+        onLaneChange={setLane}
+        onBack={() => {
+          setDirection(-1);
+          prevStepRef.current = 2;
+          setStep(1);
+        }}
+        onNext={() => {
+          setDirection(1);
+          prevStepRef.current = 2;
+          setStep(3);
+        }}
+      />
+    );
+  }
+
+  if (step === 3) {
+    return <StoryIntro onClose={closeStory} onSkip={cancelSetup} />;
   }
 
   return featureHookVariant ? (
