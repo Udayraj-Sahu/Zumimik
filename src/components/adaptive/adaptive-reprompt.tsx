@@ -554,11 +554,6 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
         onPlanChange={setPlan}
         lane={lane}
         onLaneChange={setLane}
-        onBack={() => {
-          setDirection(-1);
-          prevStepRef.current = 2;
-          setStep(1);
-        }}
         onNext={() => {
           setDirection(1);
           prevStepRef.current = 2;

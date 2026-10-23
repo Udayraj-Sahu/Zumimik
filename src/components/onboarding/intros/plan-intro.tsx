@@ -1,21 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  BG_MOSS,
-  FOREST,
-  GLASS_BORDER,
-  PANEL,
-} from "@/lib/theme";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BG_MOSS } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
-import { createPortal } from "react-dom";
-import { MotionConfig, motion } from "motion/react";
+import { motion } from "motion/react";
 import { Check, CreditCard, QrCode, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLANS } from "@/lib/types/onboarding";
 import type { PlanId } from "@/lib/types/onboarding";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { useOnboardingStore } from "@/stores/onboarding-store";
+import { IntroSurface } from "@/components/onboarding/intros/intro-surface";
 
 const inr = (n: number) => `₹${new Intl.NumberFormat("en-IN").format(n)}`;
 
@@ -316,23 +311,6 @@ export function PlanIntro({
   const total = plan.billing[billing];
   const isFree = planId === "initiate";
 
-  useLayoutEffect(() => {
-    if (preloaded) return;
-    document.body.style.overflow = "hidden";
-    if (overlayRef.current) {
-      overlayRef.current.animate(
-        [{ transform: "translateX(100%)" }, { transform: "translateX(0%)" }],
-        {
-          duration: 320,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        },
-      );
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [preloaded]);
-
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const closingRef = useRef(false);
@@ -356,46 +334,13 @@ export function PlanIntro({
     fadeOut(onDone);
   }, [store, planId, lane, fadeOut, onDone]);
 
-  return createPortal(
-    <MotionConfig reducedMotion="user">
-      <div
-        ref={overlayRef}
-        data-theme-scope
-        className={cn(
-          "fixed inset-0 z-[var(--z-intro)] flex overflow-hidden flex-col sm:items-center sm:justify-center sm:bg-black/60 sm:backdrop-blur-sm",
-          preloaded && "invisible pointer-events-none",
-          theme === "light" && "light",
-        )}
-        role="dialog"
-        aria-modal="true"
-        aria-hidden={preloaded || undefined}
-        aria-labelledby="plan-hook-title"
-      >
-      <div
-        className="relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl md:max-w-3xl md:max-h-[85vh] lg:max-w-4xl xl:max-w-[1080px]"
-        style={{
-          borderColor: GLASS_BORDER,
-          background:
-            theme === "light"
-              ? "linear-gradient(180deg, var(--screen-tint) 0%, var(--overlay-solid) 100%)"
-              : `radial-gradient(130% 90% at 50% 0%, ${PANEL} 0%, ${BG_MOSS} 48%, ${FOREST} 100%)`,
-        }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.5]"
-          style={{
-            backgroundImage: "radial-gradient(var(--glass-045) 1px, transparent 1px)",
-            backgroundSize: "26px 26px",
-          }}
-        />
-
-        <div className="relative mx-auto flex w-full max-w-[400px] min-h-0 flex-1 flex-col px-[18px] pt-[max(1rem,var(--sat))] sm:max-w-none max-[359px]:px-4">
-          {/* The headline block ("Pick your pace." + the one-pass line) stays
-              centred, with the annual/monthly switch directly beneath it and
-              the plan cards + pay-with rows running across the full width
-              below. Mobile keeps exactly the same source order. */}
-          <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+  return (
+    <IntroSurface ref={overlayRef} labelledBy="plan-hook-title" preloaded={preloaded}>
+      {/* The headline block ("Pick your pace." + the one-pass line) stays
+          centred, with the annual/monthly switch directly beneath it and
+          the plan cards + pay-with rows running across the full width
+          below. Mobile keeps exactly the same source order. */}
+      <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* centered brand */}
           <FadeUp className="flex flex-col items-center gap-3.5 text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-[var(--lime-30)] bg-[var(--lime-10)] px-3 py-1.5">
@@ -553,10 +498,6 @@ export function PlanIntro({
               Skip for now
             </button>
           </div>
-        </div>
-      </div>
-      </div>,
-    </MotionConfig>,
-    document.body,
+    </IntroSurface>
   );
 }
