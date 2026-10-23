@@ -605,7 +605,7 @@ export default function DashboardPage() {
                   {streak.labels.map((day, i) => {
                     const done = streak.days[i];
                     return (
-                      <span key={i} className={cn("h-7 w-full max-w-7 mx-auto rounded-full flex items-center justify-center font-mono text-[10px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
+                      <span key={i} className={cn("h-7 w-full max-w-7 mx-auto rounded-lg flex items-center justify-center font-mono text-[10px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
                         {day}
                       </span>
                     );
