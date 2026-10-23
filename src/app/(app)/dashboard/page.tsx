@@ -601,11 +601,11 @@ export default function DashboardPage() {
                   </span>
                 </header>
 
-                <div className="relative shrink-0 mt-4 sm:mt-3 grid grid-cols-7 gap-1 md:gap-1.5 pb-4 sm:pb-3 border-b border-white/[0.06]">
+                <div className="relative shrink-0 mt-4 sm:mt-3 grid grid-cols-7 gap-1 md:gap-2 lg:gap-2.5 pb-4 sm:pb-3 border-b border-white/[0.06]">
                   {streak.labels.map((day, i) => {
                     const done = streak.days[i];
                     return (
-                      <span key={i} className={cn("h-7 w-full max-w-7 mx-auto rounded-lg flex items-center justify-center font-mono text-[10px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
+                      <span key={i} className={cn("h-7 w-full max-w-[36px] md:max-w-[40px] lg:max-w-[44px] mx-auto rounded-lg flex items-center justify-center font-mono text-[10px] font-semibold border transition-all", done ? "text-[#05150d] shadow-[0_0_12px_var(--emerald-45)]" : "text-[#4d5552]")} style={{ background: done ? `linear-gradient(135deg, ${EMERALD}, ${EMERALD_SOLID})` : GLASS_03, borderColor: done ? "transparent" : GLASS_06 }}>
                         {day}
                       </span>
                     );
