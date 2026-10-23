@@ -244,7 +244,7 @@
 }
 
 .dd .on > .hd .sw {
-  background: var(--neon);
+  background: var(--lime-solid);
 }
 
 .dd .on > .hd .sw::after {
@@ -510,7 +510,7 @@
 }
 
 .dd .cta {
-  background: var(--neon);
+  background: var(--lime-solid);
   border: 0;
   border-radius: 16px;
   color: var(--on-accent);

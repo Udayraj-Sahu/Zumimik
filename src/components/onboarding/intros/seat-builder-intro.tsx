@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { BG_MOSS, FOREST, LIME, LIME_LIGHT, LIME_MID_2, PANEL } from "@/lib/theme";
+import { BG_MOSS, FOREST, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {
@@ -278,7 +278,7 @@ function ChildSeatSheet({
               type="submit"
               className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
               style={{
-                background: `linear-gradient(90deg, ${LIME}, ${LIME_LIGHT})`,
+                background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
                 boxShadow: "0 6px 20px var(--lime-mid-25)",
               }}
             >
@@ -705,7 +705,7 @@ export function SeatBuilderIntro({
             <span
               className="text-transparent"
               style={{
-                background: `linear-gradient(90deg, ${LIME}, ${LIME_MID_2})`,
+                background: `linear-gradient(90deg, var(--lime), var(--lime-mid-2))`,
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
               }}
@@ -727,7 +727,7 @@ export function SeatBuilderIntro({
           onClick={confirm}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-[16px] py-4 text-[12px] font-bold tracking-[0.12em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
           style={{
-            background: `linear-gradient(90deg, ${LIME}, ${LIME_LIGHT})`,
+            background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
             boxShadow: "0 10px 34px var(--lime-mid-25), 0 1px 0 var(--glass-25) inset",
           }}
         >

@@ -8,7 +8,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { CYAN_251, LIME } from "@/lib/theme";
+import { CYAN_251 } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {
@@ -31,7 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import HabitCard from "@/components/onboarding/slides/habit-card";
 
-const ACCENT = LIME;
+const ACCENT = "var(--lime)";
 
 type Variant = "this_year" | "whenever" | "not_sure" | "vedic";
 
@@ -534,7 +534,7 @@ export function FeatureIntro({ variant, onDone, onClose, preloaded = false }: Pr
                     {copy.headline.text}
                     <motion.span
                       className="block"
-                      style={{ color: theme === "light" ? "var(--lime)" : ACCENT }}
+                      style={{ color: ACCENT }}
                       initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.18, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}

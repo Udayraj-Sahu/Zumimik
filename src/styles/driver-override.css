@@ -21,7 +21,7 @@
   font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #c8ff4d;
+  color: var(--lime);
   padding-top: 6px;
 }
 
@@ -73,13 +73,13 @@
 
 .ea-tour-popover.driver-popover .driver-popover-next-btn {
   border: none;
-  background: #c8ff4d;
+  background: var(--lime-solid);
   color: #0a0c0a;
-  box-shadow: 0 0 24px rgba(200, 255, 77, 0.25);
+  box-shadow: 0 0 24px var(--lime-25);
 }
 
 .ea-tour-popover.driver-popover .driver-popover-next-btn:hover {
-  background: #d4ff6e;
+  background: var(--lime-light);
 }
 
 .driver-active .ea-tour-overlay.driver-overlay {
@@ -102,7 +102,7 @@
 }
 
 .light.ea-tour-popover.driver-popover .driver-popover-title {
-  color: #3d6b00;
+  color: var(--lime);
 }
 
 .light.ea-tour-popover.driver-popover .driver-popover-description {

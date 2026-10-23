@@ -884,7 +884,7 @@ export default function DashboardPage() {
                 key={q.label}
                 type="button"
                 onClick={() => router.push(q.href)}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-[var(--glass-07)] py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex flex-col items-center gap-3 rounded-2xl py-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full" style={{ background: q.bg }}>
                   <q.icon size={18} color={hueText(q.color)} />
@@ -893,8 +893,8 @@ export default function DashboardPage() {
               </button>
               );
             })}
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--glass-07)] py-4 opacity-35">
-              <div className="h-11 w-11 rounded-full flex items-center justify-center border border-dashed border-[var(--glass-10)]">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl py-4 opacity-35">
+              <div className="h-11 w-11 rounded-full flex items-center justify-center">
                 <Plus size={15} className="text-muted-foreground" />
               </div>
               <span className="text-micro font-medium text-muted-foreground text-center leading-tight tracking-[0.01em]">Coming Soon</span>

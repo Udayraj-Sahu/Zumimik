@@ -14,9 +14,11 @@ type StartOptions = {
 /** driver.js portals the popover to <body>, outside the app's [data-theme-scope]
  *  wrappers, so tag it directly with the current theme class. */
 function syncPopoverTheme(): void {
-  const isLight = useThemeStore.getState().theme === "light";
+  const { theme, accent } = useThemeStore.getState();
+  const isLight = theme === "light";
   document.querySelectorAll<HTMLElement>(".ea-tour-popover.driver-popover").forEach((el) => {
     el.setAttribute("data-theme-scope", "");
+    el.setAttribute("data-accent", accent);
     el.classList.toggle("light", isLight);
     el.classList.toggle("dark", !isLight);
   });

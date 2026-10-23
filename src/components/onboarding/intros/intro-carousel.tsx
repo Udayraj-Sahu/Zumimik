@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { BG_MOSS, FOREST, GLASS_BORDER, LIME, LIME_LIGHT, LIME_TINT, PANEL } from "@/lib/theme";
+import { BG_MOSS, FOREST, GLASS_BORDER, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import {
@@ -549,7 +549,7 @@ export function IntroCarousel({
             <span
               className="text-transparent"
               style={{
-                background: `linear-gradient(90deg, ${LIME}, ${LIME_TINT})`,
+                background: `linear-gradient(90deg, var(--lime), var(--lime-tint))`,
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
               }}
@@ -668,7 +668,7 @@ export function IntroCarousel({
                   onClick={() => exit(onClose)}
                   className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3.5 text-[12px] font-bold tracking-[0.12em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
                   style={{
-                    background: `linear-gradient(90deg, ${LIME}, ${LIME_LIGHT})`,
+                    background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
                     boxShadow: "0 10px 34px var(--lime-mid-25), 0 1px 0 var(--glass-25) inset",
                   }}
                 >

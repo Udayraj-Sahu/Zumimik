@@ -822,6 +822,82 @@ body::after {
 
 /* ==== END LIGHT THEME ==== */
 
+/* ==== ACCENT-BOUND LIME ALIASES ==== */
+/* The app authored most accent surfaces against the `--lime*` / `--cta-lime*`
+   scales. Re-point those scales at the active accent tokens so every existing
+   consumer (dashboard, onboarding, arenas, story, paywall, portals) follows
+   Appearance Settings without per-component rewrites. Declared on the element
+   that owns `data-accent`, so the `var()` references resolve against that
+   scope's accent set (dark or light). Semantic status colors (emerald, red,
+   amber, cyan, violet) are untouched. Scopes without `data-accent` keep the
+   lime fallbacks on `:root` / `.light` above. */
+[data-accent] {
+  --lime: var(--accent-foreground);
+  --neon: var(--accent-foreground);
+  --neon-bg: var(--accent-08);
+  --neon-border: var(--accent-30);
+  --lime-bright: var(--accent-foreground);
+  --lime-solid: var(--cta-from);
+  --cta-lime: var(--cta-from);
+  --cta-lime-solid: var(--cta-from);
+  --lime-light: color-mix(in srgb, var(--cta-from) 72%, #ffffff);
+  --lime-mid: var(--cta-to);
+  --lime-mid-2: color-mix(in srgb, var(--cta-from) 78%, #ffffff);
+  --lime-dark: var(--cta-to);
+  --lime-deeper: color-mix(in srgb, var(--cta-to) 85%, #000000);
+  --lime-pale: color-mix(in srgb, var(--cta-from) 40%, #ffffff);
+  --lime-pale-2: color-mix(in srgb, var(--cta-from) 45%, #ffffff);
+  --lime-pale-3: color-mix(in srgb, var(--cta-from) 50%, #ffffff);
+  --lime-tint: color-mix(in srgb, var(--cta-from) 30%, #ffffff);
+  --lime-pale-3-70: color-mix(in srgb, var(--lime-pale-3) 70%, transparent);
+  --lime-04: color-mix(in srgb, var(--accent-foreground) 4%, transparent);
+  --lime-05: color-mix(in srgb, var(--accent-foreground) 5%, transparent);
+  --lime-06: color-mix(in srgb, var(--accent-foreground) 6%, transparent);
+  --lime-07: color-mix(in srgb, var(--accent-foreground) 7%, transparent);
+  --lime-08: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --lime-10: color-mix(in srgb, var(--accent-foreground) 10%, transparent);
+  --lime-12: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
+  --lime-14: color-mix(in srgb, var(--accent-foreground) 14%, transparent);
+  --lime-15: color-mix(in srgb, var(--accent-foreground) 15%, transparent);
+  --lime-16: color-mix(in srgb, var(--accent-foreground) 16%, transparent);
+  --lime-18: color-mix(in srgb, var(--accent-foreground) 18%, transparent);
+  --lime-20: color-mix(in srgb, var(--accent-foreground) 20%, transparent);
+  --lime-22: color-mix(in srgb, var(--accent-foreground) 22%, transparent);
+  --lime-25: color-mix(in srgb, var(--accent-foreground) 25%, transparent);
+  --lime-30: color-mix(in srgb, var(--accent-foreground) 30%, transparent);
+  --lime-32: color-mix(in srgb, var(--accent-foreground) 32%, transparent);
+  --lime-35: color-mix(in srgb, var(--accent-foreground) 35%, transparent);
+  --lime-40: color-mix(in srgb, var(--accent-foreground) 40%, transparent);
+  --lime-45: color-mix(in srgb, var(--accent-foreground) 45%, transparent);
+  --lime-50: color-mix(in srgb, var(--accent-foreground) 50%, transparent);
+  --lime-55: color-mix(in srgb, var(--accent-foreground) 55%, transparent);
+  --lime-60: color-mix(in srgb, var(--accent-foreground) 60%, transparent);
+  --lime-067: color-mix(in srgb, var(--accent-foreground) 6.7%, transparent);
+  --lime-67: color-mix(in srgb, var(--accent-foreground) 67%, transparent);
+  --lime-70: color-mix(in srgb, var(--accent-foreground) 70%, transparent);
+  --lime-80: color-mix(in srgb, var(--accent-foreground) 80%, transparent);
+  --lime-85: color-mix(in srgb, var(--accent-foreground) 85%, transparent);
+  --lime-125: color-mix(in srgb, var(--accent-foreground) 12.5%, transparent);
+  --lime-133: color-mix(in srgb, var(--accent-foreground) 13.3%, transparent);
+  --lime-bright-00: transparent;
+  --lime-bright-03: color-mix(in srgb, var(--accent-foreground) 3%, transparent);
+  --lime-bright-04: color-mix(in srgb, var(--accent-foreground) 4%, transparent);
+  --lime-bright-05: color-mix(in srgb, var(--accent-foreground) 5%, transparent);
+  --lime-bright-06: color-mix(in srgb, var(--accent-foreground) 6%, transparent);
+  --lime-bright-10: color-mix(in srgb, var(--accent-foreground) 10%, transparent);
+  --lime-bright-15: color-mix(in srgb, var(--accent-foreground) 15%, transparent);
+  --lime-bright-18: color-mix(in srgb, var(--accent-foreground) 18%, transparent);
+  --lime-bright-20: color-mix(in srgb, var(--accent-foreground) 20%, transparent);
+  --lime-bright-25: color-mix(in srgb, var(--accent-foreground) 25%, transparent);
+  --lime-bright-30: color-mix(in srgb, var(--accent-foreground) 30%, transparent);
+  --lime-bright-40: color-mix(in srgb, var(--accent-foreground) 40%, transparent);
+  --lime-bright-50: color-mix(in srgb, var(--accent-foreground) 50%, transparent);
+  --lime-mid-25: color-mix(in srgb, var(--cta-to) 25%, transparent);
+  --lime-mid-28: color-mix(in srgb, var(--cta-to) 28%, transparent);
+  --lime-mid-35: color-mix(in srgb, var(--cta-to) 35%, transparent);
+  --cta-lime-10: color-mix(in srgb, var(--cta-from) 10%, transparent);
+}
+
 /* ==== ACCENT THEMES ==== */
 /* User-selectable brand hue, independent of the light/dark axis.
  *

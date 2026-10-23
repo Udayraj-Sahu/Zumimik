@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EMERALD_LIGHT, LIME, LIME_LIGHT, NEAR_BLACK_60, YELLOW } from "@/lib/theme";
+import { EMERALD_LIGHT, NEAR_BLACK_60, YELLOW } from "@/lib/theme";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import {
@@ -25,8 +25,9 @@ import { useThemeStore } from "@/stores/theme-store";
 import { isNativeRuntime } from "@/lib/native/is-native";
 import { ClearanceTiers, PREP_OPTIONS } from "@/components/paywall/clearance-tiers";
 
-const ACCENT = LIME;
-const ACCENT_DIM = LIME_LIGHT;
+const ACCENT = "var(--lime)";
+const ACCENT_FILL = "var(--lime-solid)";
+const ACCENT_FILL_DIM = "var(--lime-light)";
 
 const PREP_METRICS: {
   id: string;
@@ -207,7 +208,7 @@ export function PaywallModal() {
         <div className="pointer-events-none absolute right-0 top-[60%] h-64 w-64 rounded-full bg-violet-600/[0.07] blur-[100px]" />
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
-          style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}55, transparent)` }}
+          style={{ background: `linear-gradient(90deg, transparent, color-mix(in srgb, var(--lime) 33%, transparent), transparent)` }}
         />
 
         {state === "success" ? (
@@ -219,7 +220,7 @@ export function PaywallModal() {
                 <div
                   className="flex items-center gap-2 rounded-2xl border border-white/10 px-6 py-4 text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--on-accent)]"
                   style={{
-                    background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT_DIM})`,
+                    background: `linear-gradient(90deg, ${ACCENT_FILL}, ${ACCENT_FILL_DIM})`,
                     boxShadow: `0 10px 34px var(--lime-30), 0 1px 0 var(--glass-25) inset`,
                   }}
                 >
@@ -300,7 +301,7 @@ export function PaywallModal() {
                         <div className="mt-1.5 flex items-baseline gap-1">
                           <span
                             className="font-mono text-[18px] font-bold leading-none"
-                            style={{ color: theme === "light" ? (warn ? "#B45309" : "var(--lime)") : warn ? YELLOW : ACCENT }}
+                            style={{ color: warn ? (theme === "light" ? "#B45309" : YELLOW) : ACCENT }}
                           >
                             {value}
                           </span>
@@ -321,7 +322,7 @@ export function PaywallModal() {
                       <span className="font-mono text-[8px] font-bold tracking-[0.2em] text-muted-foreground/70">
                         LOOP THROTTLE
                       </span>
-                      <span className="font-mono text-[10px] font-bold" style={{ color: theme === "light" ? "var(--lime)" : ACCENT }}>
+                      <span className="font-mono text-[10px] font-bold" style={{ color: ACCENT }}>
                         {throttle}%
                       </span>
                     </div>
@@ -395,7 +396,7 @@ export function PaywallModal() {
                     onClick={confirmPlan}
                     className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-mono text-[11px] font-bold tracking-wider text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
                     style={{
-                      background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT_DIM})`,
+                      background: `linear-gradient(90deg, ${ACCENT_FILL}, ${ACCENT_FILL_DIM})`,
                       boxShadow:
                         "0 0 28px var(--lime-30), 0 1px 0 var(--glass-25) inset",
                     }}

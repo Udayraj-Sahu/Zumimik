@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GLASS_03, GLASS_35, GLASS_BG, LIME, LIME_125, OVERLAY } from "@/lib/theme";
+import { GLASS_03, GLASS_35, GLASS_BG, OVERLAY } from "@/lib/theme";
 import gsap from "gsap";
 import {
   ChevronLeft,
@@ -43,7 +43,7 @@ const TEMPORAL_OPTIONS = [
   { label: "Not sure yet", desc: "Flexible, balanced approach", value: "not_sure" },
 ];
 
-const ACCENT = LIME;
+const ACCENT = "var(--lime)";
 
 const STEP_ICONS = [GraduationCap, Target, ClipboardList, Brain];
 const STEP_LABELS = ["Exam", "When", "Plan", "Story"];
@@ -332,7 +332,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
                       >
                         <div
                           className="size-8 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ background: active ? LIME_125 : GLASS_BG }}
+                          style={{ background: active ? "var(--lime-125)" : GLASS_BG }}
                         >
                           <opt.icon
                             size={14}
@@ -460,7 +460,7 @@ export function AdaptiveReprompt({ onDone }: { onDone: () => void }) {
                   ? "text-[var(--on-accent)]"
                   : "bg-white/[0.06] text-muted-foreground/20 cursor-not-allowed",
               )}
-              style={canNext ? { background: ACCENT } : undefined}
+              style={canNext ? { background: "var(--lime-solid)" } : undefined}
             >
               <ArrowRight size={16} />
             </button>

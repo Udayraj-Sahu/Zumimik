@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { BG_MOSS, BLACKGREEN, CYAN, FOREST, FUCHSIA, GLASS_06, GLASS_09, GLASS_12, GLASS_BORDER, LIME, LIME_067, LIME_133, LIME_40, LIME_TINT, PANEL, SLATE_MUTED } from "@/lib/theme";
+import { BG_MOSS, BLACKGREEN, CYAN, FOREST, FUCHSIA, GLASS_06, GLASS_09, GLASS_12, GLASS_BORDER, PANEL, SLATE_MUTED } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
 import { createPortal } from "react-dom";
 import { MotionConfig, motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
@@ -37,7 +37,7 @@ import type { ReclaimConfig, StoryCommitment } from "@/lib/types/onboarding";
 import { DAILY_TIME_OPTIONS } from "@/lib/types/onboarding";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 
-const ACCENT = LIME;
+const ACCENT = "var(--lime)";
 
 type Tone = "lime" | "cyan" | "fuchsia";
 
@@ -54,16 +54,26 @@ const toneText: Record<Tone, string> = {
 };
 
 const toneHex: Record<Tone, string> = {
-  lime: LIME,
+  lime: "var(--lime)",
   cyan: CYAN,
   fuchsia: FUCHSIA,
 };
 
 const toneDark: Record<Tone, string> = {
-  lime: "#4D7C0F",
+  lime: "var(--accent-foreground)",
   cyan: "#0E7490",
   fuchsia: "#A21CAF",
 };
+
+function withAlpha(color: string, percent: number): string {
+  if (!color.startsWith("var(")) {
+    const hex = Math.round((percent / 100) * 255)
+      .toString(16)
+      .padStart(2, "0");
+    return `${color}${hex}`;
+  }
+  return `color-mix(in srgb, ${color} ${percent}%, transparent)`;
+}
 
 const RECLAIM_ICONS: Record<string, typeof TrainFront> = {
   "Subway Commute": TrainFront,
@@ -188,7 +198,7 @@ function Panel({
 }) {
   const hex = toneHex[tone];
   const theme = useThemeStore((s) => s.theme);
-  const line = theme === "light" ? toneDark[tone] : `${hex}22`;
+  const line = theme === "light" ? toneDark[tone] : withAlpha(hex, 13.3);
   return (
     <section
       aria-label={ariaLabel}
@@ -203,7 +213,7 @@ function Panel({
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, ${hex}77, transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, ${withAlpha(hex, 46.7)}, transparent)` }}
       />
       {/* corner brackets */}
       {(
@@ -372,7 +382,7 @@ function Stepper({
         onClick={() => onSpin(options[idx + 1])}
         className={cn(
           "grid size-6 place-items-center rounded-full text-[var(--on-accent)] transition-opacity disabled:opacity-35",
-          tone === "lime" ? "bg-[var(--lime)]" : tone === "cyan" ? "bg-cyan-400" : "bg-fuchsia-400",
+          tone === "lime" ? "bg-[var(--lime-solid)]" : tone === "cyan" ? "bg-cyan-400" : "bg-fuchsia-400",
         )}
       >
         <Plus size={12} strokeWidth={3} />
@@ -390,7 +400,7 @@ function DayButtons({
   onChange: (i: number) => void;
   tone: Tone;
 }) {
-  const onBg = tone === "lime" ? LIME : tone === "cyan" ? CYAN : FUCHSIA;
+  const onBg = tone === "lime" ? "var(--lime-solid)" : tone === "cyan" ? CYAN : FUCHSIA;
   return (
     <div role="group" aria-label="Active days" className="flex gap-[4px]">
       {DAY_LABELS.map((d, i) => (
@@ -403,7 +413,7 @@ function DayButtons({
           className="size-[22px] rounded-[6px] border-0  text-[9.5px] font-bold leading-none transition-colors"
           style={
             days[i]
-              ? { background: onBg, color: BLACKGREEN, boxShadow: `0 0 12px ${onBg}66` }
+              ? { background: onBg, color: BLACKGREEN, boxShadow: tone === "lime" ? "0 0 12px var(--lime-40)" : `0 0 12px ${onBg}66` }
               : { background: GLASS_06, color: SLATE_MUTED }
           }
         >
@@ -449,7 +459,7 @@ function DayRail({ value, spanMin }: { value: StoryCommitment; spanMin: number }
               className="relative h-full flex-1 rounded-[3px]"
               style={{
                 background: lit ? hex : base,
-                boxShadow: lit ? `0 0 10px ${hex}55, 0 0 1px ${hex}` : undefined,
+                boxShadow: lit ? `0 0 10px ${withAlpha(hex, 33.3)}, 0 0 1px ${hex}` : undefined,
                 opacity: lit ? 0.95 : sleeping ? 0.7 : 1,
                 transition: "background 300ms ease, box-shadow 300ms ease, opacity 300ms ease",
               }}
@@ -460,7 +470,7 @@ function DayRail({ value, spanMin }: { value: StoryCommitment; spanMin: number }
         <motion.span
           aria-hidden
           className="pointer-events-none absolute inset-y-0 z-10 w-[2px] rounded-full"
-          style={{ background: `linear-gradient(180deg, transparent, ${LIME}, transparent)` }}
+          style={{ background: `linear-gradient(180deg, transparent, var(--lime), transparent)` }}
           animate={{ left: ["12%", "88%"] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatType: "reverse" }}
         />
@@ -478,8 +488,8 @@ function DayRail({ value, spanMin }: { value: StoryCommitment; spanMin: number }
         <span
           className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1  text-[8.5px] font-bold uppercase tracking-[0.1em]"
           style={{
-            borderColor: `${hex}55`,
-            background: `${hex}14`,
+            borderColor: withAlpha(hex, 33.3),
+            background: withAlpha(hex, 7.8),
             color: theme === "light" ? toneDark[tone] : hex,
           }}
         >
@@ -510,7 +520,7 @@ function MiniRail({ window, tone }: { window: string; tone: Tone }) {
             style={{
               background: ov > 0 ? hex : GLASS_09,
               opacity: ov > 0 ? 0.9 : 1,
-              boxShadow: ov > 0 ? `0 0 6px ${hex}44` : undefined,
+              boxShadow: ov > 0 ? `0 0 6px ${withAlpha(hex, 26.7)}` : undefined,
             }}
           />
         );
@@ -1016,7 +1026,7 @@ export function StoryCommitmentMatrix({
             className="block h-full rounded-full"
             style={{
               width: `${shownPct}%`,
-              background: `linear-gradient(90deg, ${CYAN}, ${LIME})`,
+              background: `linear-gradient(90deg, ${CYAN}, var(--lime))`,
               boxShadow: "0 0 10px var(--lime-50)",
               transition: "width 300ms ease",
             }}
@@ -1063,7 +1073,7 @@ export function StoryCommitmentMatrix({
               className="flex-1 rounded-t-[3px]"
               style={{
                 height: `${16 + ((i * 3) % 9)}px`,
-                background: `linear-gradient(180deg, ${i === sprints - 1 ? LIME : LIME_40}, ${i === sprints - 1 ? LIME_133 : LIME_067})`,
+                background: `linear-gradient(180deg, ${i === sprints - 1 ? ACCENT : "var(--lime-40)"}, ${i === sprints - 1 ? "var(--lime-133)" : "var(--lime-067)"})`,
                 transition: "height 300ms ease",
               }}
             />
@@ -2837,7 +2847,7 @@ export function StoryIntro({
                 <span
                   className="text-transparent"
                   style={{
-                    background: `linear-gradient(90deg, ${LIME}, ${LIME_TINT})`,
+                    background: `linear-gradient(90deg, var(--lime), var(--lime-tint))`,
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                   }}
