@@ -184,7 +184,12 @@ export default function StallTimer({
         Section ends in {minutes} minutes. {numberWord(questions)} questions left.
       </p>
 
-      <div className={styles.seg} role="group" aria-label="Compare time lost to stalls">
+      <div
+        className={styles.seg}
+        data-mode-theme={modeId === "today" ? "today" : "zuzumik"}
+        role="group"
+        aria-label="Compare time lost to stalls"
+      >
         {modes.map((m) => {
           const on = m.id === modeId;
           return (
