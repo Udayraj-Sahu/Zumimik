@@ -456,11 +456,6 @@ export function IntroCarousel({
 
   /** Keeps dots in sync when the user swipes by hand. */
   const onTrackScroll = useCallback(() => {
-    userInteractedRef.current = true;
-    if (autoScrollTimerRef.current) {
-      clearTimeout(autoScrollTimerRef.current);
-      autoScrollTimerRef.current = null;
-    }
     const track = trackRef.current;
     const slide = track?.firstElementChild as HTMLElement | null;
     if (!track || !slide || slide.offsetWidth === 0) return;
@@ -473,11 +468,6 @@ export function IntroCarousel({
   useEffect(() => {
     if (preloaded) return;
     const onKey = (e: KeyboardEvent) => {
-      userInteractedRef.current = true;
-      if (autoScrollTimerRef.current) {
-        clearTimeout(autoScrollTimerRef.current);
-        autoScrollTimerRef.current = null;
-      }
       if (e.key === "ArrowRight") {
         e.preventDefault();
         goTo(active + 1);
@@ -503,11 +493,6 @@ export function IntroCarousel({
         },
       );
     }
-    if (prefersReducedMotion()) return;
-    autoScrollTimerRef.current = setTimeout(() => {
-      if (userInteractedRef.current) return;
-      goTo(1);
-    }, 1000);
     return () => {
       document.body.style.overflow = "";
       if (autoScrollTimerRef.current) {
@@ -515,7 +500,7 @@ export function IntroCarousel({
         autoScrollTimerRef.current = null;
       }
     };
-  }, [preloaded, goTo]);
+  }, [preloaded]);
 
   const exit = useCallback((cb: () => void) => {
     if (closingRef.current) return;
@@ -661,14 +646,7 @@ export function IntroCarousel({
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => {
-                    userInteractedRef.current = true;
-                    if (autoScrollTimerRef.current) {
-                      clearTimeout(autoScrollTimerRef.current);
-                      autoScrollTimerRef.current = null;
-                    }
-                    goTo(i);
-                  }}
+                  onClick={() => goTo(i)}
                   aria-label={`Go to slide ${i + 1} of ${TOTAL}: ${c.tag}`}
                   aria-current={i === active ? "true" : undefined}
                   className={cn(
@@ -682,11 +660,6 @@ export function IntroCarousel({
 
           <div
             onClick={(e) => {
-              userInteractedRef.current = true;
-              if (autoScrollTimerRef.current) {
-                clearTimeout(autoScrollTimerRef.current);
-                autoScrollTimerRef.current = null;
-              }
               if (!split) return;
               const target = e.target as HTMLElement;
               if (target.closest("button") || target.closest("a") || target.closest('[role="radio"]')) {
@@ -725,37 +698,14 @@ export function IntroCarousel({
             <div className={cn(split && "md:my-auto")}>
               <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
-              <div
-                className="mt-1 shrink-0"
-                onClick={(e) => {
-                  userInteractedRef.current = true;
-                  if (autoScrollTimerRef.current) {
-                    clearTimeout(autoScrollTimerRef.current);
-                    autoScrollTimerRef.current = null;
-                  }
-                }}
-              >
-                <ClearanceTiers value={tier} onChange={(v) => {
-                  userInteractedRef.current = true;
-                  if (autoScrollTimerRef.current) {
-                    clearTimeout(autoScrollTimerRef.current);
-                    autoScrollTimerRef.current = null;
-                  }
-                  setTier(v);
-                }} />
+              <div className="mt-1 shrink-0">
+                <ClearanceTiers value={tier} onChange={setTier} />
               </div>
 
               {/* fixed CTA */}
               <footer className="mt-2.5 shrink-0 md:absolute md:bottom-4 md:left-0 md:right-0 md:mt-0 md:px-5 lg:bottom-6 lg:px-6 xl:bottom-6">
                 <button
-                  onClick={() => {
-                    userInteractedRef.current = true;
-                    if (autoScrollTimerRef.current) {
-                      clearTimeout(autoScrollTimerRef.current);
-                      autoScrollTimerRef.current = null;
-                    }
-                    exit(onClose);
-                  }}
+                  onClick={() => exit(onClose)}
                   className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3 text-[11px] font-bold tracking-[0.1em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
                   style={{
                     background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
@@ -772,14 +722,7 @@ export function IntroCarousel({
                   <ArrowRight size={14} />
                 </button>
                 <button
-                  onClick={() => {
-                    userInteractedRef.current = true;
-                    if (autoScrollTimerRef.current) {
-                      clearTimeout(autoScrollTimerRef.current);
-                      autoScrollTimerRef.current = null;
-                    }
-                    exit(onSkip ?? onClose);
-                  }}
+                  onClick={() => exit(onSkip ?? onClose)}
                   className={cn(
                     "mx-auto mt-2 block text-[10px] underline-offset-2 transition-colors hover:text-muted-foreground hover:underline",
                     tone.faint,
