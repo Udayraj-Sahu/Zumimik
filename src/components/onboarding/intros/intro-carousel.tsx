@@ -418,6 +418,8 @@ export function IntroCarousel({
   const closingRef = useRef(false);
   const [pricingSheetOpen, setPricingSheetOpen] = useState(false);
   const reducedMotionRef = useRef(false);
+  const userInteractedRef = useRef(false);
+  const autoScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -454,6 +456,11 @@ export function IntroCarousel({
 
   /** Keeps dots in sync when the user swipes by hand. */
   const onTrackScroll = useCallback(() => {
+    userInteractedRef.current = true;
+    if (autoScrollTimerRef.current) {
+      clearTimeout(autoScrollTimerRef.current);
+      autoScrollTimerRef.current = null;
+    }
     const track = trackRef.current;
     const slide = track?.firstElementChild as HTMLElement | null;
     if (!track || !slide || slide.offsetWidth === 0) return;
@@ -466,6 +473,11 @@ export function IntroCarousel({
   useEffect(() => {
     if (preloaded) return;
     const onKey = (e: KeyboardEvent) => {
+      userInteractedRef.current = true;
+      if (autoScrollTimerRef.current) {
+        clearTimeout(autoScrollTimerRef.current);
+        autoScrollTimerRef.current = null;
+      }
       if (e.key === "ArrowRight") {
         e.preventDefault();
         goTo(active + 1);
@@ -491,10 +503,19 @@ export function IntroCarousel({
         },
       );
     }
+    if (prefersReducedMotion()) return;
+    autoScrollTimerRef.current = setTimeout(() => {
+      if (userInteractedRef.current) return;
+      goTo(1);
+    }, 1000);
     return () => {
       document.body.style.overflow = "";
+      if (autoScrollTimerRef.current) {
+        clearTimeout(autoScrollTimerRef.current);
+        autoScrollTimerRef.current = null;
+      }
     };
-  }, [preloaded]);
+  }, [preloaded, goTo]);
 
   const exit = useCallback((cb: () => void) => {
     if (closingRef.current) return;
@@ -526,7 +547,7 @@ export function IntroCarousel({
       <div
         className={cn(
           "relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl",
-          split && "md:max-w-3xl md:max-h-[85vh] lg:max-w-4xl xl:max-w-[1080px]",
+          split && "md:max-w-[920px] md:max-h-[88vh] lg:max-w-[980px] xl:max-w-[1100px]",
         )}
         style={{
           borderColor: GLASS_BORDER,
@@ -560,7 +581,7 @@ export function IntroCarousel({
             aria-label="Arena overview"
             className={cn(
               "flex min-h-0 flex-col px-5 pt-3",
-              split ? "md:min-w-0 md:flex-1 md:px-5 md:pt-4 md:pb-2 lg:px-6" : "flex-1",
+              split ? "md:min-w-0 md:flex-[1.4] md:px-5 md:pt-4 md:pb-2 lg:flex-[1.5] lg:px-6" : "flex-1",
             )}
             style={
               split && typeof window !== "undefined" && window.innerWidth < 768
@@ -640,7 +661,14 @@ export function IntroCarousel({
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => goTo(i)}
+                  onClick={() => {
+                    userInteractedRef.current = true;
+                    if (autoScrollTimerRef.current) {
+                      clearTimeout(autoScrollTimerRef.current);
+                      autoScrollTimerRef.current = null;
+                    }
+                    goTo(i);
+                  }}
                   aria-label={`Go to slide ${i + 1} of ${TOTAL}: ${c.tag}`}
                   aria-current={i === active ? "true" : undefined}
                   className={cn(
@@ -654,6 +682,11 @@ export function IntroCarousel({
 
           <div
             onClick={(e) => {
+              userInteractedRef.current = true;
+              if (autoScrollTimerRef.current) {
+                clearTimeout(autoScrollTimerRef.current);
+                autoScrollTimerRef.current = null;
+              }
               if (!split) return;
               const target = e.target as HTMLElement;
               if (target.closest("button") || target.closest("a") || target.closest('[role="radio"]')) {
@@ -668,7 +701,7 @@ export function IntroCarousel({
             className={cn(
               "relative mx-auto w-full max-w-[400px] px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[height,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
               split
-                ? "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]"
+                ? "md:mx-0 md:w-[280px] md:min-h-0 md:flex-[0.6] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[320px] lg:flex-[0.5] lg:px-6 lg:pb-6 xl:w-[340px] xl:flex-[0.5]"
                 : "flex shrink-0 flex-col",
               split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-hidden",
               split && (theme === "light" ? "max-[767px]:bg-black/[0.08]" : "max-[767px]:bg-[#141414]/90"),
@@ -692,15 +725,38 @@ export function IntroCarousel({
             <div className={cn(split && "md:my-auto")}>
               <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
-              <div className="mt-1 shrink-0">
-                <ClearanceTiers value={tier} onChange={setTier} />
+              <div
+                className="mt-1 shrink-0"
+                onClick={(e) => {
+                  userInteractedRef.current = true;
+                  if (autoScrollTimerRef.current) {
+                    clearTimeout(autoScrollTimerRef.current);
+                    autoScrollTimerRef.current = null;
+                  }
+                }}
+              >
+                <ClearanceTiers value={tier} onChange={(v) => {
+                  userInteractedRef.current = true;
+                  if (autoScrollTimerRef.current) {
+                    clearTimeout(autoScrollTimerRef.current);
+                    autoScrollTimerRef.current = null;
+                  }
+                  setTier(v);
+                }} />
               </div>
 
               {/* fixed CTA */}
               <footer className="mt-2.5 shrink-0">
                 <button
-                  onClick={() => exit(onClose)}
-                  className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3.5 text-[12px] font-bold tracking-[0.12em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
+                  onClick={() => {
+                    userInteractedRef.current = true;
+                    if (autoScrollTimerRef.current) {
+                      clearTimeout(autoScrollTimerRef.current);
+                      autoScrollTimerRef.current = null;
+                    }
+                    exit(onClose);
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3 text-[11px] font-bold tracking-[0.1em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
                   style={{
                     background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
                     boxShadow: "0 10px 34px var(--lime-mid-25), 0 1px 0 var(--glass-25) inset",
@@ -716,7 +772,14 @@ export function IntroCarousel({
                   <ArrowRight size={14} />
                 </button>
                 <button
-                  onClick={() => exit(onSkip ?? onClose)}
+                  onClick={() => {
+                    userInteractedRef.current = true;
+                    if (autoScrollTimerRef.current) {
+                      clearTimeout(autoScrollTimerRef.current);
+                      autoScrollTimerRef.current = null;
+                    }
+                    exit(onSkip ?? onClose);
+                  }}
                   className={cn(
                     "mx-auto mt-2 block text-[10px] underline-offset-2 transition-colors hover:text-muted-foreground hover:underline",
                     tone.faint,

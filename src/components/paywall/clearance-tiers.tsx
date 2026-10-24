@@ -124,9 +124,11 @@ export function ClearanceTiers({
                       )}
                     >
                       {o.price}
-                      <span className="text-[9px] font-normal text-muted-foreground/50">
-                        {o.priceSuffix}
-                      </span>
+                      {o.priceSuffix && o.priceSuffix.trim().toLowerCase() !== "forever" && (
+                        <span className="text-[9px] font-normal text-muted-foreground/50">
+                          {o.priceSuffix}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div
