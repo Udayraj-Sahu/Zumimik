@@ -416,7 +416,7 @@ export function IntroCarousel({
   const overlayRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
-  const [pricingExpanded, setPricingExpanded] = useState(false);
+  const [pricingSheetOpen, setPricingSheetOpen] = useState(false);
   const reducedMotionRef = useRef(false);
 
   useEffect(() => {
@@ -549,33 +549,31 @@ export function IntroCarousel({
         <div className="relative shrink-0 px-5 pt-[max(0.75rem,var(--sat))]" />
 
         {/* panels: stacked column by default; side-by-side from md in split mode */}
-        <div
-          className={cn(
-            "relative flex min-h-0 flex-1 flex-col",
-            split && "md:flex-row-reverse",
-          )}
-        >
+          <div
+            className={cn(
+              "relative flex min-h-0 flex-1 flex-col overflow-hidden",
+              split && "md:flex-row-reverse",
+            )}
+          >
           <section
             aria-roledescription="carousel"
             aria-label="Arena overview"
-            onClick={() => {
-              if (pricingExpanded) {
-                setPricingExpanded(false);
-              }
-            }}
             className={cn(
-              "flex min-h-0 flex-col px-5 pt-3 transition-[flex-basis,height] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              "flex min-h-0 flex-col px-5 pt-3",
               split ? "md:min-w-0 md:flex-1 md:px-5 md:pt-4 md:pb-2 lg:px-6" : "flex-1",
-              split && "md:flex-row-reverse",
-              pricingExpanded && split ? "md:flex-[1_1_50%]" : !split && pricingExpanded ? "flex-[1_1_50%]" : !split && !pricingExpanded ? "flex-[1_1_70%]" : "",
             )}
             style={
-              !split && typeof window !== "undefined" && window.innerWidth < 768
+              split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
-                  flexBasis: pricingExpanded ? "50%" : "70%",
-                  transition: reducedMotionRef.current
-                    ? "none"
-                    : "flex-basis 520ms cubic-bezier(0.22,1,0.36,1)",
+                    flex: "0 0 78%",
+                    paddingBottom: pricingSheetOpen
+                      ? "calc(50% + max(1.125rem, env(safe-area-inset-bottom, 0px)))"
+                      : "calc(22% + max(0.25rem, env(safe-area-inset-bottom, 0px)))",
+                    transform: pricingSheetOpen ? "scale(0.98)" : "scale(1)",
+                    transformOrigin: "top center",
+                    transition: reducedMotionRef.current
+                      ? "none"
+                      : "flex 520ms cubic-bezier(0.22,1,0.36,1), padding-bottom 520ms cubic-bezier(0.22,1,0.36,1), transform 520ms cubic-bezier(0.22,1,0.36,1)",
                   }
                 : undefined
             }
@@ -656,37 +654,45 @@ export function IntroCarousel({
 
           <div
             onClick={(e) => {
-              // Don't toggle if clicking interactive elements
+              if (!split) return;
               const target = e.target as HTMLElement;
               if (target.closest("button") || target.closest("a") || target.closest('[role="radio"]')) {
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  setPricingSheetOpen(true);
+                }
                 return;
               }
-              if (!split && window.innerWidth < 768) {
-                setPricingExpanded((v) => !v);
-              }
+              if (typeof window === "undefined" || window.innerWidth >= 768) return;
+              setPricingSheetOpen((v) => !v);
             }}
             className={cn(
-              "relative mx-auto flex w-full max-w-[400px] flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[flex-basis,height] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              "relative mx-auto w-full max-w-[400px] px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[height,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
               split
                 ? "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]"
-                : "shrink-0",
-              !split && pricingExpanded ? "flex-[1_1_50%]" : !split && !pricingExpanded ? "flex-[1_1_30%]" : "",
-              !split && (theme === "light" ? "bg-black/[0.04]" : "bg-black/40"),
+                : "flex shrink-0 flex-col",
+              split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-hidden",
+              split && (theme === "light" ? "max-[767px]:bg-black/[0.08]" : "max-[767px]:bg-[#141414]/90"),
             )}
             style={
-              !split && typeof window !== "undefined" && window.innerWidth < 768
+              split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
-                    flexBasis: pricingExpanded ? "50%" : "30%",
+                    height: pricingSheetOpen ? "50%" : "26%",
+                    transform: pricingSheetOpen ? "translateY(0)" : "translateY(-4px)",
+                    boxShadow: pricingSheetOpen
+                      ? "0 -40px 80px -40px rgba(0,0,0,0.8), 0 -2px 0 rgba(255,255,255,0.06) inset, 0 -4px 14px -10px rgba(0,0,0,0.7)"
+                      : "0 -24px 56px -32px rgba(0,0,0,0.7), 0 -1px 0 rgba(255,255,255,0.04) inset",
                     transition: reducedMotionRef.current
                       ? "none"
-                      : "flex-basis 520ms cubic-bezier(0.22,1,0.36,1)",
+                      : "height 520ms cubic-bezier(0.22,1,0.36,1), box-shadow 520ms cubic-bezier(0.22,1,0.36,1), transform 520ms cubic-bezier(0.22,1,0.36,1)",
+                    paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))",
                   }
                 : undefined
             }
           >
             <div className={cn(split && "md:my-auto")}>
+              <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
-              <div className="mt-3 shrink-0">
+              <div className="mt-1 shrink-0">
                 <ClearanceTiers value={tier} onChange={setTier} />
               </div>
 
