@@ -35,7 +35,7 @@ const MODES: Mode[] = [
   },
   {
     id: "zuzumik",
-    label: "With zuzumik",
+    label: "With Zuzumik",
     minutes: 3,
     tone: "neon",
     line: "Stalls found. Time back.",
