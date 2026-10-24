@@ -559,13 +559,47 @@ export function IntroCarousel({
           </h1>
         </div>
 
-        {/* panels: stacked column by default; side-by-side from md in split mode */}
+        {/* panels: stacked column by default; horizontal 30/70 split from md in split mode */}
         <div
           className={cn(
             "relative flex min-h-0 flex-1 flex-col",
-            split && "md:flex-row-reverse",
+            split && "md:grid md:grid-cols-[30%_70%] md:items-start md:gap-x-4 lg:gap-x-6",
           )}
         >
+          {split && (
+            <div className="hidden md:flex flex-col px-5 pb-5 pt-4 lg:px-6">
+              <div className="flex flex-col">
+                {/* clearance tiers */}
+                <div>
+                  <ClearanceTiers value={tier} onChange={setTier} />
+                </div>
+
+                {/* fixed CTA */}
+                <footer className="mt-3">
+                  <button
+                    onClick={() => exit(onClose)}
+                    className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3.5 text-[12px] font-bold tracking-[0.12em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
+                    style={{
+                      background: `linear-gradient(90deg, var(--lime-solid), var(--lime-light))`,
+                      boxShadow: "0 10px 34px var(--lime-mid-25), 0 1px 0 var(--glass-25) inset",
+                    }}
+                  >
+                    ENTER {lanesCount > 1 ? "MULTI-LANE" : "YOUR"} ARENA
+                    <ArrowRight size={14} />
+                  </button>
+                  <button
+                    onClick={() => exit(onSkip ?? onClose)}
+                    className={cn(
+                      "mx-auto mt-2 block text-[10px] underline-offset-2 transition-colors hover:text-muted-foreground hover:underline",
+                      tone.faint,
+                    )}
+                  >
+                    Skip for now
+                  </button>
+                </footer>
+              </div>
+            </div>
+          )}
           <section
             aria-roledescription="carousel"
             aria-label="Arena overview"
@@ -653,10 +687,10 @@ export function IntroCarousel({
           <div
             className={cn(
               "relative mx-auto flex w-full max-w-[400px] shrink-0 flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4",
-              split && "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]",
+              split && "md:hidden",
             )}
           >
-            <div className={cn(split && "md:my-auto")}>
+            <div>
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
               <div className="mt-3 shrink-0">
                 <ClearanceTiers value={tier} onChange={setTier} />
