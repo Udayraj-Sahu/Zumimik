@@ -533,31 +533,7 @@ export function IntroCarousel({
         />
 
         {/* brand + hero */}
-        <div className="relative shrink-0 px-5 pt-[max(0.75rem,var(--sat))] text-center">
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-[var(--lime-25)] bg-[var(--lime-07)] px-3.5 py-1">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--lime)] opacity-60" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-[var(--lime)]" />
-            </span>
-            <span className="text-[10px] font-bold tracking-[0.22em] text-[var(--lime)]">{badge}</span>
-          </div>
-          <h1
-            id={titleId}
-            className="mt-2 text-[clamp(21px,6vw,28px)] font-extrabold uppercase leading-[1.02] tracking-tight text-foreground"
-          >
-            {heading.lead}{" "}
-            <span
-              className="text-transparent"
-              style={{
-                background: `linear-gradient(90deg, var(--lime), var(--lime-tint))`,
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-              }}
-            >
-              {heading.highlight}
-            </span>
-          </h1>
-        </div>
+        <div className="relative shrink-0 px-5 pt-[max(0.75rem,var(--sat))]" />
 
         {/* panels: stacked column by default; side-by-side from md in split mode */}
         <div
@@ -593,9 +569,7 @@ export function IntroCarousel({
                   >
                     <div
                       className={cn(
-                        "flex min-h-0 flex-1 flex-col rounded-[18px] border p-2.5",
-                        tone.card,
-                        card.full && "border-0 bg-transparent p-0",
+                        "flex min-h-0 flex-1 flex-col border-0 bg-transparent p-0",
                       )}
                     >
                       {!card.bare && !card.full && (
@@ -672,7 +646,13 @@ export function IntroCarousel({
                     boxShadow: "0 10px 34px var(--lime-mid-25), 0 1px 0 var(--glass-25) inset",
                   }}
                 >
-                  ENTER {lanesCount > 1 ? "MULTI-LANE" : "YOUR"} ARENA
+                  {tier === "initiate"
+                    ? "Join Free"
+                    : tier === "single-lane"
+                      ? "15 Days Unrestricted Access"
+                      : lanesCount > 1
+                        ? "ENTER MULTI-LANE"
+                        : "ENTER YOUR ARENA"}
                   <ArrowRight size={14} />
                 </button>
                 <button

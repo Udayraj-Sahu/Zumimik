@@ -482,9 +482,13 @@ export function PlanIntro({
               className="w-full rounded-[14px] border-0 bg-[var(--lime-solid)] py-3 text-[13px] font-bold tracking-[0.03em] text-[var(--on-accent)] transition active:scale-[0.98]"
               style={{ boxShadow: "0 8px 24px -10px var(--lime-60)" }}
             >
-              {isFree
-                ? "Continue Free"
-                : `Start My Pass · ${inr(total)}/${billing === "annual" ? "Year" : "Month"}`}
+              {plan?.id === "initiate"
+                ? "Join Free"
+                : plan?.id === "single-lane"
+                  ? "15 Days Unrestricted Access"
+                  : isFree
+                    ? "Join Free"
+                    : `Start My Pass ₹ ${inr(total)}/${billing === "annual" ? "Year" : "Month"}`}
             </button>
 
             <button

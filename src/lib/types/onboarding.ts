@@ -56,8 +56,8 @@ export const PLANS: {
 }[] = [
   {
     id: "initiate",
-    name: "Initiate",
-    desc: "Ad-free drills for 1 active segment",
+    name: "Free",
+    desc: "Ad-free drills · 1 active segment",
     lanes: 1,
     price: "Free",
     cadence: "forever",
@@ -66,8 +66,8 @@ export const PLANS: {
   },
   {
     id: "single-lane",
-    name: "Single Lane Pro",
-    desc: "Full adaptive engine for one exam track",
+    name: "Pro",
+    desc: "Full adaptive engine for one exam",
     lanes: 1,
     price: "₹399",
     cadence: "/month",
@@ -81,14 +81,14 @@ export const PLANS: {
   {
     id: "dual-lane",
     name: "Dual Lane Access",
-    desc: "Execute concurrent prep across multiple syllabi.",
+    desc: "Build your study stack",
     lanes: 2,
     price: "₹649",
     cadence: "/month",
     billing: { annual: 6490, monthly: 649 },
     badge: "MOST POPULAR",
     tracks: ["CAT (Verbal & Quant)", "GMAT Fast-Track"],
-    extra: "+ Vedic Math HUD",
+    extra: "Prepare for two or more exams",
     features: [
       "Two exam tracks in parallel",
       "Priority drill matching",
