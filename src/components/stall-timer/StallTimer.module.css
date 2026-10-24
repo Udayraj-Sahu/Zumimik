@@ -38,11 +38,12 @@
   background: var(--glass-06);
   border: 1px solid var(--glass-border);
   border-radius: 999px;
-  width: 100%;
+  width: 50%;
+  align-self: center;
 }
 
 .chip {
-  flex: 0 0 50%;
+  flex: 1 1 0;
   min-width: 0;
   padding: 8px 10px;
   border-radius: 999px;
