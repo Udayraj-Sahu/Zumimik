@@ -567,8 +567,8 @@ export function IntroCarousel({
                 ? {
                     flex: "0 0 78%",
                     paddingBottom: pricingSheetOpen
-                      ? "calc(50% + max(1.25rem, env(safe-area-inset-bottom, 0px)))"
-                      : "calc(22% + max(0.375rem, env(safe-area-inset-bottom, 0px)))",
+                      ? "calc(50% + max(1.5rem, env(safe-area-inset-bottom, 0px)))"
+                      : "calc(22% + max(1rem, env(safe-area-inset-bottom, 0px)))",
                     transform: pricingSheetOpen ? "scale(0.98)" : "scale(1)",
                     transformOrigin: "top center",
                     transition: reducedMotionRef.current
