@@ -698,14 +698,14 @@ export function IntroCarousel({
               if (typeof window === "undefined" || window.innerWidth >= 768) return;
               setPricingSheetOpen((v) => !v);
             }}
-            className={cn(
-              "relative mx-auto w-full max-w-[400px] px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[height,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-              split
-                ? "md:mx-0 md:w-[280px] md:min-h-0 md:flex-[0.6] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[320px] lg:flex-[0.5] lg:px-6 lg:pb-6 xl:w-[340px] xl:flex-[0.5]"
-                : "flex shrink-0 flex-col",
-              split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-hidden",
-              split && (theme === "light" ? "max-[767px]:bg-black/[0.08]" : "max-[767px]:bg-[#141414]/90"),
-            )}
+              className={cn(
+                "relative mx-auto w-full max-w-[400px] px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[height,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+                split
+                  ? "md:mx-0 md:w-[280px] md:min-h-0 md:flex-[0.6] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-[calc(96px+max(1rem,var(--sab)))] md:pt-4 lg:w-[320px] lg:flex-[0.5] lg:px-6 lg:pb-[calc(104px+max(1rem,var(--sab)))] lg:pt-4 xl:w-[340px] xl:flex-[0.5]"
+                  : "flex shrink-0 flex-col",
+                split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-hidden",
+                split && (theme === "light" ? "max-[767px]:bg-black/[0.08]" : "max-[767px]:bg-[#141414]/90"),
+              )}
             style={
               split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
@@ -746,7 +746,7 @@ export function IntroCarousel({
               </div>
 
               {/* fixed CTA */}
-              <footer className="mt-2.5 shrink-0">
+              <footer className="mt-2.5 shrink-0 md:absolute md:bottom-4 md:left-0 md:right-0 md:mt-0 md:px-5 lg:bottom-6 lg:px-6 xl:bottom-6">
                 <button
                   onClick={() => {
                     userInteractedRef.current = true;
