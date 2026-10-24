@@ -57,9 +57,9 @@
 }
 
 .chipOn {
-  background: var(--glass-12);
-  color: var(--foreground);
-  box-shadow: inset 0 0 0 1px var(--glass-border);
+  background: var(--lime-10);
+  color: var(--lime);
+  box-shadow: inset 0 0 0 1px var(--neon-border);
 }
 
 .chip:focus-visible {
