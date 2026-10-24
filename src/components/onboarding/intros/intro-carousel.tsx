@@ -416,6 +416,19 @@ export function IntroCarousel({
   const overlayRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
+  const [pricingExpanded, setPricingExpanded] = useState(false);
+  const reducedMotionRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reducedMotionRef.current = mq.matches;
+    const onChange = (e: MediaQueryListEvent) => {
+      reducedMotionRef.current = e.matches;
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const split = layout === "split";
 
@@ -545,10 +558,27 @@ export function IntroCarousel({
           <section
             aria-roledescription="carousel"
             aria-label="Arena overview"
+            onClick={() => {
+              if (pricingExpanded) {
+                setPricingExpanded(false);
+              }
+            }}
             className={cn(
-              "flex min-h-0 flex-1 flex-col px-5 pt-3",
-              split && "md:min-w-0 md:px-5 md:pt-4 md:pb-2 lg:px-6",
+              "flex min-h-0 flex-col px-5 pt-3 transition-[flex-basis,height] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              split ? "md:min-w-0 md:flex-1 md:px-5 md:pt-4 md:pb-2 lg:px-6" : "flex-1",
+              split && "md:flex-row-reverse",
+              pricingExpanded && split ? "md:flex-[1_1_50%]" : !split && pricingExpanded ? "flex-[1_1_50%]" : !split && !pricingExpanded ? "flex-[1_1_70%]" : "",
             )}
+            style={
+              !split && typeof window !== "undefined" && window.innerWidth < 768
+                ? {
+                  flexBasis: pricingExpanded ? "50%" : "70%",
+                  transition: reducedMotionRef.current
+                    ? "none"
+                    : "flex-basis 520ms cubic-bezier(0.22,1,0.36,1)",
+                  }
+                : undefined
+            }
           >
             <div
               ref={trackRef}
@@ -625,10 +655,34 @@ export function IntroCarousel({
           </section>
 
           <div
+            onClick={(e) => {
+              // Don't toggle if clicking interactive elements
+              const target = e.target as HTMLElement;
+              if (target.closest("button") || target.closest("a") || target.closest('[role="radio"]')) {
+                return;
+              }
+              if (!split && window.innerWidth < 768) {
+                setPricingExpanded((v) => !v);
+              }
+            }}
             className={cn(
-              "relative mx-auto flex w-full max-w-[400px] shrink-0 flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4",
-              split && "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]",
+              "relative mx-auto flex w-full max-w-[400px] flex-col px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[flex-basis,height] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              split
+                ? "md:mx-0 md:w-[300px] md:min-h-0 md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-5 md:pt-4 lg:w-[420px] lg:px-6 lg:pb-6 xl:w-[520px]"
+                : "shrink-0",
+              !split && pricingExpanded ? "flex-[1_1_50%]" : !split && !pricingExpanded ? "flex-[1_1_30%]" : "",
+              !split && (theme === "light" ? "bg-black/[0.04]" : "bg-black/40"),
             )}
+            style={
+              !split && typeof window !== "undefined" && window.innerWidth < 768
+                ? {
+                    flexBasis: pricingExpanded ? "50%" : "30%",
+                    transition: reducedMotionRef.current
+                      ? "none"
+                      : "flex-basis 520ms cubic-bezier(0.22,1,0.36,1)",
+                  }
+                : undefined
+            }
           >
             <div className={cn(split && "md:my-auto")}>
               {/* clearance tiers: replaces the stock video, mirrors the paywall */}
