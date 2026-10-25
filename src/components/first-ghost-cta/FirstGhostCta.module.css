@@ -1,143 +1,181 @@
-/* Arena intro slide 1: the first-three-seconds hook. A single vertical column
-   at every width, centred inside the slide's card surface. */
+/* FirstGhostCta: Arena poster skin. Works with your component unchanged
+   (same class names: card, title, tagline, stats, stat, bad, good,
+   statValue, statLabel, points, note).
+   ink #12140f, paper #f6f5f0, lime #c8f23c, pink #ff72be, leak red #e0201f. */
 
 .card {
+  --sans: var(--font-inter, Inter), system-ui, sans-serif;
+  --mono: var(--font-space-mono, "Space Mono"), var(--font-jetbrains-mono), ui-monospace, monospace;
+  --line: #353a2b;
+  --mut: #a6ab9c;
+  --paper: #f6f5f0;
+  --lime: #c8f23c;
+  --pink: #ff72be;
+  --red: #e0201f;
+  /* keeps the content in one column of at most 420px, centred in the card */
+  --col: 420px;
+  --pad: 16px;
+
   display: flex;
-  flex: 1 1 auto;
   min-height: 0;
+  flex: 1;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px 16px 16px;
-  font-family: var(--font-inter), system-ui, sans-serif;
-  color: var(--foreground);
-  background: var(--panel);
-  border: 1px solid var(--glass-border);
+  gap: 12px;
+  border: 1px solid #262a1f;
   border-radius: 18px;
-  overflow: clip;
+  background: #12140f;
+  padding: 18px max(var(--pad), calc((100% - var(--col)) / 2));
+  font-family: var(--sans);
+  color: #f1f3ec;
 }
 
-@supports not (overflow: clip) {
-  .card {
-    overflow-x: hidden;
-    overflow-y: hidden;
-  }
-}
+/* ---------- headline ---------- */
 
 .title {
   margin: 0;
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
-  font-size: clamp(18px, 5vw, 24px);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  font: 900 clamp(34px, 11vw, 46px) / 0.92 var(--sans);
+  letter-spacing: -0.05em;
   text-transform: uppercase;
-  text-align: center;
-  color: var(--foreground);
+  text-wrap: balance;
+}
+
+/* pink bar under the headline, the poster's highlight colour */
+.title::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 6px;
+  margin-top: 12px;
+  background: var(--pink);
 }
 
 .tagline {
   margin: 0;
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 9.5px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.12em;
+  font: 700 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-align: center;
-  color: var(--neon);
+  color: var(--lime);
 }
 
-/* the two stats: red for the run before the radar, lime after it */
+/* ---------- before / after ---------- */
+
 .stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 132px));
-  justify-content: center;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .stat {
   display: flex;
-  min-width: 0;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 84px;
-  padding: 16px 10px;
-  text-align: center;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: var(--tile);
+  border: 1.5px solid;
+  border-radius: 4px;
+  padding: 12px 10px 10px;
+  color: #141413;
 }
 
 .bad {
-  border-color: var(--red-30);
-  background: var(--red-10);
-  color: var(--red);
+  border-color: var(--paper);
+  background: var(--paper);
 }
 
 .good {
-  border-color: var(--neon-border);
-  background: var(--neon-bg);
-  color: var(--neon);
+  border-color: var(--lime);
+  background: var(--lime);
 }
 
 .statValue {
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
-  font-size: clamp(18px, 5vw, 22px);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  display: block;
+  font: 900 clamp(30px, 9vw, 38px) / 0.9 var(--sans);
+  letter-spacing: -0.05em;
+}
+
+.bad .statValue {
+  color: var(--red);
 }
 
 .statLabel {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 8px;
-  font-weight: 700;
-  line-height: 1.3;
+  display: block;
+  margin-top: 8px;
+  font: 700 10px/1.2 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-align: center;
-  color: var(--muted-foreground);
 }
+
+/* ---------- points ---------- */
 
 .points {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin: 0;
+  gap: 8px;
+  margin: 6px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .points li {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: clamp(10px, 2.8vw, 11.5px);
-  line-height: 1.45;
-  color: var(--muted-foreground);
+  position: relative;
+  padding-left: 18px;
+  font: 600 14px/1.35 var(--sans);
+  color: #f1f3ec;
 }
 
 .points li::before {
   content: "";
-  flex: none;
-  width: 4px;
-  height: 4px;
-  margin-top: 6px;
-  border-radius: 50%;
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
   background: var(--lime);
 }
 
 .note {
-  margin: 0;
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 9px;
-  line-height: 1.4;
+  margin: 8px 0 0;
+  border-top: 1.5px solid var(--line);
+  padding-top: 10px;
+  font: 400 10.5px/1.3 var(--mono);
   letter-spacing: 0.04em;
-  text-align: center;
-  color: var(--muted-foreground);
+  color: var(--mut);
+}
+
+/* a little more room once the slide is wider than a phone */
+@media (min-width: 640px) {
+  .card {
+    --col: 480px;
+    --pad: 24px;
+    gap: 14px;
+    padding-block: 24px;
+  }
+
+  .title {
+    font-size: 52px;
+  }
+
+  .tagline {
+    font-size: 12px;
+  }
+
+  .stat {
+    padding: 14px 12px 12px;
+  }
+
+  .statValue {
+    font-size: 42px;
+  }
+
+  .statLabel {
+    font-size: 10.5px;
+  }
+
+  .points li {
+    font-size: 15px;
+  }
+
+  .note {
+    font-size: 11px;
+  }
 }
