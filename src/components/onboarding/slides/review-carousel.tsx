@@ -44,10 +44,10 @@ function ReviewCard({ review }: { review: StudentReview }) {
 }
 
 export function ReviewCarousel({
-  seconds = 28,
+  seconds = 24,
   className,
   showSummary = true,
-  compact = false,
+  compact = true,
 }: ReviewCarouselProps) {
   return (
     <section

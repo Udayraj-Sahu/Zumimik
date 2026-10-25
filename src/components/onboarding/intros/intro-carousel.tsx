@@ -35,6 +35,16 @@ import StallTimer from "@/components/stall-timer/StallTimer";
 import TrialTimeline from "@/components/trial-timeline/TrialTimeline";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { DOMAIN_LABELS } from "@/lib/types/template";
+import "./intro-styles.css";
+import { Fight1 } from "./fight-1";
+import { Fight2 } from "./fight-2";
+import { Rank1 } from "./rank-1";
+import { Rank2 } from "./rank-2";
+import { Rise1 } from "./rise-1";
+import { Rise2 } from "./rise-2";
+import { Join } from "./join";
+import { Join1 } from "./join-1";
+import { Join2 } from "./join-2";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -145,80 +155,137 @@ export function useArenaIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
    * how-it-works walkthrough. The hook and the review/walkthrough slides are
    * skipped when they have nothing to show.
    */
-  const slides: IntroSlide[] = [
-    ...(lanes.length > 0
-      ? [
-          {
-            id: "lanes",
-            num: "01",
-            tag: "FIRST 3 SECONDS",
-            title: "",
-            sub: "",
-            Icon: Flame,
-            full: true,
-            fill: true,
-            body: () => (
-              <FirstGhostCta
-                title="Win the first 3 seconds."
-                tagline="Quant. LRDI. VARC. One arena."
-                stats={[
-                  { value: "9 min", label: "lost to stalls", tone: "bad" },
-                  { value: "3 min", label: "after the radar", tone: "good" },
-                ]}
-                points={[
-                  "Know exactly where your seconds leak.",
-                  "See the trap that fooled the field.",
-                  "Race the ghost until you\u2019re the benchmark.",
-                ]}
-                note="Works offline. Sample data shown."
-              />
-            ),
-          },
-        ]
-      : []),
-    FIRST_MOVE_SLIDE,
-    {
-      id: "sponsor",
-      num: "03",
-      tag: "SPONSOR REEL",
-      title: "",
-      sub: "",
-      Icon: Play,
-      bare: true,
-      body: (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-[var(--glass-border)]">
-          <StockVideoAd
-            src="/media/stock-ad.mp4"
-            poster="/media/stock-ad-poster.webp"
-            alt="Sponsor message"
-            className="h-full w-full min-h-[160px]"
-          />
-        </div>
-      ),
-    },
-    TRAP_RESULTS_SLIDE,
-    STALL_TIMER_SLIDE,
-    {
-      id: "reviews",
-      num: "06",
-      tag: "REVIEWS",
-      title: "",
-      sub: "",
-      Icon: Star,
-      full: true,
-      body: <ReviewCarousel />,
-    },
-    {
-      id: "how-it-works",
-      num: "07",
-      tag: "HOW IT WORKS",
-      title: "",
-      sub: "",
-      Icon: Workflow,
-      full: true,
-      body: <HowItWorks />,
-    },
-  ];
+   const slides: IntroSlide[] = [
+     ...(lanes.length > 0
+       ? [
+           {
+             id: "lanes",
+             num: "01",
+             tag: "FIRST 3 SECONDS",
+             title: "",
+             sub: "",
+             Icon: Flame,
+             full: true,
+             fill: true,
+             body: () => (
+               <FirstGhostCta
+                 title="Win the first 3 seconds."
+                 tagline="Quant. LRDI. VARC. One arena."
+                 stats={[
+                   { value: "9 min", label: "lost to stalls", tone: "bad" },
+                   { value: "3 min", label: "after the radar", tone: "good" },
+                 ]}
+                 points={[
+                   "Know exactly where your seconds leak.",
+                   "See the trap that fooled the field.",
+                   "Race the ghost until you\u2019re the benchmark.",
+                 ]}
+                 note="Works offline. Sample data shown."
+               />
+             ),
+           },
+         ]
+       : []),
+     {
+       id: "fight-1",
+       num: "02",
+       tag: "FIGHT 1/2",
+       title: "",
+       sub: "",
+       Icon: Swords,
+       full: true,
+       fill: true,
+       body: <Fight1 />,
+     },
+     {
+       id: "fight-2",
+       num: "03",
+       tag: "FIGHT 2/2",
+       title: "",
+       sub: "",
+       Icon: Timer,
+       full: true,
+       fill: true,
+       body: <Fight2 />,
+     },
+     {
+       id: "rank-1",
+       num: "04",
+       tag: "RANK 1/2",
+       title: "",
+       sub: "",
+       Icon: TrendingUp,
+       full: true,
+       fill: true,
+       body: <Rank1 />,
+     },
+     {
+       id: "rank-2",
+       num: "05",
+       tag: "RANK 2/2",
+       title: "",
+       sub: "",
+       Icon: Star,
+       full: true,
+       fill: true,
+       body: <Rank2 />,
+     },
+     {
+       id: "rise-1",
+       num: "06",
+       tag: "RISE 1/2",
+       title: "",
+       sub: "",
+       Icon: Zap,
+       full: true,
+       fill: true,
+       body: <Rise1 />,
+     },
+     {
+       id: "rise-2",
+       num: "07",
+       tag: "RISE 2/2",
+       title: "",
+       sub: "",
+       Icon: Flame,
+       full: true,
+       fill: true,
+       body: <Rise2 />,
+     },
+     {
+       id: "join",
+       num: "08",
+       tag: "JOIN",
+       title: "",
+       sub: "",
+       Icon: Megaphone,
+       full: true,
+       fill: true,
+       body: <Join />,
+     },
+     {
+       id: "join-1",
+       num: "09",
+       tag: "REVIEWS",
+       title: "",
+       sub: "",
+       Icon: Star,
+       full: true,
+       fill: true,
+       body: <Join1 />,
+     },
+     {
+       id: "join-2",
+       num: "10",
+       tag: "HOW IT WORKS",
+       title: "",
+       sub: "",
+       Icon: Workflow,
+       full: true,
+       fill: true,
+       body: <Join2 />,
+     },
+   ];
 
   return { slides, lanes };
 }
@@ -590,26 +657,39 @@ export function IntroCarousel({
                 : undefined
             }
           >
-            <div
+             <div
               ref={trackRef}
               onScroll={onTrackScroll}
-              className="flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="intro-carousel flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {slides.map((card, i) => {
                 const Icon = card.Icon;
+                const CAPTIONS = [
+                  { badge: "Fight 1/2", text: "You vs the clock. You vs that blank at question 14." },
+                  { badge: "Fight 2/2", text: "You thought you were solving. You were staring." },
+                  { badge: "Rank 1/2", text: "Not \u201csilly mistakes\u201d. Four repeat offenders, and we name every one." },
+                  { badge: "Rank 2/2", text: "Others see a red cross. You see the trap behind it." },
+                  { badge: "Rise 1/2", text: "Same question. Six weeks on, a third of the time." },
+                  { badge: "Rise 2/2", text: "Skip the topper comparison. Just beat last week\u2019s you." },
+                  { badge: "Join", text: "For people who show up daily and pull the next one up." },
+                  { badge: "Reviews", text: "Real results from those who showed up." },
+                  { badge: "How it works", text: "One arena. One goal. Show up." },
+                ];
+                const baseIdx = (typeof lanesCount !== "undefined" ? (lanesCount > 0 ? 1 : 0) : 0);
+                const c = CAPTIONS[i - baseIdx];
                 return (
                   <article
                     key={card.id}
                     aria-label={`${i + 1} of ${TOTAL}: ${card.tag}`}
                     aria-hidden={i !== active ? "true" : undefined}
                     className={cn(
-                      "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden",
-                      (card.bare || card.fill) && "self-stretch",
+                      "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden h-full",
+                      (card.bare || card.fill || card.full) && "self-stretch",
                     )}
                   >
                     <div
                       className={cn(
-                        "flex min-h-0 flex-1 flex-col border-0 bg-transparent p-0",
+                        "flex min-h-0 flex-1 flex-col border-0 bg-transparent p-0 h-full",
                       )}
                     >
                       {!card.bare && !card.full && (
@@ -637,44 +717,54 @@ export function IntroCarousel({
                         </>
                       )}
 
-                      <div className={cn("flex min-h-0 flex-1 flex-col", card.bare || card.full ? "" : "mt-4")}>
+                      <div className={cn("flex min-h-0 flex-1 flex-col", card.bare || card.full ? "" : "mt-4", card.full || card.fill ? "h-full" : "")}>
                         {typeof card.body === "function" ? card.body(i === active) : card.body}
                       </div>
+                      {(card.full || card.fill) && c && (
+                        <div className="mt-2 shrink-0 px-1">
+                          <div className="text-[15px] sm:text-[16px] font-extrabold leading-tight tracking-tight">{c.text}</div>
+                        </div>
+                      )}
                     </div>
                   </article>
                 );
               })}
             </div>
 
-            <div className="mt-2.5 shrink-0">
-              {(() => {
-                const isPitch = slides === usePitchIntroSlides().slides || (typeof window !== "undefined" && location.pathname.includes("pitch"));
-                // Build groups based on typical mappings
-                if (isPitch) {
-                const groups = [
-                  { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
-                  { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => [1].includes(i)) },
-                  { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => [2].includes(i)) },
-                  { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => [3, 4].includes(i)) },
-                  { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => [5].includes(i)) },
-                ].filter((g) => g.slideIndexes.length > 0);
-                  if (groups.length === 0) return null;
-              const stopIdx = groups.find(g=>g.label==="Stop")?.slideIndexes[0] ?? 0;
-              return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
-                }
-                // Arena groups
-                const groups = [
-                  { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
-                  { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1) },
-                  { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => i === 2) },
-                  { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => i === 3 || i === 4) },
-                  { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 5) },
-                ].filter((g) => g.slideIndexes.length > 0);
-                if (groups.length === 0) return null;
-                const stopIdx = groups.find(g=>g.label==="Stop")?.slideIndexes[0] ?? 0;
-                return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
-              })()}
-            </div>
+             <div className="mt-2.5 shrink-0">
+               {(() => {
+                 // Build groups: Stop/first (0), Fight (1-2), Rank (3-4), Rise (5-6), Join (last)
+                 const groups = [
+                   { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
+                   { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1 || i === 2) },
+                   { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => i === 3 || i === 4) },
+                   { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => i === 5 || i === 6) },
+                   { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 7) },
+                 ].filter((g) => g.slideIndexes.length > 0);
+                 if (groups.length === 0) return null;
+                 const stopIdx = groups.find((g) => g.label === "Stop")?.slideIndexes[0] ?? 0;
+                 const joinIdx = groups.find((g) => g.label === "Join")?.slideIndexes[0];
+                 return (
+                   <Steps
+                     groups={groups}
+                     currentIndex={active}
+                     onGroupClick={(idx) => {
+                       if (joinIdx !== undefined && idx === joinIdx) {
+                         goTo(stopIdx);
+                         return;
+                       }
+                       goTo(idx);
+                     }}
+                     disabled={false}
+                     totalSlides={slides.length}
+                     autoAdvance={!reducedMotionRef.current}
+                     slideDurationMs={slideDurationMs}
+                     onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)}
+                     reducedMotion={reducedMotionRef.current}
+                   />
+                 );
+               })()}
+             </div>
           </section>
 
           <div
