@@ -31,11 +31,11 @@ const MODES: { id: Theme; label: string }[] = [
  * globals.css, never from a literal hex in this component.
  */
 const ACCENTS: { label: string; accent: AccentId; swatch: string }[] = [
+  { label: "Lime", accent: "lime", swatch: "var(--swatch-lime)" },
   { label: "Coral", accent: "orange", swatch: "var(--swatch-coral)" },
   { label: "Azure", accent: "blue", swatch: "var(--swatch-azure)" },
   { label: "Mint", accent: "emerald", swatch: "var(--swatch-mint)" },
   { label: "Gold", accent: "amber", swatch: "var(--swatch-gold)" },
-  { label: "Lime", accent: "lime", swatch: "var(--swatch-lime)" },
   { label: "Cyan", accent: "cyan", swatch: "var(--swatch-cyan)" },
   { label: "Violet", accent: "violet", swatch: "var(--swatch-violet)" },
   { label: "Red", accent: "red", swatch: "var(--swatch-red)" },
