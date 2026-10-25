@@ -452,12 +452,7 @@ export function IntroCarousel({
       const track = trackRef.current;
       const slide = track?.children[clamped] as HTMLElement | undefined;
       if (!track || !slide) return;
-      const behavior: ScrollBehavior = opts?.jump || prefersReducedMotion() ? "auto" : "smooth";
-      if (opts?.jump) {
-        track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior: "auto" });
-        return;
-      }
-      track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior });
+      track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior: "auto" });
     },
     [TOTAL],
   );
@@ -597,8 +592,8 @@ export function IntroCarousel({
           >
             <div
               ref={trackRef}
-            onScroll={onTrackScroll}
-            className="flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+              onScroll={onTrackScroll}
+              className="flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {slides.map((card, i) => {
                 const Icon = card.Icon;
@@ -664,7 +659,8 @@ export function IntroCarousel({
                     { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => [5].includes(i)) },
                   ].filter((g) => g.slideIndexes.length > 0);
                   if (groups.length === 0) return null;
-              return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => goTo(idx, { jump: true })} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? 0 : active + 1, { jump: true })} reducedMotion={reducedMotionRef.current} />;
+              const stopIdx = groups.find(g=>g.label==="Stop")?.slideIndexes[0] ?? 0;
+              return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
                 }
                 // Arena groups
                 const groups = [
@@ -675,7 +671,8 @@ export function IntroCarousel({
                   { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 5) },
                 ].filter((g) => g.slideIndexes.length > 0);
                 if (groups.length === 0) return null;
-                return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => goTo(idx, { jump: true })} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? 0 : active + 1, { jump: true })} reducedMotion={reducedMotionRef.current} />;
+                const stopIdx = groups.find(g=>g.label==="Stop")?.slideIndexes[0] ?? 0;
+                return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
               })()}
             </div>
           </section>

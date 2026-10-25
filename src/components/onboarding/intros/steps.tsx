@@ -53,8 +53,8 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
           disabled={disabled}
           onClick={() => {
             setManual(true);
+            const firstStop = groups.find((x) => x.label === "Stop")?.slideIndexes[0] ?? 0;
             if (g.label === "Join") {
-              const firstStop = groups.find((x) => x.label === "Stop")?.slideIndexes[0] ?? 0;
               onGroupClick(firstStop);
               return;
             }
