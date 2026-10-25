@@ -47,7 +47,7 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
       <style>{css.replace(/:global\([^)]+\)/g, ".light ")}</style>
       {groups.map((g, k) => (
         <button
-          key={g.label}
+          key={g.label + k}
           role="tab"
           aria-selected={k === gi}
           disabled={disabled}

@@ -663,13 +663,14 @@ export function IntroCarousel({
               return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
                 }
                 // Arena groups
-                const groups = [
-                  { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
-                  { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1) },
-                  { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => i === 2) },
-                  { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => i === 3 || i === 4) },
-                  { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 5) },
-                ].filter((g) => g.slideIndexes.length > 0);
+              const groups = [
+                { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
+                { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1) },
+                { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 2) },
+                { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => i === 3) },
+                { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => i === 4 || i === 5) },
+                { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 6) },
+              ].filter((g) => g.slideIndexes.length > 0);
                 if (groups.length === 0) return null;
                 const stopIdx = groups.find(g=>g.label==="Stop")?.slideIndexes[0] ?? 0;
                 return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => { const joinIdx = groups.find(g=>g.label==="Join")?.slideIndexes[0]; if (joinIdx !== undefined && idx === joinIdx) { goTo(stopIdx); return; } goTo(idx); }} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? stopIdx : active + 1)} reducedMotion={reducedMotionRef.current} />;
