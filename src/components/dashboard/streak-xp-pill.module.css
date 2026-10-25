@@ -51,12 +51,19 @@
   color: var(--emerald);
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--emerald) 70%, transparent));
 }
+.pill.nextAccent .flame {
+  color: var(--streak-accent, var(--lime));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--streak-accent, var(--lime)) 40%, transparent));
+}
 .streak {
   display: inline-block;
   color: var(--orange);
   transition: color 0.4s;
 }
 .done .streak { color: var(--emerald); }
+.pill.nextAccent .streak {
+  color: var(--streak-accent, var(--lime));
+}
 .dot {
   width: 4px;
   height: 4px;

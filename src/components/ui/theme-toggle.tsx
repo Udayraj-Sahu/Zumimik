@@ -30,7 +30,7 @@ const MODES: { id: Theme; label: string }[] = [
  * accent system. Swatch paints come from the shared --swatch-* tokens in
  * globals.css, never from a literal hex in this component.
  */
-const ACCENTS: { label: string; accent: AccentId; swatch: string }[] = [
+export const ACCENTS: { label: string; accent: AccentId; swatch: string }[] = [
   { label: "Lime", accent: "lime", swatch: "var(--swatch-lime)" },
   { label: "Coral", accent: "orange", swatch: "var(--swatch-coral)" },
   { label: "Azure", accent: "blue", swatch: "var(--swatch-azure)" },

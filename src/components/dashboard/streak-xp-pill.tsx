@@ -3,12 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import styles from "./streak-xp-pill.module.css";
+import { useThemeStore } from "@/stores/theme-store";
+import { ACCENTS } from "@/components/ui/theme-toggle";
 
 type Props = {
   streak: number;
   xp: number;
   done: boolean;
   className?: string;
+  /** When true, this is the Zuzumik 6-day streak pill and should use the next accent in circular order. */
+  variant?: "default" | "zuzumik-six-day";
 };
 
 function Odometer({ value }: { value: number }) {
@@ -67,10 +71,11 @@ const Flame = ({ filled }: { filled: boolean }) => (
  * two separate pills into one inset surface with the reference's odometer,
  * streak bump, +XP float and 1,000-XP gold beat.
  */
-export function StreakXpPill({ streak, xp, done, className }: Props) {
+export function StreakXpPill({ streak, xp, done, className, variant = "default" }: Props) {
   const prevXp = useRef(xp);
   const [gainKey, setGainKey] = useState(0);
   const [gold, setGold] = useState(false);
+  const accent = useThemeStore((s) => s.accent);
 
   useEffect(() => {
     if (xp > prevXp.current) {
@@ -85,14 +90,27 @@ export function StreakXpPill({ streak, xp, done, className }: Props) {
     prevXp.current = xp;
   }, [xp]);
 
+  let pillStyle: React.CSSProperties | undefined;
+  if (variant === "zuzumik-six-day") {
+    const currentIndex = ACCENTS.findIndex((a) => a.accent === accent);
+    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % ACCENTS.length : 0;
+    const nextAccent = ACCENTS[nextIndex].accent;
+    // Use CSS variable for next accent - rely on data-accent context? Or set inline style
+    pillStyle = { ["--streak-accent" as any]: `var(--accent-${nextAccent})` };
+  }
+
   return (
-    <div className={cn(styles.wrap, className)}>
+    <div className={cn(styles.wrap, className)} data-streak-variant={variant}>
       {gainKey > 0 && (
         <span key={gainKey} className={styles.gain} aria-hidden="true">
           +XP
         </span>
       )}
-      <div className={cn(styles.pill, done && styles.done)} data-done={done || undefined}>
+      <div
+        className={cn(styles.pill, done && styles.done, variant === "zuzumik-six-day" && styles.nextAccent)}
+        data-done={done || undefined}
+        style={pillStyle}
+      >
         <Flame filled={done} />
         <span className={styles.streak}>
           <span key={streak} className={styles.bump}>{streak}D</span>

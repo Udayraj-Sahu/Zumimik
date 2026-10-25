@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { ReactNode } from "react";
 import { BG_MOSS, FOREST, GLASS_BORDER, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
+import { Steps } from "./steps";
 import { createPortal } from "react-dom";
 import {
   ArrowRight,
@@ -420,6 +421,8 @@ export function IntroCarousel({
   const reducedMotionRef = useRef(false);
   const userInteractedRef = useRef(false);
   const autoScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [manualNav, setManualNav] = useState(false);
+  const slideDurationMs = 3000;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -442,13 +445,18 @@ export function IntroCarousel({
   const TOTAL = slides.length;
 
   const goTo = useCallback(
-    (index: number) => {
+    (index: number, opts?: { jump?: boolean }) => {
       const clamped = Math.max(0, Math.min(TOTAL - 1, index));
+      setManualNav(true);
       setActive(clamped);
       const track = trackRef.current;
       const slide = track?.children[clamped] as HTMLElement | undefined;
       if (!track || !slide) return;
-      const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+      const behavior: ScrollBehavior = opts?.jump || prefersReducedMotion() ? "auto" : "smooth";
+      if (opts?.jump) {
+        track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior: "auto" });
+        return;
+      }
       track.scrollTo({ left: slide.offsetLeft - track.offsetLeft, behavior });
     },
     [TOTAL],
@@ -462,8 +470,11 @@ export function IntroCarousel({
     const index = Math.round(
       (track.scrollLeft + track.offsetLeft - slide.offsetLeft) / slide.offsetWidth,
     );
+    if (active >= TOTAL - 1 && index === 0) {
+      return;
+    }
     setActive((prev) => (prev === index ? prev : Math.max(0, Math.min(TOTAL - 1, index))));
-  }, [TOTAL]);
+  }, [TOTAL, active]);
 
   useEffect(() => {
     if (preloaded) return;
@@ -586,8 +597,8 @@ export function IntroCarousel({
           >
             <div
               ref={trackRef}
-              onScroll={onTrackScroll}
-              className="flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            onScroll={onTrackScroll}
+            className="flex min-h-0 flex-1 snap-x snap-mandatory items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
             >
               {slides.map((card, i) => {
                 const Icon = card.Icon;
@@ -640,22 +651,33 @@ export function IntroCarousel({
               })}
             </div>
 
-            {/* dots */}
-            <nav className="mt-2.5 flex shrink-0 items-center justify-center gap-2">
-              {slides.map((c, i) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to slide ${i + 1} of ${TOTAL}: ${c.tag}`}
-                  aria-current={i === active ? "true" : undefined}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all",
-                    i === active ? "w-5 bg-[var(--lime)]" : "w-1.5 bg-white/25",
-                  )}
-                />
-              ))}
-            </nav>
+            <div className="mt-2.5 shrink-0">
+              {(() => {
+                const isPitch = slides === usePitchIntroSlides().slides || (typeof window !== "undefined" && location.pathname.includes("pitch"));
+                // Build groups based on typical mappings
+                if (isPitch) {
+                  const groups = [
+                    { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
+                    { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1) },
+                    { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => [2].includes(i)) },
+                    { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => [3, 4].includes(i)) },
+                    { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => [5].includes(i)) },
+                  ].filter((g) => g.slideIndexes.length > 0);
+                  if (groups.length === 0) return null;
+              return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => goTo(idx, { jump: true })} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? 0 : active + 1, { jump: true })} reducedMotion={reducedMotionRef.current} />;
+                }
+                // Arena groups
+                const groups = [
+                  { label: "Stop", slideIndexes: slides.map((_, i) => i).filter((i) => i === 0) },
+                  { label: "Fight", slideIndexes: slides.map((_, i) => i).filter((i) => i === 1) },
+                  { label: "Rank", slideIndexes: slides.map((_, i) => i).filter((i) => i === 2) },
+                  { label: "Rise", slideIndexes: slides.map((_, i) => i).filter((i) => i === 3 || i === 4) },
+                  { label: "Join", slideIndexes: slides.map((_, i) => i).filter((i) => i >= 5) },
+                ].filter((g) => g.slideIndexes.length > 0);
+                if (groups.length === 0) return null;
+                return <Steps groups={groups} currentIndex={active} onGroupClick={(idx) => goTo(idx, { jump: true })} disabled={false} totalSlides={slides.length} autoAdvance={!reducedMotionRef.current} slideDurationMs={slideDurationMs} onAutoAdvance={() => goTo(active >= TOTAL - 1 ? 0 : active + 1, { jump: true })} reducedMotion={reducedMotionRef.current} />;
+              })()}
+            </div>
           </section>
 
           <div
