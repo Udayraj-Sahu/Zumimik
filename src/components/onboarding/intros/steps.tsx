@@ -74,13 +74,13 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
 }
 
 const css = `
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
-.steps button{background:none;border:0;color:rgba(255,255,255,0.5);font:600 11px/1.2 var(--font-jakarta),system-ui,sans-serif;letter-spacing:0.12em;text-transform:uppercase;text-align:left;padding:0;cursor:pointer}
+.steps{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
+.steps button{flex:1;background:none;border:0;color:rgba(255,255,255,0.5);font:600 10px/1.2 var(--font-jakarta),system-ui,sans-serif;letter-spacing:0.12em;text-transform:uppercase;text-align:left;padding:0;cursor:pointer}
 .light .steps button{color:rgba(0,0,0,0.5)}
 .steps button[aria-selected="true"]{color:rgba(255,255,255,0.9)}
 .light .steps button[aria-selected="true"]{color:rgba(0,0,0,0.9)}
 .steps button:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.steps i{display:flex;gap:4px;margin-bottom:6px;height:4px}
+.steps i{display:flex;gap:6px;margin-bottom:6px;height:4px}
 .steps i u{flex:1;background:rgba(255,255,255,0.18);border-radius:2px;position:relative;overflow:hidden}
 .light .steps i u{background:rgba(0,0,0,0.18)}
 .steps i u.a:after,.steps i u.c:after{content:"";position:absolute;inset:0;background:var(--lime,#c8ff5a)}
