@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Search, Play, Clock, Sparkles, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
