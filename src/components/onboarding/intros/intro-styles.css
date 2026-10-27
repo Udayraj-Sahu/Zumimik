@@ -213,7 +213,8 @@
 .k-rank2 { background: #f6f5f0; color: #141413; position: relative; }
 .k-rank2 .question {
   margin: 2.4cqw 0;
-  font: 700 15cqw/1 var(--font-space-mono), monospace;
+  font: 900 22cqw/1 var(--font-inter), sans-serif;
+  letter-spacing: -0.03em;
   animation: rise-in 0.4s both;
 }
 .k-rank2 .answers {

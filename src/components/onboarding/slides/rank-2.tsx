@@ -53,7 +53,7 @@ export function Rank2() {
       </h1>
 
       <Fragment key={run}>
-        <div className="question">47 × 53</div>
+        <div className="question">43 × 57</div>
 
         {ANSWERS.map((a, i) => {
           const d = RANK2_START + i * RANK2_STEP;
@@ -75,7 +75,7 @@ export function Rank2() {
           );
         })}
 
-        <div className="fix">Fix: 47 × 50 + 47 × 3 = 2,350 + 141</div>
+        <div className="fix">Fix: 43 × 50 + 43 × 7 = 2,150 + 301</div>
       </Fragment>
     </div>
   );
