@@ -43,7 +43,7 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
   const gi = groups.findIndex((g) => g.slideIndexes.includes(currentIndex));
 
   return (
-    <div className={"steps" + (manual ? " manual" : "")} role="tablist" aria-label={groups.map((g) => g.label).join(", ")}>
+    <div className={"steps" + (manual ? " manual" : "")} role="tablist" aria-label={groups.map((g) => g.label + ".").join(" ")}>
       <style>{css.replace(/:global\([^)]+\)/g, ".light ")}</style>
       {groups.map((g, k) => (
         <button
@@ -66,7 +66,7 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
               <u key={s} className={k < gi ? "a" : k > gi ? "" : s < currentIndex ? "a" : s === currentIndex ? "c" : ""} />
             ))}
           </i>
-          {g.label === "Join" ? "Join" : g.label}
+          {g.label === "Join" ? "JOIN." : g.label + "."}
         </button>
       ))}
     </div>
