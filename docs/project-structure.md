@@ -13,20 +13,26 @@ src/
 │   ├── globals.css         design tokens (:root / .light) + base styles
 │   └── layout.tsx          fonts, providers, <html> shell
 │
-├── components/             one folder per surface — PascalCase component,
-│   │                       kebab-name.module.css, kebab-name.test.tsx
+├── components/             one folder per surface — kebab-case files
 │   ├── ui/                 primitives: button, dialog, glass-card, toaster…
-│   ├── shell/              app frame: shell, splash, walkthrough, offline, rate
+│   ├── shell/              app frame: app-shell, dashboard-shell, splash,
+│   │                       walkthrough, offline banner, rate prompt
 │   ├── landing/            marketing page sections
 │   ├── onboarding/         first-run flow (see onboarding-flow.md)
 │   │   ├── onboarding-modal.tsx   entry point + step machine
-│   │   ├── intros/                full-screen intro screens + carousel
-│   │   ├── slides/                bodies rendered by the carousel
-│   │   └── auth/                  auth-modal, auth-panel
-│   ├── dashboard/          dashboard-only modals and cards
+│   │   ├── intros/                intro screens + carousel shell
+│   │   ├── slides/                every body rendered by the carousel
+│   │   └── ads/                   sponsor reel used by the intros
+│   ├── auth/               sign-in modal + panel (landing and /auth)
+│   ├── dashboard/          dashboard-only modals, cards and mascot
+│   ├── adaptive/           adaptive plan/dashboard/re-prompt screens
+│   ├── exam/               exam shell + question navigator
+│   ├── explorer/           topic tree / mind map
+│   ├── learn/              learn-only modals
+│   ├── paywall/            paywall modal + clearance tiers
+│   ├── technique/          technique lesson UI
 │   ├── renderers/          question-type renderers (answer input, matrices…)
-│   └── <feature>/          arena, pitch, trial-timeline, trap-results,
-│                           stall-timer, review-carousel, paywall, …
+│   └── brand/              mark + wordmark
 │
 ├── hooks/                  every hook, incl. queries/
 │   └── queries/            one use-<domain>.ts per service (React Query)
@@ -61,6 +67,8 @@ src/
   `lib/mock/dashboard.ts` fakes it, `services/dashboard.ts` fetches it,
   `hooks/queries/use-dashboard.ts` caches it, and a screen in
   `app/(app)/dashboard/` renders it. Grep one name to see the whole vertical.
+- **Files are kebab-case; components are PascalCase.** `glass-card.tsx` exports
+  `GlassCard`, `stall-timer.tsx` exports `StallTimer`.
 - **Barrels keep call sites short.** Import from `@/lib/text`, `@/lib/theme`,
   `@/lib/platform`, `@/lib/content`, `@/lib/utils`; the folder's `index.ts`
   re-exports its modules.
@@ -68,5 +76,9 @@ src/
   `use-entrance-animations`, `use-feedback`, `use-reduced-motion`.
 - **Tests sit next to their subject** and are named after it, not after the
   edge-case theme they exercise.
-- **Route folders never hold logic**; they import from `components/` and
-  `hooks/`.
+- **Route folders only hold routes.** Shared chrome lives in
+  `components/shell/` (`dashboard-shell.tsx` owns the auth guard); route
+  folders keep only `page`/`layout`/`loading`/`client-page` files.
+- **Carousel bodies live in `onboarding/slides/`.** `onboarding/intros/` holds
+  the intro screens and the carousel shell (`intro-carousel`, `steps`,
+  `intro-surface`, styles); anything rendered by the carousel is a slide.

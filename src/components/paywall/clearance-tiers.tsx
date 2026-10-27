@@ -3,7 +3,9 @@
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
 
-const inr = (n: number) => `₹${new Intl.NumberFormat("en-IN").format(n)}`;
+import { formatINR } from "@/lib/text";
+
+const inr = formatINR;
 
 export type PaywallOption = {
   id: string;

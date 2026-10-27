@@ -3,7 +3,12 @@ node_modules/
 out/
 public/sw.js
 *.local
+.env*.local
 .DS_Store
+
+# scratch/debug artifacts
+.tmp-*
+*.log
 
 # build/test artifacts
 tsconfig.tsbuildinfo

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { LIME_BRIGHT, LIME_BRIGHT_05, LIME_BRIGHT_RGB, NEAR_BLACK, NEAR_WHITE_BLACK } from "@/lib/theme";
 import { motion, useMotionValue, useSpring } from "motion/react";
-import { AuthModal } from "@/components/onboarding/auth/auth-modal";
+import { AuthModal } from "@/components/auth/auth-modal";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";

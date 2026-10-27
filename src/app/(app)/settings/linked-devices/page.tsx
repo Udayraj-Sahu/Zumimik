@@ -11,15 +11,18 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import type { LinkedDevice, LinkedDevicePlatform } from "@/lib/types/linked-devices";
 import { GLASS_BG } from "@/lib/theme";
 
+import { timeAgo } from "@/lib/text";
+
 const PLATFORM_META: Record<LinkedDevicePlatform, { label: string; Icon: typeof Smartphone }> = {
   android: { label: "Android", Icon: Smartphone },
   web: { label: "Web", Icon: Globe },
   ios: { label: "iOS", Icon: Smartphone },
 };
 
-function timeAgo(lastActive: string): string {
+function lastActiveLabel(lastActive: string): string {
   if (lastActive === "now") return "Active now";
-  return `Last active ${lastActive}`;
+  const ago = timeAgo(lastActive);
+  return ago ? `Last active ${ago}` : `Last active ${lastActive}`;
 }
 
 export default function LinkedDevicesPage() {
@@ -109,8 +112,8 @@ export default function LinkedDevicesPage() {
                     <p className="text-[11px] text-muted-foreground/40 font-normal mt-0.5">{device.model}</p>
                     <p className={cn("text-[10px] font-normal mt-0.5", device.current ? "text-primary/70" : "text-muted-foreground/55")}>
                       {device.current
-                        ? timeAgo(device.lastActive)
-                        : `${timeAgo(device.lastActive)} · ${device.addedAt}`}
+                        ? lastActiveLabel(device.lastActive)
+                        : `${lastActiveLabel(device.lastActive)} · ${device.addedAt}`}
                     </p>
                   </div>
                   <button

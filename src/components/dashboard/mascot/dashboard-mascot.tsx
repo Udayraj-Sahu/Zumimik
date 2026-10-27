@@ -10,7 +10,7 @@ import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
  * package - see ./pip-avatar.tsx) touches `window.matchMedia` and a layout effect
  * at mount, so it is loaded as a client-only chunk. The fixed-size frame reserves
  * layout space up front so the mascot never causes a layout shift while the chunk
- * loads, and `overflow-x-hidden` on the page clips the off-screen walk start.
+ * loads, and `overflow-x-clip` on the page clips the off-screen walk start.
  */
 const PipAvatar = dynamic(() => import("./pip-avatar"), {
   ssr: false,

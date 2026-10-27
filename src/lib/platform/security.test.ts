@@ -142,7 +142,7 @@ describe("security surface", () => {
 
 describe("keyboard & mobile input attributes (static)", () => {
   it("10. phone sign-in uses a numeric tel keyboard", () => {
-    const text = readFileSync(join(SRC, "components", "onboarding", "auth", "auth-panel.tsx"), "utf8");
+    const text = readFileSync(join(SRC, "components", "auth", "auth-panel.tsx"), "utf8");
     expect(text).toContain('type="tel"');
   });
 

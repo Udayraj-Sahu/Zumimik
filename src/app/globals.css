@@ -1447,7 +1447,7 @@ body::after {
    * present (100vw includes the scrollbar gutter). Renderers already use
    * w-full + max-w-[…], so nothing legitimate needs the clip. */
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -1750,3 +1750,17 @@ body::after {
   .text-5xl { font-size: 50px; }
   }
 }
+
+
+
+
+
+
+/* Responsive guards */
+html, body { max-width: 100%; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+table { width: 100%; }
+[style*="100vw"] { max-width: 100vw; }
+@media (max-width: 359px) { :root { --page-padding: 12px; } }
+@media (max-height: 640px) { :root { --header-height: 48px; } }
+

@@ -20,7 +20,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import StockVideoAd from "@/components/ads/stock-video-ad";
+import StockVideoAd from "@/components/onboarding/ads/stock-video-ad";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&

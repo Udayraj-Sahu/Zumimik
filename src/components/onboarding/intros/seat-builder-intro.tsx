@@ -18,7 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 
-const inr = (n: number) => `₹${new Intl.NumberFormat("en-IN").format(n)}`;
+import { formatINR } from "@/lib/text";
+
+const inr = formatINR;
 
 /* ── pricing rules (matches app/seat-builder reference) ── */
 
@@ -655,7 +657,7 @@ export function SeatBuilderIntro({
       ref={overlayRef}
       data-theme-scope
       className={cn(
-        "fixed inset-0 z-[var(--z-intro)] overflow-x-hidden overflow-y-auto sm:flex sm:items-center sm:justify-center sm:overflow-hidden sm:bg-black/60 sm:backdrop-blur-sm",
+        "fixed inset-0 z-[var(--z-intro)] overflow-x-clip overflow-y-auto sm:flex sm:items-center sm:justify-center sm:overflow-hidden sm:bg-black/60 sm:backdrop-blur-sm",
         preloaded && "invisible pointer-events-none",
         theme === "light" && "light",
       )}
@@ -747,3 +749,4 @@ export function SeatBuilderIntro({
     document.body,
   );
 }
+

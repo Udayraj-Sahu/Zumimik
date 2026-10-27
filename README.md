@@ -66,19 +66,19 @@ The app is designed for a **static export** (`out/`) consumed by Mobile native s
 |---|---|---|
 | **Onboarding** | `/onboarding` | Landing/auth + multi-step profile setup (name, persona, goal, triggers, details). Persisted, resumable. Goal maps to `targetExam`. |
 | **Dashboard** | `/dashboard` | Welcome header (streak/XP), swipeable carousel (profile status, stats, week/habits, practice), quick-access grid, topic mastery + recent activity, cognitive radar, upcoming events, leaderboard, referral/invite card. |
-| **Learn** | `/dashboard/learn` | "Choose Your path" — S-curve animated mode selector (Explore / Adaptive / Mock). Exam Prep tabs limited to **onboarding exam + added preps** (`Add Prep` modal). |
-| **Explorer** | `/dashboard/explorer` | Topic tree + technique library. Unlocks once `targetExam` is set (onboarding). |
-| **Sprint** | `/dashboard/sprint`, `/configure-sprint`, `/sprint/results`, `/sprint/results/analysis` | Timed exam-style sprints, results, analysis. |
-| **Practice** | `/dashboard/practice` | Technique templates via a renderer registry (division, multiplication, squares, number-line). |
-| **Technique** | `/dashboard/technique/[id]` | Step-by-step technique lessons. |
+| **Learn** | `/learn` | "Choose Your path" — S-curve animated mode selector (Explore / Adaptive / Mock). Exam Prep tabs limited to **onboarding exam + added preps** (`Add Prep` modal). |
+| **Explorer** | `/learn/explorer` | Topic tree + technique library. Unlocks once `targetExam` is set (onboarding). |
+| **Sprint** | `/play/sprint`, `/play/configure-sprint`, `/play/sprint/results`, `/play/sprint/results/analysis` | Timed exam-style sprints, results, analysis. |
+| **Practice** | `/learn/practice` | Technique templates via a renderer registry (division, multiplication, squares, number-line). |
+| **Technique** | `/learn/technique/[id]` | Step-by-step technique lessons. |
 | **Habits** | via dashboard | `HabitTrackerModal` — daily reminders with native notifications + compact time picker. |
 | **Analytics** | `/dashboard/analytics` | Weekly activity, scorecards, session insights. |
-| **Mastery** | `/dashboard/mastery` | Topic mastery heatmap/bars. |
-| **Planner** | `/dashboard/planner` | Training plan/calendar. |
-| **Reports / Stats** | `/dashboard/reports`, `/dashboard/history` | Performance history & reports. |
-| **Social** | `/dashboard/friends`, `/dashboard/clubs`, `/dashboard/duel`, `/dashboard/leaderboard`, `/dashboard/feed` | Friends, clubs, 1v1 duels, leaderboard, feed. |
-| **Profile** | `/dashboard/profile`, `profile/edit` | Profile view & editing. |
-| **Meta** | `/dashboard/settings`, `/more`, `/notifications`, `/help`, `/questions`, `/flashcards`, `/achievements` | Settings, more hub, notifications, help, Q-bank, flashcards, achievements. |
+| **Mastery** | `/learn/mastery` | Topic mastery heatmap/bars. |
+| **Planner** | `/settings/planner` | Training plan/calendar. |
+| **Reports / Stats** | `/settings/reports`, `/settings/history` | Performance history & reports. |
+| **Social** | `/dashboard/friends`, `/dashboard/clubs`, `/play/duel`, `/settings/leaderboard`, `/dashboard/feed` | Friends, clubs, 1v1 duels, leaderboard, feed. |
+| **Profile** | `/settings/profile`, `/settings/profile/edit` | Profile view & editing. |
+| **Meta** | `/settings`, `/settings/notifications`, `/settings/help`, `/settings/linked-devices`, `/settings/achievements`, `/settings/history` | Settings, notifications, help, linked devices, achievements, history. |
 | **Auth/Web Login** | `/auth` | WhatsApp-Web-style scan-to-login pairing UI (mock pairing for now). |
 
 ---
@@ -87,49 +87,61 @@ The app is designed for a **static export** (`out/`) consumed by Mobile native s
 
 ```
 src/
-├─ app/                       # Next.js App Router pages
-│  ├─ onboarding/page.tsx     # Landing + auth buttons (Google/Phone — mock)
-│  ├─ auth/page.tsx           # Scan-to-login pairing screen
-│  └─ dashboard/
-│     ├─ page.tsx             # Home dashboard
-│     ├─ dashboard-shell.tsx  # Auth guard + layout wrapper
-│     ├─ layout.tsx
-│     └─ ...                  # One dir per route (see Routing table)
-├─ components/
-│  ├─ dashboard/              # HabitTrackerModal, InviteCard, etc.
-│  ├─ nav/                    # Navigation / sidebar
-│  ├─ onboarding/             # OnboardingModal + steps
-│  ├─ learn/                  # AddPrepModal
-│  ├─ explorer/               # Topic tree components
-│  ├─ sprint/                 # Sprint UI
-│  ├─ renderers/              # Technique renderers
-│  ├─ sections/               # Reusable page sections
-│  ├─ wall/                   # Activity/feed wall
-│  └─ ui/                     # Design-system primitives
-├─ stores/                    # Zustand stores (see below)
-├─ hooks/
-│  ├─ queries/                # React Query hooks (typed, mock-backed)
-│  └─ use-*.ts                # Feature hooks
+├─ app/                       # Next.js App Router — routes only
+│  ├─ (app)/                  # signed-in shell: dashboard, learn, play, settings
+│  ├─ onboarding/page.tsx     # first-run wizard
+│  ├─ auth/page.tsx           # scan-to-login pairing screen
+│  ├─ page.tsx                # marketing landing
+│  └─ globals.css             # design tokens (:root / .light) + base styles
+├─ components/                # one folder per surface, kebab-case files
+│  ├─ ui/                     # design-system primitives
+│  ├─ shell/                  # app-shell, dashboard-shell, splash, walkthrough
+│  ├─ landing/                # marketing page sections
+│  ├─ brand/                  # mark + wordmark
+│  ├─ onboarding/
+│  │  ├─ intros/              # intro screens + carousel shell
+│  │  ├─ slides/              # every carousel body
+│  │  └─ ads/                 # sponsor reel
+│  ├─ auth/                   # sign-in modal/panel
+│  ├─ dashboard/              # dashboard cards, modals, mascot
+│  ├─ adaptive/               # adaptive plan/dashboard/re-prompt
+│  ├─ exam/                   # exam shell + question navigator
+│  ├─ explorer/               # topic tree / mind map
+│  ├─ learn/                  # learn-only modals
+│  ├─ paywall/                # paywall modal + clearance tiers
+│  ├─ technique/              # technique lesson UI
+│  └─ renderers/              # question-type renderers
+├─ hooks/                     # all hooks
+│  └─ queries/                # React Query hooks (typed, mock-backed)
+├─ stores/                    # Zustand stores
+├─ services/                  # one <domain>.ts per API surface
 ├─ lib/
-│  ├─ mock/                   # Mock data per domain (all typed)
-│  ├─ types/                  # Domain types (sprint, template, etc.)
-│  ├─ utils/                  # Renderer registry, parsers
-│  ├─ firebase/client.ts      # Firebase client (optional auth)
-│  └─ config.ts               # API base, mock flag, site name
-├─ app/globals.css            # Design tokens (colors, fonts)
+│  ├─ types/                  # domain types + zod schemas
+│  ├─ mock/                   # typed mock data per domain
+│  ├─ text/  theme/  platform/  content/  utils/
+│  ├─ adaptive/  native/  story/  firebase/  notifications/
+├─ providers/                 # React context providers
+├─ registry/                  # shadcn/magicui registry components
+└─ styles/                    # shared non-global stylesheets
 ```
+
+See [`docs/project-structure.md`](docs/project-structure.md) for the full map
+and conventions.
 
 ---
 
 ## 🧭 Routing
 
-Routes are declared as folders under `src/app` (App Router). Server/client usage:
-- `/` root → redirects / landing
-- `/onboarding` — auth + on-boarding flow (**client**)
+Routes are declared as folders under `src/app` (App Router).
+- `/` root → marketing landing
+- `/onboarding` — auth + onboarding flow (**client**)
 - `/auth` — scan-to-login pairing (**client**)
-- `/dashboard/...` — gated by `DashboardShell` which redirects unauthenticated users to `/onboarding`
+- `/dashboard`, `/learn`, `/play`, `/settings` — signed-in surfaces, gated by
+  `DashboardShell` (`src/components/shell/dashboard-shell.tsx`), which redirects
+  unauthenticated users to `/onboarding`
 
-Each dashboard feature follows the pattern `src/app/dashboard/<feature>/page.tsx` plus a matching React Query hook in `src/hooks/queries/`.
+Each surface follows the pattern `src/app/(app)/<surface>/<feature>/page.tsx`
+plus a matching React Query hook in `src/hooks/queries/`.
 
 ---
 
@@ -160,10 +172,10 @@ Stores live in `src/stores/`. All use `persist` (localStorage) except where ephe
 
 ## 📊 Data Layer — Mocks & Queries
 
-Everything is **mock-first**. `src/lib/mock/*` exports typed fixture data per domain; React Query hooks in `src/hooks/queries/` consume them. `apiUrl()` / `IS_MOCK` in `src/lib/config.ts` gate real HTTP calls:
+Everything is **mock-first**. `src/lib/mock/*` exports typed fixture data per domain; React Query hooks in `src/hooks/queries/` consume them. `apiUrl()` / `IS_MOCK` in `src/lib/platform/config.ts` (barrel: `@/lib/platform`) gate real HTTP calls:
 
 ```ts
-// src/lib/config.ts
+// src/lib/platform/config.ts
 export const IS_MOCK = process.env.NEXT_PUBLIC_API_MOCK !== "false";
 ```
 
@@ -214,7 +226,7 @@ Representative query hooks: `use-dashboard`, `use-analytics`, `use-sprint`, `use
   5. Coming-soon placeholder
 - Quick Access grid, Topic mastery bars, Cognitive radar, Upcoming, Leaderboard, **Invite/referral card** at the bottom.
 
-### Learn (`/dashboard/learn`)
+### Learn (`/learn`)
 - Header "Choose Your path".
 - **S-curve mode selector** animating between Explore / Adaptive Learning / Mock (fill is a sheen gradient, white 1px stroke).
 - **Exam Prep** tabs = onboarding `targetExam` + exams added via **Add Prep** (`AddPrepModal`).
@@ -262,7 +274,7 @@ npm run build
 
 > **Note**: `tsconfig.tsbuildinfo` is a tracked build artifact. Run `git checkout tsconfig.tsbuildinfo` before/after builds and `tsc` to avoid noise, or just ignore it in your local flow.
 
-**Mock vs real backend**: set `NEXT_PUBLIC_API_MOCK=false` (and `NEXT_PUBLIC_API_URL`) to point the app at a real API. See `src/lib/config.ts`.
+**Mock vs real backend**: set `NEXT_PUBLIC_API_MOCK=false` (and `NEXT_PUBLIC_API_URL`) to point the app at a real API. See `src/lib/platform/config.ts`.
 
 ---
 

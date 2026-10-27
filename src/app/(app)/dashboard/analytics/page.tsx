@@ -16,7 +16,7 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen px-5 pt-6 pb-4 flex items-center justify-center max-[359px]:px-4">
+      <div className="min-h-[100dvh] px-5 pt-6 pb-4 flex items-center justify-center max-[359px]:px-4">
         <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen px-5 pt-6 pb-4 flex flex-col items-center justify-center gap-4 max-[359px]:px-4">
+      <div className="min-h-[100dvh] px-5 pt-6 pb-4 flex flex-col items-center justify-center gap-4 max-[359px]:px-4">
         <p className="text-[13px] text-muted-foreground">Failed to load analytics.</p>
         <Button
           size="sm"

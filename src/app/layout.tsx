@@ -78,12 +78,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
       <html
         lang="en"
-        className={`loading overflow-x-hidden ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+        className={`loading overflow-x-clip ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
         suppressHydrationWarning
       >
-      <body className="overflow-x-hidden">
+      <body className="overflow-x-clip">
         <style>{`html.loading #main-content{opacity:0}`}</style>
-        <div className="bg-background min-h-screen pb-0 overflow-x-clip" id="main-content">
+        <div className="bg-background min-h-[100dvh] pb-0 overflow-x-clip" id="main-content">
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded focus:text-sm focus:font-semibold"

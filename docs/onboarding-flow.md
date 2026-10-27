@@ -151,13 +151,13 @@ by id).
 
 | # | Tag | Body component | Notes |
 |---|-----|----------------|-------|
-| 01 | FIRST 3 SECONDS | `<FirstGhostCta />` (`src/components/first-ghost-cta/FirstGhostCta.tsx`) | `full` + `fill`; only rendered while at least one lane exists |
-| 02 | FIRST MOVE | `<FirstMoveTimes />` (`first-move-times/FirstMoveTimes.tsx`) | `FIRST_MOVE_SLIDE`, same object the Pitch uses |
+| 01 | FIRST 3 SECONDS | `<FirstGhostCta />` (`onboarding/slides/first-ghost-cta.tsx`) | `full` + `fill`; only rendered while at least one lane exists |
+| 02 | FIRST MOVE | `<FirstMoveTimes />` (`onboarding/slides/first-move-times.tsx`) | `FIRST_MOVE_SLIDE`, same object the Pitch uses |
 | 03 | SPONSOR REEL | `<StockVideoAd src="/media/stock-ad.mp4" poster="/media/stock-ad-poster.webp" />` | `bare` |
-| 04 | THE TRAP | `<TrapResults />` (`trap-results/TrapResults.tsx`) | `TRAP_RESULTS_SLIDE`, same object the Pitch uses |
-| 05 | THE STALL | `<StallTimer isActive={…} />` (`stall-timer/StallTimer.tsx`) | `STALL_TIMER_SLIDE`; count-up runs only while active |
-| 06 | REVIEWS | `<ReviewCarousel />` (`onboarding/review-carousel.tsx`) | |
-| 07 | HOW IT WORKS | `<HowItWorks />` (`onboarding/how-it-works.tsx`) | |
+| 04 | THE TRAP | `<TrapResults />` (`onboarding/slides/trap-results.tsx`) | `TRAP_RESULTS_SLIDE`, same object the Pitch uses |
+| 05 | THE STALL | `<StallTimer isActive={…} />` (`onboarding/slides/stall-timer.tsx`) | `STALL_TIMER_SLIDE`; count-up runs only while active |
+| 06 | REVIEWS | `<ReviewCarousel />` (`onboarding/slides/review-carousel.tsx`) | |
+| 07 | HOW IT WORKS | `<HowItWorks />` (`onboarding/slides/how-it-works.tsx`) | |
 
 Removed from the Arena set: `FEATURES` (`FeatureList`), `SPEED` (`SpeedCard`,
 which also dropped the `useDashboardData().upcoming` lookup) and `HABIT`
@@ -172,12 +172,12 @@ and no quote; the shell's own "ENTER … ARENA" button is the only action.
 
 | # | Tag | Body component | Notes |
 |---|-----|----------------|-------|
-| 01 | TACTICAL EFFICIENCY | `<AlgorithmPitch />` (`algorithm-pitch/AlgorithmPitch.tsx`) | `stop-feeding` |
+| 01 | TACTICAL EFFICIENCY | `<AlgorithmPitch />` (`onboarding/slides/algorithm-pitch.tsx`) | `stop-feeding` |
 | 02 | FIRST MOVE | `<FirstMoveTimes />` | `manifesto` |
 | 03 | SPONSOR REEL | `<StockVideoAd />` | reused Arena slide |
 | 04 | THE TRAP | `<TrapResults />` | `compound-chart` |
 | 05 | THE STALL | `<StallTimer isActive={…} />` | `stall-timer` |
-| 06 | TRIAL | `<TrialTimeline />` (`trial-timeline/TrialTimeline.tsx`) | `trial-timeline`; reuses `<ReviewCarousel showSummary={false} compact />` for its review marquee |
+| 06 | TRIAL | `<TrialTimeline />` (`onboarding/slides/trial-timeline.tsx`) | `trial-timeline`; reuses `<ReviewCarousel showSummary={false} compact />` for its review marquee |
 
 `REVIEWS` and `HOW IT WORKS` are not part of the Pitch order.
 
@@ -201,7 +201,7 @@ as the entry point.
 ```
 onboarding/
 ├── onboarding-modal.tsx      wizard + step machine, branches to every intro
-├── intros/                   full-screen intro screens
+├── intros/                   intro screens + shared carousel shell
 │   ├── arena-intro.tsx       exam-this-year path
 │   ├── pitch-intro.tsx       whenever / not-sure path
 │   ├── plan-intro.tsx        paywall
@@ -210,20 +210,28 @@ onboarding/
 │   ├── family-intro.tsx      vedic family path
 │   ├── family-hub-intro.tsx
 │   ├── seat-builder-intro.tsx
-│   └── intro-carousel.tsx    shared carousel shell + both slide lists (+ .test)
-├── slides/                   bodies rendered inside the carousel
-│   ├── hero-card.tsx         legacy opener (no longer mounted)
-│   ├── feature-list.tsx      legacy Arena slide (no longer mounted)
-│   ├── habit-card.tsx
-│   ├── habit-protocol.tsx    legacy Arena slide (no longer mounted)
-│   ├── speed-card.tsx        legacy Arena slide (no longer mounted)
+│   ├── intro-carousel.tsx    carousel shell + both slide lists (+ .test)
+│   ├── steps.tsx             progress dots / step chrome (+ .module.css)
+│   ├── intro-surface.tsx     shared intro backdrop
+│   └── intro-styles.css      classes the slide bodies use
+├── slides/                   every body rendered inside the carousel
+│   ├── fight-1.tsx … rise-2.tsx   arena story slides
+│   ├── join.tsx, join-1.tsx, join-2.tsx
+│   ├── first-ghost-cta.tsx   (+ .module.css, .test)
+│   ├── algorithm-pitch.tsx   (+ .module.css, .test)
+│   ├── first-move-times.tsx  (+ .module.css, .test)
+│   ├── trap-results.tsx      (+ .module.css, .test)
+│   ├── stall-timer.tsx       (+ .module.css, .test)
+│   ├── trial-timeline.tsx    (+ .module.css, .test)
+│   ├── compound-chart.tsx, manifesto.tsx, stop-feeding.tsx  legacy, unmounted
+│   ├── hero-card.tsx, feature-list.tsx, habit-card.tsx,
+│   ├── habit-protocol.tsx, speed-card.tsx                    legacy, unmounted
 │   ├── how-it-works.tsx      (+ .module.css)
 │   └── review-carousel.tsx   (+ .module.css)
-└── auth/
-    ├── auth-modal.tsx
-    └── auth-panel.tsx
+├── ads/
+│   └── stock-video-ad.tsx    sponsor reel
 ```
 
-Imports always use the `@/components/onboarding/<folder>/<file>` form, so the
-only relative import left is `story-intro.tsx` → `./story-intro.module.css`.
-Tests sit next to their component in the same folder.
+The sign-in modal/panel live in `src/components/auth/` because the landing page
+uses them too. Imports always use the `@/components/onboarding/<folder>/<file>`
+form. Tests sit next to their component in the same folder.

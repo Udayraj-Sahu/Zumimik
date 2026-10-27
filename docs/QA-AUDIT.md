@@ -19,7 +19,7 @@ dark theme via `:root` CSS vars in `globals.css` + tailwind custom colors (no se
 Routing map used throughout:
 - Public: `/` (landing), `/auth`, `/onboarding`, `/not-found`
 - App (behind `DashboardShell` auth gate): `/dashboard`, `/dashboard/analytics`, `/dashboard/feed`, `/dashboard/clubs`, `/dashboard/friends`, `/settings`(+/profile/edit/reports/notifications/leaderboard/linked-devices/planner/history/achievements/help/scan-to-login), `/learn`(+/explorer/mastery/practice/mock/run/technique/[id]), `/play`(+/sprint/configure-sprint/duel/sprint/results/sprint/results/analysis)
-- Auth gate: `src/app/(app)/dashboard/dashboard-shell.tsx` + `src/components/shell/app-entry.tsx`
+- Auth gate: `src/components/shell/dashboard-shell.tsx` + `src/components/shell/app-entry.tsx`
 
 ---
 
@@ -123,7 +123,7 @@ Tablet / Desktop sizing (sidebar `lg:ml-[250px]`, max-w content) — audit pendi
 ---
 
 ## 5. 📝 Forms
-Forms inventory: auth (`components/onboarding/auth-panel.tsx`), profile edit, planner, configure-sprint, mock-exam answer input, settings forms, add-prep-modal, habit-tracker.
+Forms inventory: auth (`components/auth/auth-panel.tsx`), profile edit, planner, configure-sprint, mock-exam answer input, settings forms, add-prep-modal, habit-tracker.
 - [ ] Required fields marked
 - [ ] Validation timing correct
 - [ ] Error near field + understandable

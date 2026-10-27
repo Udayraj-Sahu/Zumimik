@@ -23,28 +23,28 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import StockVideoAd from "@/components/ads/stock-video-ad";
-import FirstGhostCta from "@/components/first-ghost-cta/FirstGhostCta";
+import StockVideoAd from "@/components/onboarding/ads/stock-video-ad";
+import FirstGhostCta from "@/components/onboarding/slides/first-ghost-cta";
 import { ReviewCarousel } from "@/components/onboarding/slides/review-carousel";
 import { HowItWorks } from "@/components/onboarding/slides/how-it-works";
 import { ClearanceTiers } from "@/components/paywall/clearance-tiers";
-import AlgorithmPitch from "@/components/algorithm-pitch/AlgorithmPitch";
-import FirstMoveTimes from "@/components/first-move-times/FirstMoveTimes";
-import TrapResults from "@/components/trap-results/TrapResults";
-import StallTimer from "@/components/stall-timer/StallTimer";
-import TrialTimeline from "@/components/trial-timeline/TrialTimeline";
+import AlgorithmPitch from "@/components/onboarding/slides/algorithm-pitch";
+import FirstMoveTimes from "@/components/onboarding/slides/first-move-times";
+import TrapResults from "@/components/onboarding/slides/trap-results";
+import StallTimer from "@/components/onboarding/slides/stall-timer";
+import TrialTimeline from "@/components/onboarding/slides/trial-timeline";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import "./intro-styles.css";
-import { Fight1 } from "./fight-1";
-import { Fight2 } from "./fight-2";
-import { Rank1 } from "./rank-1";
-import { Rank2 } from "./rank-2";
-import { Rise1 } from "./rise-1";
-import { Rise2 } from "./rise-2";
-import { Join } from "./join";
-import { Join1 } from "./join-1";
-import { Join2 } from "./join-2";
+import { Fight1 } from "@/components/onboarding/slides/fight-1";
+import { Fight2 } from "@/components/onboarding/slides/fight-2";
+import { Rank1 } from "@/components/onboarding/slides/rank-1";
+import { Rank2 } from "@/components/onboarding/slides/rank-2";
+import { Rise1 } from "@/components/onboarding/slides/rise-1";
+import { Rise2 } from "@/components/onboarding/slides/rise-2";
+import { Join } from "@/components/onboarding/slides/join";
+import { Join1 } from "@/components/onboarding/slides/join-1";
+import { Join2 } from "@/components/onboarding/slides/join-2";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -604,8 +604,8 @@ export function IntroCarousel({
     >
       <div
         className={cn(
-          "relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[92vh] sm:max-w-md sm:overflow-hidden sm:rounded-3xl sm:border sm:shadow-2xl",
-          split && "md:max-w-[920px] md:max-h-[88vh] lg:max-w-[980px] xl:max-w-[1100px]",
+          "relative flex h-full w-full shrink-0 flex-col sm:h-auto sm:max-h-[min(92dvh,92vh)] sm:max-w-md sm:overflow-y-auto sm:overflow-x-clip sm:rounded-3xl sm:border sm:shadow-2xl",
+          split && "md:max-w-[920px] md:max-h-[min(88dvh,88vh)] lg:max-w-[980px] xl:max-w-[1100px]",
         )}
         style={{
           borderColor: GLASS_BORDER,
@@ -848,3 +848,8 @@ export function IntroCarousel({
     document.body,
   );
 }
+
+
+
+
+

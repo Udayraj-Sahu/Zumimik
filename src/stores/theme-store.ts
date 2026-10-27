@@ -44,9 +44,11 @@ type ThemeState = {
   reset: () => void;
 };
 
-function clamp(value: unknown, min: number, max: number, fallback: number): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
-  return Math.min(max, Math.max(min, Math.round(value)));
+import { clamp } from "@/lib/utils";
+
+function clampNum(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== "number" || Number.isNaN(value)) return fallback;
+  return Math.round(clamp(value, min, max));
 }
 
 const STORAGE_KEY = "zuzumik-theme";
@@ -133,7 +135,7 @@ function readInitialNumber(
     const raw = safeLocalStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as { state?: Record<string, unknown> };
-      return clamp(parsed?.state?.[key], min, max, fallback);
+      return clampNum(parsed?.state?.[key], min, max, fallback);
     }
   } catch {
     /* ignore */
@@ -153,9 +155,9 @@ export const useThemeStore = create<ThemeState>()(
         set({ theme: get().theme === "light" ? "dark" : "light" }),
       setAccent: (accent) => set({ accent }),
       setWarmTint: (warmTint) =>
-        set({ warmTint: clamp(warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0) }),
-      setBrightness: (brightness) =>
-        set({ brightness: clamp(brightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_MAX) }),
+        set({ warmTint: clampNum(warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0) }),
+        setBrightness: (brightness) =>
+          set({ brightness: clampNum(brightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX, BRIGHTNESS_MAX) }),
       reset: () =>
         set({
           theme: "dark",
@@ -180,8 +182,8 @@ export const useThemeStore = create<ThemeState>()(
           ...incoming,
           theme: isTheme(incoming.theme) ? incoming.theme : "dark",
           accent: isAccentId(incoming.accent) ? incoming.accent : DEFAULT_ACCENT,
-          warmTint: clamp(incoming.warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0),
-          brightness: clamp(
+          warmTint: clampNum(incoming.warmTint, WARM_TINT_MIN, WARM_TINT_MAX, 0),
+          brightness: clampNum(
             incoming.brightness,
             BRIGHTNESS_MIN,
             BRIGHTNESS_MAX,

@@ -374,7 +374,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <PageContainer className="max-w-none pt-0 pb-6 overflow-x-hidden min-[1025px]:pl-[64px] min-[1025px]:pr-[64px]">
+    <PageContainer className="max-w-none pt-0 pb-6 overflow-x-clip min-[1025px]:pl-[64px] min-[1025px]:pr-[64px]">
       <div className="w-full">
 
       {/* Ambient glow behind header */}

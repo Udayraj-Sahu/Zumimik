@@ -10,7 +10,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body className="bg-background text-foreground">
-        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground px-6 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-background text-foreground px-6 text-center">
           <h1 className="text-6xl font-bold text-destructive font-display">ERROR</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-md">
             The arena hit a critical fault. Please reload.

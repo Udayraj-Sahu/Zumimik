@@ -166,7 +166,7 @@ function ExplorerContent() {
   }
 
   return (
-    <PageContainer className="overflow-x-hidden">
+    <PageContainer className="overflow-x-clip">
       <div className="mx-auto w-full md:max-w-3xl">
       {(treesError || techniquesError) && (
         <div

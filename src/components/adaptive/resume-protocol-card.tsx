@@ -5,26 +5,15 @@ import { GLASS_05, GLASS_BORDER, VIOLET_PURPLE } from "@/lib/theme";
 import { Play, X, Clock, Sparkles, ChevronRight } from "lucide-react";
 import { useResumeStore } from "@/stores/resume-store";
 import { useTodayPlan } from "@/hooks/queries/use-adaptive";
-import { cn } from "@/lib/utils";
-import { formatTime } from "@/lib/text";
-
-function timeAgo(ts: number): string {
-  const s = Math.max(1, Math.round((Date.now() - ts) / 1000));
-  if (s < 60) return `${s}s ago`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
+import { clamp, cn } from "@/lib/utils";
+import { formatTime, timeAgo } from "@/lib/text";
 
 function shade(hex: string, percent: number): string {
   const num = parseInt(hex.replace("#", ""), 16);
   const amt = Math.round(2.55 * Math.abs(percent));
-  const clamp = (v: number) => Math.min(255, Math.max(0, v));
-  const r = clamp((num >> 16) + (percent > 0 ? amt : -amt));
-  const g = clamp(((num >> 8) & 0xff) + (percent > 0 ? amt : -amt));
-  const b = clamp((num & 0xff) + (percent > 0 ? amt : -amt));
+  const r = clamp((num >> 16) + (percent > 0 ? amt : -amt), 0, 255);
+  const g = clamp(((num >> 8) & 0xff) + (percent > 0 ? amt : -amt), 0, 255);
+  const b = clamp((num & 0xff) + (percent > 0 ? amt : -amt), 0, 255);
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 

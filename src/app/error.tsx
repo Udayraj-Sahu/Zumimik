@@ -10,7 +10,7 @@ export default function Error({
   console.error("[route-error]", error);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground px-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-background text-foreground px-6 text-center">
       <h1 className="text-6xl font-bold text-destructive font-display">ERROR</h1>
       <p className="mt-4 text-lg text-muted-foreground max-w-md">
         The wall encountered a fault. Signals disrupted.

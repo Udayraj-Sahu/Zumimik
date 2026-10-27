@@ -6,13 +6,14 @@ import { useThemeStore } from "@/stores/theme-store";
 import { motion } from "motion/react";
 import { Check, CreditCard, QrCode, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatINR } from "@/lib/text";
 import { PLANS } from "@/lib/types/onboarding";
 import type { PlanId } from "@/lib/types/onboarding";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { IntroSurface } from "@/components/onboarding/intros/intro-surface";
 
-const inr = (n: number) => `₹${new Intl.NumberFormat("en-IN").format(n)}`;
+const inr = formatINR;
 
 const EXAM_QUALIFIER: Record<string, string> = {
   cat: "Verbal & Quant",
