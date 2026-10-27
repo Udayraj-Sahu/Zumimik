@@ -28,7 +28,7 @@ export function Rise1() {
       </h1>
       <div className="score">
         <span>{score}</span>
-        <sup>s</sup>
+        <sup className="score-s">s</sup>
       </div>
       <div
         className="meter"
