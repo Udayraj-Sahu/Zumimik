@@ -509,6 +509,7 @@ export function IntroCarousel({
   const tone = useArenaTone();
   const [active, setActive] = useState(0);
   const [tier, setTier] = useState("dual-lane");
+  const [billing, setBilling] = useState<"annual" | "monthly">("annual");
 
   const TOTAL = slides.length;
 
