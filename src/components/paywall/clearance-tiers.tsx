@@ -61,18 +61,10 @@ export function ClearanceTiers({
   const light = useThemeStore((s) => s.theme) === "light";
   return (
     <section className={className}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <h2 className="font-mono text-[9px] font-bold tracking-[0.2em] text-muted-foreground/80">
           CLEARANCE TIERS
         </h2>
-        <span
-          className={cn(
-            "font-mono text-[8px] font-bold tracking-wider",
-            light ? "text-[var(--cyan)]" : "text-cyan-300",
-          )}
-        >
-          SCALABLE ACCESS
-        </span>
       </div>
 
       <div role="radiogroup" aria-label="Clearance tiers" className="mt-3 space-y-2.5">

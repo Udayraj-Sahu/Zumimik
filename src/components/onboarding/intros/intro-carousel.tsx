@@ -804,9 +804,15 @@ export function IntroCarousel({
                 : undefined
             }
           >
-            <div className={cn(split && "md:my-auto")}>
+              <div className={cn(split && "md:my-auto")}>
               <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
-              {/* clearance tiers: replaces the stock video, mirrors the paywall */}
+              <div className="mx-auto mb-2 w-full max-w-[320px] rounded-[14px] border border-white/10 bg-white/[0.02] p-1">
+                <div className="grid grid-cols-2">
+                  <button type="button" className="rounded-[10px] bg-[var(--lime-solid)] py-2 text-center text-[11px] font-semibold text-[var(--on-accent)]">Annual</button>
+                  <button type="button" className="rounded-[10px] py-2 text-center text-[11px] font-semibold text-muted-foreground/70">Monthly</button>
+                </div>
+              </div>
+              {/* clearance tiers: mirrors the paywall */}
               <div className="mt-1 shrink-0">
                 <ClearanceTiers value={tier} onChange={setTier} />
               </div>
