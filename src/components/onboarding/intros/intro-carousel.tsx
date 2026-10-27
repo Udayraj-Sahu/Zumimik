@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { BG_MOSS, FOREST, GLASS_BORDER, PANEL } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
