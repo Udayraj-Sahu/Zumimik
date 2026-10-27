@@ -807,14 +807,35 @@ export function IntroCarousel({
               <div className={cn(split && "md:my-auto")}>
               <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
               <div className="mx-auto mb-2 w-full max-w-[320px] rounded-[14px] border border-white/10 bg-white/[0.02] p-1">
-                <div className="grid grid-cols-2">
-                  <button type="button" className="rounded-[10px] bg-[var(--lime-solid)] py-2 text-center text-[11px] font-semibold text-[var(--on-accent)]">Annual</button>
-                  <button type="button" className="rounded-[10px] py-2 text-center text-[11px] font-semibold text-muted-foreground/70">Monthly</button>
+                <div className="relative grid grid-cols-2">
+                  <motion.span
+                    aria-hidden
+                    className="absolute bottom-1 left-1 top-1 w-[calc(50%-4px)] rounded-[10px] bg-[var(--lime-solid)]"
+                    animate={{ x: billing === "monthly" ? "100%" : "0%" }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                  {(["annual", "monthly"] as const).map((b) => {
+                    const on = billing === b;
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setBilling(b)}
+                        aria-pressed={on}
+                        className={cn(
+                          "relative z-[1] rounded-[10px] py-2 text-center text-[11px] font-semibold transition-colors",
+                          on ? "text-[var(--on-accent)]" : "text-muted-foreground/70",
+                        )}
+                      >
+                        {b === "annual" ? "Annual" : "Monthly"}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               {/* clearance tiers: mirrors the paywall */}
               <div className="mt-1 shrink-0">
-                <ClearanceTiers value={tier} onChange={setTier} />
+                <ClearanceTiers value={tier} onChange={setTier} billing={billing} />
               </div>
 
               {/* fixed CTA */}

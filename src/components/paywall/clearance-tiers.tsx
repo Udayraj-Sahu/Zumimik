@@ -12,6 +12,7 @@ export type PaywallOption = {
   title: string;
   desc: string;
   price: string;
+  monthlyPrice?: string;
   priceSuffix: string;
   note: string;
   cta: string;
@@ -33,6 +34,7 @@ export const PREP_OPTIONS: PaywallOption[] = [
     title: "Pro",
     desc: "Full adaptive engine for one exam",
     price: inr(399),
+    monthlyPrice: inr(499),
     priceSuffix: "/mo",
     note: "",
     cta: "ACTIVATE SINGLE LANE",
@@ -42,6 +44,7 @@ export const PREP_OPTIONS: PaywallOption[] = [
     title: "Build your study stack",
     desc: "Prepare for two or more exams",
     price: inr(649),
+    monthlyPrice: inr(799),
     priceSuffix: "/mo",
     note: "",
     cta: "ACTIVATE DUAL LANE",
@@ -53,10 +56,12 @@ export function ClearanceTiers({
   value,
   onChange,
   className,
+  billing = "annual",
 }: {
   value: string;
   onChange: (id: string) => void;
   className?: string;
+  billing?: "annual" | "monthly";
 }) {
   const light = useThemeStore((s) => s.theme) === "light";
   return (
@@ -117,10 +122,15 @@ export function ClearanceTiers({
                           : "text-[var(--lime)]",
                       )}
                     >
-                      {o.price}
-                      {o.priceSuffix && o.priceSuffix.trim().toLowerCase() !== "forever" && (
+                      {o.price === "FREE" ? "FREE" : billing === "monthly" && o.monthlyPrice ? o.monthlyPrice : o.price}
+                      {!(o.price === "FREE") && o.priceSuffix && o.priceSuffix.trim().toLowerCase() !== "forever" && (
                         <span className="text-[9px] font-normal text-muted-foreground/50">
                           {o.priceSuffix}
+                        </span>
+                      )}
+                      {o.price === "FREE" && (
+                        <span className="text-[9px] font-normal text-muted-foreground/50">
+                          forever
                         </span>
                       )}
                     </div>
