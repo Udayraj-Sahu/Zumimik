@@ -259,12 +259,12 @@
   letter-spacing: -0.07em;
 }
 .k-rise1 .score sup {
-  margin-left: 0.6cqw;
+  margin-left: 0.9cqw;
   font-size: 9cqw;
   letter-spacing: -0.02em;
   vertical-align: top;
 }
-.k-rise1 .score-s { position: relative; top: -0.8cqw; }
+.k-rise1 .score-s { position: relative; top: -0.8cqw; margin-left: 3px; }
 .k-rise1 .meter {
   position: relative;
   height: 3cqw;
