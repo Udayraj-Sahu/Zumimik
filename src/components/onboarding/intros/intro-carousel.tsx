@@ -843,6 +843,12 @@ export function IntroCarousel({
               {/* fixed CTA */}
               <footer className="mt-2.5 shrink-0 md:absolute md:bottom-4 md:left-0 md:right-0 md:mt-0 md:px-5 lg:bottom-6 lg:px-6 xl:bottom-6">
                 <button
+                  type="button"
+                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-[16px] border border-white/15 bg-white/[0.02] py-2.5 text-[10px] font-semibold tracking-[0.16em] text-foreground/80 transition hover:bg-white/[0.05] hover:text-foreground"
+                >
+                  Know More
+                </button>
+                <button
                   onClick={() => exit(onClose)}
                   className="flex w-full items-center justify-center gap-2 rounded-[16px] py-3 text-[11px] font-bold tracking-[0.1em] text-[var(--on-accent)] transition hover:brightness-110 active:scale-[0.98]"
                   style={{
