@@ -43,7 +43,7 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
   const gi = groups.findIndex((g) => g.slideIndexes.includes(currentIndex));
 
   return (
-    <div className={"steps" + (manual ? " manual" : "")} role="tablist" aria-label={groups.map((g) => g.label + ".").join(" ")}>
+    <div className={"steps steps--swiss" + (manual ? " manual" : "")} role="tablist" aria-label={groups.map((g) => g.label + ".").join(" ")}>
       <style>{css.replace(/:global\([^)]+\)/g, ".light ")}</style>
       {groups.map((g, k) => (
         <button
@@ -61,12 +61,9 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
             onGroupClick(g.slideIndexes[0]);
           }}
         >
-          <i>
-            {g.slideIndexes.map((s) => (
-              <u key={s} className={k < gi ? "a" : k > gi ? "" : s < currentIndex ? "a" : s === currentIndex ? "c" : ""} />
-            ))}
-          </i>
-          {g.label === "Join" ? "JOIN." : g.label + "."}
+          <span className="steps__marker" aria-hidden="true" />
+          <span className="steps__label">{g.label === "Join" ? "JOIN." : g.label + "."}</span>
+          <span className="steps__rule" aria-hidden="true" />
         </button>
       ))}
     </div>
@@ -74,21 +71,26 @@ export function Steps({ groups, currentIndex, onGroupClick, disabled = false, to
 }
 
 const css = `
-.steps{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
-.steps button{flex:1;background:none;border:0;color:rgba(255,255,255,0.5);font:600 10px/1.2 var(--font-jakarta),system-ui,sans-serif;letter-spacing:0.12em;text-transform:uppercase;text-align:left;padding:0;cursor:pointer}
-.light .steps button{color:rgba(0,0,0,0.5)}
-.steps button[aria-selected="true"]{color:rgba(255,255,255,0.9)}
-.light .steps button[aria-selected="true"]{color:rgba(0,0,0,0.9)}
-.steps button:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.steps i{display:flex;gap:6px;margin-bottom:6px;height:4px}
-.steps i u{flex:1;background:rgba(255,255,255,0.18);border-radius:2px;position:relative;overflow:hidden}
-.light .steps i u{background:rgba(0,0,0,0.18)}
-.steps i u.a:after,.steps i u.c:after{content:"";position:absolute;inset:0;background:var(--lime,#c8ff5a)}
-.light .steps i u.a:after,.light .steps i u.c:after{background:var(--lime-solid,#9fd42f)}
-.steps i u.c:after{transform-origin:left;animation:pf 3s linear both}
-.steps.manual i u.c:after{animation:none;transform:scaleX(1)}
-@keyframes pf{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.steps i u.c:after{animation:none;transform:scaleX(1)}}
+.steps--swiss{display:grid;grid-template-columns:repeat(5,1fr);align-items:stretch;gap:0;width:100%;border-top:1px solid rgba(255,255,255,0.28);border-bottom:1px solid rgba(255,255,255,0.28)}
+.light .steps--swiss{border-top:1px solid rgba(0,0,0,0.24);border-bottom:1px solid rgba(0,0,0,0.24)}
+.steps--swiss button{position:relative;display:flex;align-items:center;gap:10px;flex:none;width:100%;background:none;border:0;color:rgba(255,255,255,0.38);font:700 9px/1 var(--font-inter),Helvetica,Arial,sans-serif;letter-spacing:0.22em;text-transform:uppercase;text-align:left;padding:10px 14px 10px 0;cursor:pointer}
+.light .steps--swiss button{color:rgba(0,0,0,0.38)}
+.steps--swiss button + button{border-left:1px solid rgba(255,255,255,0.18)}
+.light .steps--swiss button + button{border-left:1px solid rgba(0,0,0,0.16)}
+.steps--swiss button[aria-selected="true"]{color:#fff}
+.light .steps--swiss button[aria-selected="true"]{color:#000}
+.steps--swiss button:focus-visible{outline:1px solid currentColor;outline-offset:-4px}
+.steps__marker{width:6px;height:6px;flex:0 0 6px;background:currentColor;opacity:0.4}
+.steps button[aria-selected="true"] .steps__marker{opacity:1;background:#ff1f1f}
+.steps__label{white-space:nowrap}
+.steps__rule{margin-left:auto;flex:0 0 14px;height:1px;background:currentColor;opacity:0.22}
+.steps button[aria-selected="true"] .steps__rule{opacity:0.6}
+.steps.manual .steps__marker{opacity:0.4}
+@media (max-width:640px){
+  .steps--swiss button{gap:8px;padding:9px 10px 9px 0;font-size:8px;letter-spacing:0.18em}
+  .steps__rule{flex-basis:10px}
+}
+@media (prefers-reduced-motion:reduce){}
 `;
 
 export default Steps;
