@@ -254,9 +254,6 @@
   letter-spacing: -0.01em;
   opacity: 0.88;
 }
-  font: 700 3.2cqw/1.3 var(--font-space-mono), monospace;
-  animation: rise-in 0.5s 2.8s both;
-}
 
 /* ---------- Rise 1 ---------- */
 .k-rise1 { background: #c8f23c; color: #141413; position: relative; }
