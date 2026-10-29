@@ -249,11 +249,10 @@
   color: #c8f23c;
 }
 .k-rank2 .fix-trap {
-  margin-top: 3%;
-  font: 700 2.4cqw/1.4 var(--font-inter), Helvetica Neue, Helvetica, Arial, system-ui, sans-serif;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.9;
+  margin-top: 4%;
+  font: 500 2.6cqw/1.5 var(--font-inter), Helvetica Neue, Helvetica, Arial, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  opacity: 0.88;
 }
   font: 700 3.2cqw/1.3 var(--font-space-mono), monospace;
   animation: rise-in 0.5s 2.8s both;
