@@ -122,13 +122,12 @@ export function ClearanceTiers({
                           : "text-[var(--lime)]",
                       )}
                     >
-                      {o.price === "FREE" ? "FREE" : billing === "monthly" && o.monthlyPrice ? o.monthlyPrice : o.price}
+                      {o.price === "FREE" ? "" : billing === "monthly" && o.monthlyPrice ? o.monthlyPrice : o.price}
                       {!(o.price === "FREE") && o.priceSuffix && o.priceSuffix.trim().toLowerCase() !== "forever" && (
                         <span className="text-[9px] font-normal text-muted-foreground/50">
                           {o.priceSuffix}
                         </span>
                       )}
-
                     </div>
                   </div>
                   <div
