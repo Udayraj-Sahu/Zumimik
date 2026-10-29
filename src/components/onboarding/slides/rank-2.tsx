@@ -76,6 +76,7 @@ export function Rank2() {
         })}
 
         <div className="fix">Fix: 43 × 50 + 43 × 7 = 2,150 + 301</div>
+        <div className="fix-trap">EXPOSE THE TRAP THAT BROKE YOUR RANK</div>
       </Fragment>
     </div>
   );
