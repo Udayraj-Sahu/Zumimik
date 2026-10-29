@@ -128,6 +128,11 @@ export function ClearanceTiers({
                           {o.priceSuffix}
                         </span>
                       )}
+                      {o.price === "FREE" && (
+                        <span className="text-[9px] font-normal text-muted-foreground/50">
+                          forever
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div
