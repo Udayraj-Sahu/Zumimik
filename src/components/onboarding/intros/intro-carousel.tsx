@@ -865,7 +865,15 @@ export function IntroCarousel({
                         : "ENTER YOUR ARENA"}
                   <ArrowRight size={14} />
                 </button>
-
+                <button
+                  onClick={() => exit(onSkip ?? onClose)}
+                  className={cn(
+                    "mx-auto mt-2 block text-[10px] underline-offset-2 transition-colors hover:text-muted-foreground hover:underline",
+                    tone.faint,
+                  )}
+                >
+                  Skip for now
+                </button>
               </footer>
             </div>
           </div>
