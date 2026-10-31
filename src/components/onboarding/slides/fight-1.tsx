@@ -1,18 +1,18 @@
 "use client";
 
 const FIGHTS =
-  "FIGHT · FIGHT · FIGHT · FIGHT · FIGHT · FIGHT · FIGHT · FIGHT · FIGHT · FIGHT ·";
+  "BEAT THE CLOCK • BEAT THE CLOCK • BEAT THE CLOCK • BEAT THE CLOCK • BEAT THE CLOCK • ";
 
 export function Fight1() {
   return (
     <main className="card k-fight1 h-full">
-      <div className="eyebrow">Vs. the clock</div>
+      <div className="eyebrow">Beat the clock</div>
 
       <h1 className="headline">
         <span>Every</span>
-        <span>session</span>
-        <span>is a</span>
-        <span className="highlight">fight.</span>
+        <span>second</span>
+        <span>counts</span>
+        <span className="highlight">to win.</span>
       </h1>
 
       <div className="stopwatch">
