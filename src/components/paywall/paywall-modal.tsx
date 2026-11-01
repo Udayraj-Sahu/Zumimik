@@ -19,7 +19,8 @@ import {
 import { usePlanStore } from "@/stores/plan-store";
 import { usePaywallStore } from "@/stores/paywall-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import type { PlanId } from "@/lib/types/onboarding";
+import { PLANS, type PlanId } from "@/lib/types/onboarding";
+import { formatINR } from "@/lib/text";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
 import { isNativeRuntime } from "@/lib/native/is-native";
@@ -97,6 +98,7 @@ export function PaywallModal() {
   const setPlanLane = useOnboardingStore((s) => s.setPlanLane);
 
   const [planOptionId, setPlanOptionId] = useState<string>("dual-lane");
+  const [billing, setBilling] = useState<"annual" | "monthly">("annual");
   const [lane, setLane] = useState<string>(planLane || targetExam || "cat");
   const theme = useThemeStore((s) => s.theme);
   const [state, setState] = useState<"idle" | "success">("idle");
@@ -110,6 +112,7 @@ export function PaywallModal() {
     if (open && !wasOpenRef.current) {
       setClosing(false);
       setPlanOptionId(planId ?? "dual-lane");
+      setBilling("annual");
       setLane(planLane || targetExam || "cat");
       setState("idle");
       if (overlayRef.current) {
@@ -173,6 +176,7 @@ export function PaywallModal() {
   if (!open || !action) return null;
 
   const selectedPlan = PREP_OPTIONS.find((o) => o.id === planOptionId)!;
+  const selectedPlanDetails = PLANS.find((plan) => plan.id === planOptionId)!;
   const throttle = planOptionId === "dual-lane" ? 100 : planOptionId === "single-lane" ? 72 : 19;
 
   return createPortal(
@@ -386,7 +390,12 @@ export function PaywallModal() {
                   </section>
 
                   {/* clearance tiers */}
-                  <ClearanceTiers value={planOptionId} onChange={setPlanOptionId} />
+                  <ClearanceTiers
+                    value={planOptionId}
+                    onChange={setPlanOptionId}
+                    billing={billing}
+                    onBillingChange={setBilling}
+                  />
                 </div>
 
                 {/* sticky CTA */}
@@ -403,7 +412,8 @@ export function PaywallModal() {
                   >
                     <Zap size={14} />
                     {selectedPlan.cta}
-                    {selectedPlan.price !== "FREE" && ` — ${selectedPlan.price}/YEAR`}
+                    {selectedPlanDetails.id !== "initiate" &&
+                      ` — ${formatINR(selectedPlanDetails.billing[billing])}/${billing === "annual" ? "YEAR" : "MONTH"}`}
                   </button>
                   <p className="mt-2 text-center text-[9px] font-medium text-muted-foreground/35">
                     You can change this anytime in Settings.

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BG_MOSS } from "@/lib/theme";
 import { useThemeStore } from "@/stores/theme-store";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Check, CreditCard, QrCode, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/lib/text";
@@ -33,9 +33,137 @@ function laneQualifier(lane: string | null | undefined): string {
   return EXAM_QUALIFIER[lane] ?? "adaptive syllabus";
 }
 
-function realDiscount(annual: number, monthly: number): number {
+export type BillingCycle = "annual" | "monthly";
+
+export function getAnnualSavingsPercent(annual: number, monthly: number): number {
   if (monthly <= 0 || annual <= 0) return 0;
   return Math.max(0, Math.round((1 - annual / (monthly * 12)) * 100));
+}
+
+export function BillingCycleToggle({
+  billing,
+  onChange,
+  annualSavings = 0,
+  variant = "full",
+  className,
+}: {
+  billing: BillingCycle;
+  onChange: (billing: BillingCycle) => void;
+  annualSavings?: number;
+  variant?: "full" | "compact";
+  className?: string;
+}) {
+  const cycles: BillingCycle[] = ["annual", "monthly"];
+  const reduceMotion = useReducedMotion();
+  const layoutTransition = reduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 460, damping: 36, mass: 0.7 };
+
+  if (variant === "compact") {
+    return (
+      <motion.div
+        layout="size"
+        transition={layoutTransition}
+        role="group"
+        aria-label="Billing cycle"
+        className={cn(
+          "inline-flex shrink-0 items-center rounded-full border border-border bg-muted/60 p-1",
+          className,
+        )}
+      >
+        {cycles.map((cycle) => {
+          const selected = billing === cycle;
+          const shortLabel = cycle === "annual" ? "A" : "M";
+          const fullLabel =
+            cycle === "annual" && annualSavings > 0
+              ? `Annual −${annualSavings}%`
+              : cycle === "annual"
+                ? "Annual"
+                : "Monthly";
+          return (
+            <motion.button
+              layout="size"
+              transition={layoutTransition}
+              key={cycle}
+              type="button"
+              onClick={() => onChange(cycle)}
+              aria-pressed={selected}
+              aria-label={fullLabel}
+              className={cn(
+                "inline-flex min-h-6 items-center justify-center gap-0 rounded-full px-1.5 text-[9px] font-bold transition-colors duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+                selected
+                  ? "bg-primary px-2 text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <motion.span
+                aria-hidden="true"
+                className="block overflow-hidden whitespace-nowrap"
+                initial={false}
+                animate={{ width: selected ? 0 : "auto", opacity: selected ? 0 : 1 }}
+                transition={layoutTransition}
+              >
+                {shortLabel}
+              </motion.span>
+              <motion.span
+                className="block overflow-hidden whitespace-nowrap"
+                initial={false}
+                animate={{ width: selected ? "auto" : 0, opacity: selected ? 1 : 0 }}
+                transition={layoutTransition}
+              >
+                {fullLabel}
+              </motion.span>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+    );
+  }
+
+  return (
+    <div
+      role="group"
+      aria-label="Billing cycle"
+      className={cn(
+        "relative grid grid-cols-2 rounded-[14px] border border-border bg-[var(--accent-muted)] p-1",
+        className,
+      )}
+    >
+      <motion.span
+        aria-hidden
+        className="absolute bottom-1 left-1 top-1 w-[calc(50%-4px)] rounded-[10px] bg-primary"
+        animate={{ x: billing === "monthly" ? "100%" : "0%" }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      />
+      {cycles.map((cycle) => {
+        const selected = billing === cycle;
+        return (
+          <button
+            key={cycle}
+            type="button"
+            onClick={() => onChange(cycle)}
+            aria-pressed={selected}
+            className={cn(
+              "relative z-[1] rounded-[10px] py-2.5 text-center text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              selected ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {cycle === "annual" ? "Annual" : "Monthly"}
+            {annualSavings > 0 && cycle === "annual" && (
+              <span
+                className={cn(
+                  "ml-1.5 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                  selected ? "bg-black/15" : "bg-[var(--accent-soft)] text-accent-foreground",
+                )}
+              >
+                SAVE {annualSavings}%
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 type Tone = {
@@ -311,6 +439,7 @@ export function PlanIntro({
   const plan = PLANS.find((p) => p.id === planId)!;
   const total = plan.billing[billing];
   const isFree = planId === "initiate";
+  const annualSavings = getAnnualSavingsPercent(plan.billing.annual, plan.billing.monthly);
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -369,51 +498,12 @@ export function PlanIntro({
           </FadeUp>
 
           {/* billing switch - directly under the headline block, centred */}
-          <div
-            className={cn(
-              "relative mt-5 grid grid-cols-2 rounded-[14px] border p-1 mx-auto w-full max-w-[420px]",
-              tone.surface,
-            )}
-          >
-
-            <motion.span
-              aria-hidden
-              className="absolute bottom-1 left-1 top-1 w-[calc(50%-4px)] rounded-[10px] bg-[var(--lime-solid)]"
-              animate={{ x: billing === "monthly" ? "100%" : "0%" }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            />
-            {(["annual", "monthly"] as const).map((b) => {
-              const on = billing === b;
-              const off =
-                b === "annual"
-                  ? realDiscount(PLANS[0].billing.annual, PLANS[0].billing.monthly)
-                  : 0;
-              return (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setBilling(b)}
-                  aria-pressed={on}
-                  className={cn(
-                    "relative z-[1] rounded-[10px] py-2.5 text-center text-[13px] font-semibold transition-colors",
-                    on ? "text-[var(--on-accent)]" : tone.soft,
-                  )}
-                >
-                  {b === "annual" ? "Annual" : "Monthly"}
-                  {off > 0 && b === "annual" && (
-                    <span
-                      className={cn(
-                        "ml-1.5 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-                        on ? "bg-black/15" : "bg-[var(--lime-15)] text-[var(--lime)]",
-                      )}
-                    >
-                      SAVE {off}%
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <BillingCycleToggle
+            billing={billing}
+            onChange={setBilling}
+            annualSavings={annualSavings}
+            className="mx-auto mt-5 w-full max-w-[420px]"
+          />
 
           {/* plan cards — same component the adaptive reprompt "Select your plan" step uses.
               One row of three from md up, matching the pay-with row below. */}

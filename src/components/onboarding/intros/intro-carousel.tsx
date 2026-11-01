@@ -648,7 +648,7 @@ export function IntroCarousel({
                 ? {
                     flex: "0 0 78%",
                     paddingBottom: pricingSheetOpen
-                      ? "calc(50% + max(1.5rem, env(safe-area-inset-bottom, 0px)))"
+                      ? "calc(82dvh + max(1.5rem, env(safe-area-inset-bottom, 0px)))"
                       : "calc(22% + max(1rem, env(safe-area-inset-bottom, 0px)))",
                     transform: pricingSheetOpen ? "scale(0.98)" : "scale(1)",
                     transformOrigin: "top center",
@@ -785,15 +785,15 @@ export function IntroCarousel({
               className={cn(
                 "relative mx-auto w-full max-w-[400px] px-5 pb-[max(0.5rem,var(--sab))] pt-0 sm:max-w-none max-[359px]:px-4 transition-[height,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
                 split
-                  ? "md:mx-0 md:w-[280px] md:min-h-0 md:flex-[0.6] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-[calc(96px+max(1rem,var(--sab)))] md:pt-4 lg:w-[320px] lg:flex-[0.5] lg:px-6 lg:pb-[calc(104px+max(1rem,var(--sab)))] lg:pt-4 xl:w-[340px] xl:flex-[0.5]"
+                ? "md:mx-0 md:w-[280px] md:min-h-0 md:flex-[0_0_280px] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-5 md:pb-[calc(96px+max(1rem,var(--sab)))] md:pt-4 lg:w-[320px] lg:flex-[0_0_320px] lg:px-6 lg:pb-[calc(104px+max(1rem,var(--sab)))] lg:pt-4 xl:w-[340px] xl:flex-[0_0_340px]"
                   : "flex shrink-0 flex-col",
-                split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-hidden",
+                split && "max-[767px]:absolute max-[767px]:bottom-0 max-[767px]:left-0 max-[767px]:right-0 max-[767px]:mx-auto max-[767px]:z-50 max-[767px]:rounded-t-[20px] max-[767px]:overflow-y-auto max-[767px]:overscroll-contain",
                 split && (theme === "light" ? "max-[767px]:bg-black/[0.08]" : "max-[767px]:bg-[#141414]/90"),
               )}
             style={
               split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
-                    height: pricingSheetOpen ? "50%" : "26%",
+                    height: pricingSheetOpen ? "min(82dvh, calc(100dvh - 64px))" : "26%",
                     transform: pricingSheetOpen ? "translateY(0)" : "translateY(-4px)",
                     boxShadow: pricingSheetOpen
                       ? "0 -40px 80px -40px rgba(0,0,0,0.8), 0 -2px 0 rgba(255,255,255,0.06) inset, 0 -4px 14px -10px rgba(0,0,0,0.7)"
@@ -808,36 +808,14 @@ export function IntroCarousel({
           >
               <div className={cn(split && "md:my-auto")}>
               <div className="mx-auto mt-1 mb-2 h-1 w-8 rounded-full bg-white/20 max-[767px]:block hidden" />
-              <div className="mx-auto mb-2 w-full max-w-[320px] rounded-[14px] border border-white/10 bg-white/[0.02] p-1">
-                <div className="relative grid grid-cols-2">
-                  <motion.span
-                    aria-hidden
-                    className="absolute bottom-1 left-1 top-1 w-[calc(50%-4px)] rounded-[10px] bg-[var(--lime-solid)]"
-                    animate={{ x: billing === "monthly" ? "100%" : "0%" }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                  {(["annual", "monthly"] as const).map((b) => {
-                    const on = billing === b;
-                    return (
-                      <button
-                        key={b}
-                        type="button"
-                        onClick={() => setBilling(b)}
-                        aria-pressed={on}
-                        className={cn(
-                          "relative z-[1] rounded-[10px] py-2 text-center text-[11px] font-semibold transition-colors",
-                          on ? "text-[var(--on-accent)]" : "text-muted-foreground/70",
-                        )}
-                      >
-                        {b === "annual" ? "Annual" : "Monthly"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
               {/* clearance tiers: mirrors the paywall */}
               <div className="mt-1 shrink-0">
-                <ClearanceTiers value={tier} onChange={setTier} billing={billing} />
+                <ClearanceTiers
+                  value={tier}
+                  onChange={setTier}
+                  billing={billing}
+                  onBillingChange={setBilling}
+                />
               </div>
 
               {/* fixed CTA */}
