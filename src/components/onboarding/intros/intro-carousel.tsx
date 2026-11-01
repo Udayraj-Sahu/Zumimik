@@ -648,15 +648,12 @@ export function IntroCarousel({
             style={
               split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
-                    flex: "0 0 78%",
-                    paddingBottom: pricingSheetOpen
-                      ? "calc(82dvh + max(1.5rem, env(safe-area-inset-bottom, 0px)))"
-                      : "calc(22% + max(1rem, env(safe-area-inset-bottom, 0px)))",
+                    flex: pricingSheetOpen ? "0 0 50%" : "0 0 66%",
                     transform: pricingSheetOpen ? "scale(0.98)" : "scale(1)",
                     transformOrigin: "top center",
                     transition: reducedMotionRef.current
                       ? "none"
-                      : "flex 520ms cubic-bezier(0.22,1,0.36,1), padding-bottom 520ms cubic-bezier(0.22,1,0.36,1), transform 520ms cubic-bezier(0.22,1,0.36,1)",
+                      : "flex 520ms cubic-bezier(0.22,1,0.36,1), transform 520ms cubic-bezier(0.22,1,0.36,1)",
                   }
                 : undefined
             }
@@ -796,7 +793,7 @@ export function IntroCarousel({
             style={
               split && typeof window !== "undefined" && window.innerWidth < 768
                 ? {
-                    height: pricingSheetOpen ? "min(82dvh, calc(100dvh - 64px))" : "26%",
+                    height: pricingSheetOpen ? "50%" : "30%",
                     transform: pricingSheetOpen ? "translateY(0)" : "translateY(-4px)",
                     boxShadow: pricingSheetOpen
                       ? "0 -40px 80px -40px rgba(0,0,0,0.8), 0 -2px 0 rgba(255,255,255,0.06) inset, 0 -4px 14px -10px rgba(0,0,0,0.7)"
