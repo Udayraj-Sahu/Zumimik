@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "075b9184-cf29-47db-a6c2-456fae085213",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\Exam-Arena-Frontend\\.archify\\architecture-exam-arena-20261031\\candidate.json",
+  "output": "D:\\Exam-Arena-Frontend\\.archify\\architecture-exam-arena-20261031\\exam-arena-architecture.html",
+  "specification": {
+    "sha256": "763f41ca9a02017bc5e10ee32697109115b0b83dfbba0c84042687cb9615484e",
+    "bytes": 5530
+  },
+  "artifact": {
+    "sha256": "f0fe1b1a4f0d8f7339a488ae6293228cfad4a4c744c24b6e9836b3a43060b886",
+    "bytes": 859904
+  }
+}
