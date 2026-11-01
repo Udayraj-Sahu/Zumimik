@@ -51,6 +51,8 @@ const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const CONTENT_FIT_SLIDES = new Set(["fight-2", "rank-1", "rank-2", "rise-1", "rise-2"]);
+
 /* ── Using real dashboard data (mock service, backend drop-in) ── */
 
 function useLanes() {
@@ -686,6 +688,7 @@ export function IntroCarousel({
                     aria-hidden={i !== active ? "true" : undefined}
                     className={cn(
                       "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden h-full",
+                      CONTENT_FIT_SLIDES.has(card.id) && "content-fit-slide",
                       (card.bare || card.fill || card.full) && "self-stretch",
                     )}
                   >

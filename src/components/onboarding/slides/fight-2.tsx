@@ -72,7 +72,13 @@ export function Fight2() {
               className={`bar${b.loss ? " loss" : ""}${b.marker ? " marker" : ""}`}
               data-time={b.loss}
               style={{ "--h": b.h, "--i": i } as CSSProperties}
-            />
+            >
+              {b.loss && (
+                <span className="loss-label" aria-hidden="true">
+                  {b.loss}
+                </span>
+              )}
+            </div>
           ))}
         </div>
       </section>

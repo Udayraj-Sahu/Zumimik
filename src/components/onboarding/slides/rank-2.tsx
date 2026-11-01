@@ -55,25 +55,28 @@ export function Rank2() {
       <Fragment key={run}>
         <div className="question">43 × 57</div>
 
-        {ANSWERS.map((a, i) => {
-          const d = RANK2_START + i * RANK2_STEP;
-          const x = Math.min(1, Math.max(0, (elapsed - d - RANK2_LAG) / RANK2_GROW));
-          const shown = Math.round(a.percent * (1 - Math.pow(1 - x, 3)));
+        <div className="answers-list" role="list" aria-label="Answer distribution">
+          {ANSWERS.map((a, i) => {
+            const d = RANK2_START + i * RANK2_STEP;
+            const x = Math.min(1, Math.max(0, (elapsed - d - RANK2_LAG) / RANK2_GROW));
+            const shown = Math.round(a.percent * (1 - Math.pow(1 - x, 3)));
 
-          return (
-            <div
-              key={a.value}
-              className={`answers${a.correct ? " correct" : ""}`}
-              style={{ "--d": `${d}s` } as CSSProperties}
-            >
-              <span>{a.value}</span>
-              <div className="bar" style={{ "--width": `${a.percent}%` } as CSSProperties}>
-                <i />
+            return (
+              <div
+                key={a.value}
+                role="listitem"
+                className={`answers${a.correct ? " correct" : ""}`}
+                style={{ "--d": `${d}s` } as CSSProperties}
+              >
+                <span>{a.value}</span>
+                <div className="bar" style={{ "--width": `${a.percent}%` } as CSSProperties}>
+                  <i />
+                </div>
+                <span>{shown}%</span>
               </div>
-              <span>{shown}%</span>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         <div className="fix">Fix: 43 × 50 + 43 × 7 = 2,150 + 301</div>
         <div className="fix-trap">It tracks the exact flaw you fell for and hammers your exact blind spot on repeat, training your reflexes until you are battle-ready.</div>
