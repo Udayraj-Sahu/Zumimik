@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { PLANS, type PlanId } from "@/lib/types/onboarding";
 import { formatINR } from "@/lib/text";
 import { cn } from "@/lib/utils";
@@ -62,6 +63,8 @@ export function ClearanceTiers({
   onBillingChange?: (billing: BillingCycle) => void;
 }) {
   const [localBilling, setLocalBilling] = useState<BillingCycle>("annual");
+  const [selectionAnimation, setSelectionAnimation] = useState(1);
+  const reduceMotion = useReducedMotion();
   const idPrefix = useId();
   const currentBilling = billing ?? localBilling;
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -80,6 +83,11 @@ export function ClearanceTiers({
     else setLocalBilling(next);
   };
 
+  const selectPlan = (id: string) => {
+    onChange(id);
+    setSelectionAnimation((current) => current + 1);
+  };
+
   const selectWithKeyboard = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (!RADIO_KEYS.has(event.key)) return;
     event.preventDefault();
@@ -96,12 +104,15 @@ export function ClearanceTiers({
     }
 
     const next = PREP_OPTIONS[nextIndex];
-    onChange(next.id);
+    selectPlan(next.id);
     optionRefs.current[nextIndex]?.focus();
   };
 
   return (
-    <section className={cn("mx-auto w-full max-w-[360px]", className)}>
+    <section
+      className={cn("mx-auto w-full max-w-[360px]", className)}
+      style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
+    >
       <header className="flex flex-nowrap items-center justify-between gap-2">
         <h2 className="min-w-0 whitespace-nowrap text-[15px] font-semibold leading-tight tracking-[-0.01em]">
           Choose your plan
@@ -118,7 +129,23 @@ export function ClearanceTiers({
       <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
         Think faster. Speak sharper. Don&apos;t get fooled.
       </p>
-      <span aria-hidden="true" className="mt-2.5 block h-1 w-16 rounded-full bg-primary" />
+      <span
+        aria-hidden="true"
+        className="mt-2.5 block h-1 w-16 overflow-hidden rounded-full bg-primary/20"
+      >
+        {selectionAnimation > 0 && (
+          <motion.span
+            key={selectionAnimation}
+            className="block h-full w-full origin-left rounded-full bg-primary"
+            initial={{ scaleX: reduceMotion ? 1 : 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{
+              duration: reduceMotion ? 0 : 0.65,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          />
+        )}
+      </span>
 
       <div role="radiogroup" aria-label="Clearance tiers" className="mt-3 space-y-2">
         {PREP_OPTIONS.map((option, index) => {
@@ -139,7 +166,7 @@ export function ClearanceTiers({
               aria-controls={descriptionId}
               aria-describedby={active ? descriptionId : undefined}
               tabIndex={active ? 0 : -1}
-              onClick={() => onChange(option.id)}
+              onClick={() => selectPlan(option.id)}
               onKeyDown={(event) => selectWithKeyboard(event, index)}
               className={cn(
                 "w-full rounded-[11px] border p-3 text-left transition-[background-color,border-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card motion-reduce:transition-none",
@@ -151,14 +178,16 @@ export function ClearanceTiers({
               <span className="grid grid-cols-[16px_minmax(0,1fr)_auto] items-start gap-x-2.5">
                 <span
                   aria-hidden="true"
-                  className={cn(
-                    "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border transition-colors",
-                    active
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground/50 bg-transparent",
-                  )}
+                  className="mt-[3px] size-[15px] shrink-0 rounded-full"
+                  style={{
+                    borderStyle: "solid",
+                    borderWidth: active ? 7 : 1.5,
+                    borderColor: active ? "var(--foreground)" : "var(--muted-foreground)",
+                    transition: reduceMotion
+                      ? "none"
+                      : "border-width 300ms cubic-bezier(0.16,1,0.3,1), border-color 150ms cubic-bezier(0.16,1,0.3,1)",
+                  }}
                 >
-                  {active && <span className="size-1.5 rounded-full bg-primary-foreground" />}
                 </span>
 
                 <span className="min-w-0">

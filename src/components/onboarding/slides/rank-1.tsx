@@ -23,9 +23,7 @@ export function Rank1() {
 
   return (
     <div className="card k-rank1 h-full">
-      <div className="eyebrow">
-        [<b>{CATEGORIES[current].name}</b>] how many, what fixes it
-      </div>
+      <div className="eyebrow">how many, what fixes it</div>
       <h1>
         EXPOSE THE TRAP
         <br />

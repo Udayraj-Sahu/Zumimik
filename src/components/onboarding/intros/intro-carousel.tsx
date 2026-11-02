@@ -822,7 +822,8 @@ export function IntroCarousel({
               <footer className="mt-2.5 shrink-0 md:absolute md:bottom-4 md:left-0 md:right-0 md:mt-0 md:px-5 lg:bottom-6 lg:px-6 xl:bottom-6">
                 <button
                   type="button"
-                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-[16px] border border-white/15 bg-white/[0.02] py-2.5 text-[10px] font-semibold tracking-[0.16em] text-foreground/80 transition hover:bg-white/[0.05] hover:text-foreground"
+                  className="mb-2 flex min-h-[38px] w-full items-center justify-center rounded-full border border-transparent bg-transparent px-3.5 text-[10px] font-semibold text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                  style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
                 >
                   Know More
                 </button>
