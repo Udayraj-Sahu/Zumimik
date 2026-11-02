@@ -198,7 +198,7 @@ export function useArenaIntroSlides(): { slides: IntroSlide[]; lanes: Lane[] } {
        Icon: Swords,
        full: true,
        fill: true,
-       body: <Fight1 />,
+        body: (isActive: boolean) => <Fight1 active={isActive} />,
      },
      {
        id: "fight-2",
@@ -692,6 +692,7 @@ export function IntroCarousel({
                     <div
                       className={cn(
                         "flex min-h-0 flex-1 flex-col border-0 bg-transparent p-0 h-full",
+                        card.id === "fight-1" && split && typeof window !== "undefined" && window.innerWidth < 768 && pricingSheetOpen ? "[&_.k-fight1_.f1-art-wrap]:invisible [&_.k-fight1_.f1-art-wrap]:pointer-events-none" : undefined,
                       )}
                     >
                       {!card.bare && !card.full && (
