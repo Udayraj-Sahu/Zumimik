@@ -1,14 +1,32 @@
 import type { Metadata, Viewport } from "next";
 import { LIME_BRIGHT } from "@/lib/theme";
+import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { OnlineProvider } from "@/providers/online-provider";
 import { CapacitorInit } from "./capacitor-init";
 import { AppEntry } from "@/components/shell/app-entry";
 
-const spaceGrotesk = { variable: "--font-space-grotesk" };
-const inter = { variable: "--font-inter" };
-const jetbrainsMono = { variable: "--font-jetbrains-mono" };
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
