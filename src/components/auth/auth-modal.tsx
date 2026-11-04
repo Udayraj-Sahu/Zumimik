@@ -7,6 +7,7 @@ import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { AuthPanel, type AuthSuccessData } from "./auth-panel";
 import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
+import { hydrateOnboardingFromUser, refreshProfileFromServer } from "@/services/onboarding";
 import { useRouter } from "next/navigation";
 import { IS_MOCK } from "@/lib/platform";
 
@@ -52,6 +53,14 @@ export function AuthModal({ onClose }: AuthModalProps) {
       setAuthData({ name: accountName, email: account?.email ?? data.email, authMethod: "email" });
       const onboarding = useOnboardingStore.getState();
       if (!onboarding.firstName.trim()) onboarding.setFirstName(accountName.split(/\s+/)[0]);
+      // The server is the source of truth: wait for the latest profile, then fill the onboarding form from it.
+      // (The login response carries the same fields, so a failed /auth/me still hydrates from it.)
+      hydrateOnboardingFromUser(useAuthStore.getState().user, { authoritative: true });
+      try {
+        await refreshProfileFromServer({ authoritative: true });
+      } catch {
+        /* offline or transient: keep what the login response gave us */
+      }
     } else {
       setAuthData(data);
       if (data.idToken) {

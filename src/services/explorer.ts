@@ -1,9 +1,9 @@
 import type { TopicNode, TopicEdge } from "@/lib/types/technique";
 import { apiGet } from "./api";
+import { buildGlobalExplorerTree } from "./explorer-tree";
 import {
   mapBackendPracticeEdges,
   mapBackendTechniqueSummaries,
-  mapBackendTopicCatalog,
   type BackendPracticeCatalogResponse,
   type BackendTechniqueSummaryResponse,
   type BackendTopicCatalogResponse,
@@ -18,9 +18,16 @@ export async function getSubjectTree(domain: string): Promise<TopicNode[]> {
     await delay(250);
     return mockGetTree(domain);
   }
-  const response = await apiGet<BackendTopicCatalogResponse>("/api/topics");
-  return mapBackendTopicCatalog(response);
+  // Both endpoints are global: neither accepts an exam, so `domain` is deliberately not sent.
+  const [topics, techniques] = await Promise.all([
+    apiGet<BackendTopicCatalogResponse>("/api/topics"),
+    apiGet<BackendTechniqueSummaryResponse>(EXPLORER_TECHNIQUES_PATH),
+  ]);
+  return buildGlobalExplorerTree(topics, techniques);
 }
+
+/** /api/practice/techniques defaults to limit=100 (max 500) and the graph holds more skills than that. */
+export const EXPLORER_TECHNIQUES_PATH = "/api/practice/techniques?limit=500";
 
 export async function findNodeInTree(domain: string, nodeId: string): Promise<TopicNode | null> {
   if (IS_MOCK) {
@@ -42,7 +49,7 @@ export async function getLeafTechniques(domain: string): Promise<TopicNode[]> {
     const tree = mockGetTree(domain);
     return mockGetLeaves(tree);
   }
-  const response = await apiGet<BackendTechniqueSummaryResponse>("/api/practice/techniques");
+  const response = await apiGet<BackendTechniqueSummaryResponse>(EXPLORER_TECHNIQUES_PATH);
   return mapBackendTechniqueSummaries(response);
 }
 

@@ -2,19 +2,23 @@ import type { SprintResult, SprintSession } from "@/lib/types/sprint-session";
 import { IS_MOCK } from "@/lib/platform";
 import { apiPost } from "./api";
 
-export async function syncSprintResult(
+export type SyncEvent = Record<string, unknown>;
+
+/**
+ * Build the /sync events for a finished session. Event ids are generated here, once: re-sending the SAME events
+ * after a failure is idempotent on the backend (event_id is the key), whereas rebuilding would double-count.
+ */
+export function buildSprintSyncEvents(
   session: Pick<SprintSession, "questions" | "topic"> & Partial<Pick<SprintSession, "domain">>,
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-): Promise<void> {
-  if (IS_MOCK) return;
-
+): SyncEvent[] {
   const sessionId = crypto.randomUUID();
   const now = Date.now();
   const questions = new Map(session.questions.map((question) => [question.id, question]));
   const attempted = result.answers.filter((answer) => answer.selectedIndex !== -1 || answer.answerText !== undefined);
-  const events: Array<Record<string, unknown>> = attempted.map((answer) => {
+  const events: SyncEvent[] = attempted.map((answer) => {
     const question = questions.get(answer.questionId);
     return {
       event_id: crypto.randomUUID(),
@@ -53,5 +57,21 @@ export async function syncSprintResult(
     },
   });
 
+  return events;
+}
+
+/** POST /api/v1/sync. Resolves only when the backend acknowledged the batch. */
+export async function postSyncEvents(events: SyncEvent[]): Promise<void> {
+  if (IS_MOCK) return;
   await apiPost("/sync", { events });
+}
+
+export async function syncSprintResult(
+  session: Pick<SprintSession, "questions" | "topic"> & Partial<Pick<SprintSession, "domain">>,
+  result: SprintResult,
+  domain?: string,
+  sessionType = "sprint",
+): Promise<void> {
+  if (IS_MOCK) return;
+  await postSyncEvents(buildSprintSyncEvents(session, result, domain, sessionType));
 }

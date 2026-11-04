@@ -29,6 +29,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
 import { useOnboardingStore, examIdForGoal } from "@/stores/onboarding-store";
+import { saveOnboardingProfile } from "@/services/onboarding";
 import { VEDIC_USE_CASES, DRILLS, PLANS, type VedicUseCaseId } from "@/lib/types/onboarding";
 import { FeatureIntro } from "@/components/onboarding/intros/feature-intro";
 import { FamilyIntro } from "@/components/onboarding/intros/family-intro";
@@ -177,10 +178,11 @@ export function OnboardingModal({ onClose, inline }: Props) {
 
   const [localFirstName, setLocalFirstName] = useState(store.firstName);
   const [localPersona, setLocalPersona] = useState<string | null>(store.persona);
-  // Start blank on every entry: re-opening onboarding must not re-surface the
-  // previous run's goal/temporal answers as already selected.
-  const [localGoal, setLocalGoal] = useState<string | null>(null);
-  const [localTemporal, setLocalTemporal] = useState<TemporalWindowId | null>(null);
+  // Prefilled from the saved profile (server-hydrated after login), so re-opening shows what the learner already chose.
+  const [localGoal, setLocalGoal] = useState<string | null>(store.goal);
+  const [localTemporal, setLocalTemporal] = useState<TemporalWindowId | null>(store.temporalWindow);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [localTriggers, setLocalTriggers] = useState<string[]>(store.triggers);
   const [localSex, setLocalSex] = useState<string | null>(store.sex);
   const [localDob, setLocalDob] = useState(store.dob);
@@ -208,7 +210,10 @@ export function OnboardingModal({ onClose, inline }: Props) {
     setLocalSex(store.sex);
     setLocalDob(store.dob);
     setLocalVedicUseCase(store.vedicUseCase);
-  }, [store.firstName, store.persona, store.triggers, store.sex, store.dob, store.vedicUseCase]);
+    // Late hydration (profile arrives after the modal mounted): fill, never blank, a choice the learner already made here.
+    setLocalGoal((g) => g ?? store.goal);
+    setLocalTemporal((t) => t ?? store.temporalWindow);
+  }, [store.firstName, store.persona, store.triggers, store.sex, store.dob, store.vedicUseCase, store.goal, store.temporalWindow]);
 
   const preloadFamilyHub = showFamily || featureHookVariant === "vedic";
   const preloadSeatBuilder = showFamilyHub;
@@ -330,7 +335,30 @@ useEffect(() => {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (saving) return;
+    // Save to the backend first. Onboarding is only marked complete once the server accepted it.
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await saveOnboardingProfile({
+        firstName: localFirstName,
+        persona: localPersona,
+        goal: localGoal,
+        targetExam: resolvedExamId(),
+        triggers: localTriggers,
+        sex: localSex,
+        dob: localDob,
+        temporalWindow: isExam ? localTemporal : null,
+        activePreps: store.activePreps,
+        isOnboarded: true,
+      });
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Couldn't save your profile. Please try again.");
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
     store.setFirstName(localFirstName);
     store.setPersona(localPersona);
     store.setGoal(localGoal);
@@ -537,6 +565,11 @@ useEffect(() => {
       {/* Footer */}
       {!completed && (
         <div className="sticky bottom-0 px-5 pb-6 pt-3">
+          {saveError && (
+            <p role="alert" data-testid="onboarding-save-error" className="mb-2 text-center text-[12px] font-medium text-destructive">
+              {saveError}
+            </p>
+          )}
           <div className="flex items-center justify-between">
             {step > 0 ? (
               <button
@@ -552,7 +585,7 @@ useEffect(() => {
             )}
             <button
               type="button"
-              onClick={step === totalSteps - 1 ? handleFinish : goNext}
+              onClick={step === totalSteps - 1 ? () => void handleFinish() : goNext}
               disabled={!canNext}
               className={cn(
                 "size-10 rounded-full flex items-center justify-center transition-all active:scale-90",

@@ -1,5 +1,7 @@
 export type Friend = {
   id: string;
+  /** Backend friendship id: what POST /social/friends/respond and /remove take (distinct from the user id). */
+  friendshipId?: string;
   name: string;
   initials: string;
   level?: string;

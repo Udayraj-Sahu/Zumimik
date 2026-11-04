@@ -32,14 +32,13 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
-import { syncSprintResult } from "@/services/telemetry";
+import { buildSprintSyncEvents, postSyncEvents, type SyncEvent } from "@/services/telemetry";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
 import type { Question, SprintResult } from "@/lib/types/sprint-session";
 import type { SolveAlongTemplate, RenderMode } from "@/lib/types/template";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { CTA_04, CTA_06, CTA_12, CTA_20, CTA_30, GLASS_015, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
-import { toast } from "@/stores/toast-store";
 
 type PracticeType = "mcq" | "templates";
 type Phase = "config" | "active" | "done";
@@ -50,12 +49,13 @@ export default function PracticePage() {
   const feedback = useFeedback();
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const domain = targetExam;
-  const { data: sprintData } = useSprintTopics(domain);
+  const { data: sprintData, isLoading: topicsLoading, isError: topicsError, refetch: refetchTopics } = useSprintTopics(domain);
   const sprintTopics = sprintData?.topics ?? [];
   const domainLabel = DOMAIN_LABELS[targetExam] || targetExam || "Templates";
   const searchParams = useSearchParams();
   const templateIdParam = searchParams.get("templateId");
   const returnTo = searchParams.get("returnTo") || "/dashboard";
+  const skillParam = searchParams.get("skill");
 
   const [practiceType, setPracticeType] = useState<PracticeType>(templateIdParam ? "templates" : "mcq");
   const [topic, setTopic] = useState("");
@@ -69,7 +69,14 @@ export default function PracticePage() {
   const [rendererCorrect, setRendererCorrect] = useState(0);
   const [, setRendererTotal] = useState(0);
 
-  const { data: session, isLoading, error: sessionError } = usePracticeSession(topic, 10, difficulty, targetExam);
+  const {
+    data: session,
+    isLoading,
+    error: sessionError,
+    refetch: refetchSession,
+  } = usePracticeSession(topic, 10, difficulty, targetExam, { enabled: phase === "active" && practiceType === "mcq" });
+  const [syncState, setSyncState] = useState<"idle" | "saving" | "saved" | "failed">("idle");
+  const pendingSyncRef = useRef<SyncEvent[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [answerCorrectness, setAnswerCorrectness] = useState<Record<string, boolean | null>>({});
@@ -103,6 +110,13 @@ export default function PracticePage() {
     }
   }, [completed]);
 
+  // Deep link from the Explorer: /learn/practice?skill=<catalog skill>. Only a skill the catalog actually serves is
+  // selected; anything else is ignored rather than requested.
+  useEffect(() => {
+    if (!skillParam || topic) return;
+    if (sprintData?.topics.some((t) => t.id === skillParam)) setTopic(skillParam);
+  }, [skillParam, sprintData, topic]);
+
   const sessionQuestionIds = (session?.questions ?? []).map((q) => q.id).join("|");
 
   useEffect(() => {
@@ -119,6 +133,10 @@ export default function PracticePage() {
   }, [sessionQuestionIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startPractice = () => {
+    // Each start asks the backend for a new session (it excludes items already attempted); never reuse a cached one.
+    queryClient.removeQueries({ queryKey: ["practice"] });
+    setSyncState("idle");
+    pendingSyncRef.current = null;
     setPhase("active");
     setCurrentIndex(0);
     setAnswers({});
@@ -169,6 +187,23 @@ export default function PracticePage() {
     if (verdict === "incorrect") feedback.wrong();
   };
 
+  const sendPendingSync = async () => {
+    const events = pendingSyncRef.current;
+    if (!events) return;
+    setSyncState("saving");
+    try {
+      await postSyncEvents(events);
+      // Only now is the progress acknowledged. Clear the pending batch and refresh everything it feeds.
+      pendingSyncRef.current = null;
+      setSyncState("saved");
+      for (const key of ["adaptive-state", "dashboard", "account-summary", "sprint", "profile"]) {
+        void queryClient.invalidateQueries({ queryKey: [key] });
+      }
+    } catch {
+      setSyncState("failed"); // the batch stays pending for Retry
+    }
+  };
+
   const handleNext = async () => {
     if (!session) return;
     setTextAnswer("");
@@ -202,9 +237,9 @@ export default function PracticePage() {
         totalTimeSpent,
         xpEarned: 0,
       };
-      void syncSprintResult(session, telemetryResult, targetExam ?? undefined, "practice").catch(() => {
-        toast.error("Progress could not sync", "Check your connection and try again.");
-      });
+      // Built once: a retry re-sends the SAME event ids, which the backend treats idempotently.
+      pendingSyncRef.current = buildSprintSyncEvents(session, telemetryResult, targetExam ?? undefined, "practice");
+      void sendPendingSync();
     } else {
       setCurrentIndex((i) => i + 1);
       setRevealed(false);
@@ -350,6 +385,24 @@ export default function PracticePage() {
           <>
             <div ref={animateSection} data-section-index="1" className="mb-5">
               <p className="text-micro font-bold uppercase tracking-[0.18em] text-muted-foreground/40 mb-3">Choose Topic</p>
+              {topicsLoading && (
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 animate-pulse" aria-busy="true" data-testid="topics-loading">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="h-[92px] rounded-3xl" style={{ background: GLASS_BG }} />
+                  ))}
+                </div>
+              )}
+              {topicsError && !topicsLoading && (
+                <div role="alert" data-testid="topics-error" className="rounded-3xl p-5 text-center" style={{ background: GLASS_BG, border: "1px solid var(--red-12)" }}>
+                  <p className="text-[13px] font-semibold text-destructive">Couldn&apos;t load practice topics.</p>
+                  <Button onClick={() => refetchTopics()} className="mt-3 px-5 py-2.5">Retry</Button>
+                </div>
+              )}
+              {!topicsLoading && !topicsError && sprintTopics.length === 0 && (
+                <p role="status" data-testid="topics-empty" className="rounded-3xl p-5 text-center text-[13px] text-muted-foreground/60" style={{ background: GLASS_BG }}>
+                  No practice topics are available yet.
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-2.5 max-[359px]:gap-1.5 sm:grid-cols-3">
                 {sprintTopics.map((t) => {
                   const Icon = t.icon;
@@ -533,7 +586,8 @@ export default function PracticePage() {
   /*  DONE PHASE — MCQ RESULTS                                        */
   /* ================================================================ */
   if (phase === "done" && completed) {
-    const accuracy = Math.round((completed.correct / completed.total) * 100);
+    // total is 0 when every answer was deferred to server-side checking: no local verdict to show.
+    const accuracy = completed.total > 0 ? Math.round((completed.correct / completed.total) * 100) : 0;
     return (
       <PageContainer ref={contentRef} size="sm" className="pt-8">
         <div className="text-center mb-6 max-[359px]:mb-4">
@@ -541,12 +595,29 @@ export default function PracticePage() {
             "mx-auto mb-4 grid size-20 place-items-center rounded-full text-[28px] font-bold backdrop-blur-xl",
             accuracy >= 80 ? "bg-primary/10 text-primary" : accuracy >= 50 ? "bg-[var(--amber-10)] text-[var(--amber)]" : "bg-destructive/10 text-destructive",
           )}>
-            {accuracy}%
+            {completed.total > 0 ? `${accuracy}%` : "--"}
           </div>
           <h2 className="text-[20px] font-bold tracking-[-0.02em] text-foreground">
             {accuracy >= 80 ? "Well Done!" : accuracy >= 50 ? "Keep Practicing!" : "Review & Improve!"}
           </h2>
         </div>
+
+        <p
+          role="status"
+          data-testid="sync-status"
+          className={cn("mb-4 text-center text-[12px]", syncState === "failed" ? "text-destructive" : "text-muted-foreground/60")}
+        >
+          {syncState === "saving" && "Saving your progress…"}
+          {syncState === "saved" && "Progress saved."}
+          {syncState === "failed" && (
+            <>
+              Couldn&apos;t save your progress.{" "}
+              <button type="button" onClick={() => void sendPendingSync()} className="underline underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Retry
+              </button>
+            </>
+          )}
+        </p>
 
         <div className="grid grid-cols-2 gap-3 mb-5 max-[359px]:gap-2 max-[359px]:mb-4">
           <GlassCard className="p-4 max-[359px]:p-3 text-center">
@@ -763,7 +834,7 @@ export default function PracticePage() {
             </button>
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={() => refetchSession()}
               className="rounded-xl border border-white/[0.08] px-5 py-2.5 text-micro font-bold uppercase tracking-wider text-foreground outline-none transition-transform hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring"
             >
               Retry
@@ -780,6 +851,29 @@ export default function PracticePage() {
         <div className="h-12 rounded-2xl mb-4" style={{ background: GLASS_BG }} />
         <div className="h-48 rounded-3xl mb-4" style={{ background: GLASS_BG }} />
         <div className="h-12 rounded-2xl" style={{ background: GLASS_BG }} />
+      </PageContainer>
+    );
+  }
+
+  if (session.questions.length === 0) {
+    return (
+      <PageContainer>
+        <div
+          role="status"
+          data-testid="session-empty"
+          className="flex flex-col items-center gap-4 rounded-3xl p-8 text-center"
+          style={{ background: GLASS_BG, border: GLASS_BORDER }}
+        >
+          <p className="text-[13px] font-semibold text-foreground">No questions are available for this topic right now.</p>
+          <p className="text-[12px] text-muted-foreground/60">Try another topic, or come back later.</p>
+          <button
+            type="button"
+            onClick={() => { setPhase("config"); }}
+            className="rounded-xl bg-primary px-5 py-2.5 text-micro font-bold uppercase tracking-wider text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Choose another topic
+          </button>
+        </div>
       </PageContainer>
     );
   }

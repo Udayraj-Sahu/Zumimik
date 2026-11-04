@@ -1,5 +1,5 @@
 import type { Friend, FriendActivity } from "@/lib/types/friends";
-import { apiGet } from "./api";
+import { apiGet, apiPost } from "./api";
 import { mapBackendFriends, type BackendFriendsResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
@@ -32,4 +32,15 @@ export async function getFriendActivity(): Promise<FriendActivity[]> {
 
 export async function getPendingRequests(): Promise<Friend[]> {
   return (await getFriendsSummary()).requests;
+}
+
+export type FriendRequestAction = "accept" | "decline";
+
+/**
+ * POST /api/v1/social/friends/respond { friendship_id, action: "accept" | "decline" | "block" } -> { friendship_id, status }.
+ * (404 if there is no such pending request, 410 if it expired.) Mock mode has no server, so it is a no-op there.
+ */
+export async function respondToFriendRequest(friendshipId: string, action: FriendRequestAction): Promise<void> {
+  if (IS_MOCK) return;
+  await apiPost("/social/friends/respond", { friendship_id: friendshipId, action });
 }

@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Users, UserPlus, Swords, Zap, Award, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
-import { useFriends } from "@/hooks/queries/use-friends";
+import { useFriends, useRespondToFriendRequest } from "@/hooks/queries/use-friends";
+import { toast } from "@/stores/toast-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -14,6 +15,14 @@ import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 export default function FriendsPage() {
   usePageMeta("Friends — Zuzumik");
   const { data, isLoading, error } = useFriends();
+  const respond = useRespondToFriendRequest();
+  const answer = (friendshipId: string | undefined, name: string, action: "accept" | "decline") => {
+    if (!friendshipId) return;
+    respond.mutate(
+      { friendshipId, action },
+      { onError: (err) => toast.error(action === "accept" ? "Couldn't accept the request" : "Couldn't decline the request", err instanceof Error ? err.message : name) },
+    );
+  };
   const [tab, setTab] = useState<"friends" | "activity" | "requests">("friends");
   const listRef = useRef<HTMLDivElement>(null);
   const { headerRef, animateSection, staggerIn } = useEntranceAnimations();
@@ -204,6 +213,8 @@ export default function FriendsPage() {
             <button
               type="button"
               aria-label={`Accept friend request from ${f.name}`}
+              onClick={() => answer(f.friendshipId, f.name, "accept")}
+              disabled={respond.isPending || !f.friendshipId}
               className="grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground outline-none transition-transform hover:scale-[1.1] active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Check size={14} />
@@ -211,6 +222,8 @@ export default function FriendsPage() {
             <button
               type="button"
               aria-label={`Reject friend request from ${f.name}`}
+              onClick={() => answer(f.friendshipId, f.name, "decline")}
+              disabled={respond.isPending || !f.friendshipId}
               className="grid size-11 place-items-center rounded-xl text-muted-foreground outline-none transition-colors hover:text-foreground active:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
               style={{ background: GLASS_BG, border: `1px solid ${GLASS_BORDER}` }}
             >

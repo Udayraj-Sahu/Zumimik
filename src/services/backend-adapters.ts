@@ -92,7 +92,12 @@ function initialsFor(name: string): string {
 }
 
 function mapFriend(friend: BackendFriend): Friend {
-  return { id: friend.user_id, name: friend.name, initials: initialsFor(friend.name) };
+  return {
+    id: friend.user_id,
+    ...(friend.friendship_id ? { friendshipId: friend.friendship_id } : {}),
+    name: friend.name,
+    initials: initialsFor(friend.name),
+  };
 }
 
 export function mapBackendFriends(response: BackendFriendsResponse): {
@@ -143,7 +148,7 @@ export type BackendTechniqueSummaryResponse = {
     name: string;
     topic?: string | null;
     sub_topic?: string | null;
-    is_root?: boolean;
+    is_root?: boolean | null;
     problem_count: number;
   }>;
 };
