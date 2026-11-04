@@ -1,0 +1,80 @@
+.wrap {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  padding: 20px;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background: var(--panel);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+}
+
+.list {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid;
+  border-radius: 999px;
+}
+
+.cyan {
+  background: var(--cyan-bg);
+  border-color: var(--cyan-border);
+  color: var(--cyan);
+}
+
+.mint {
+  background: var(--mint-bg);
+  border-color: var(--mint-border);
+  color: var(--mint);
+}
+
+.violet {
+  background: var(--violet-bg);
+  border-color: var(--violet-border);
+  color: var(--violet);
+}
+
+.text {
+  margin: 0;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.rule {
+  height: 1px;
+  margin: 16px 0;
+  background: var(--border);
+}
+
+.caption {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}

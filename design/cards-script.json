@@ -1,0 +1,3225 @@
+[
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Dashboard · Carousel cards",
+      "x": 2350,
+      "y": 0,
+      "width": 1878,
+      "height": 560,
+      "props": {
+        "fill": "#050505",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "FrameTitle",
+      "x": 36,
+      "y": 22,
+      "width": 900,
+      "text": "Dashboard · Carousel cards (shortened)",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "FrameSub",
+      "x": 36,
+      "y": 46,
+      "width": 1200,
+      "text": "Outer cards sized to their content — dead space removed. Heights from the app at a 390px viewport.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Caption/1",
+      "x": 36,
+      "y": 64,
+      "width": 250,
+      "text": "1 · Profile status",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Height/1",
+      "x": 298,
+      "y": 64,
+      "width": 80,
+      "text": "366px",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Card/ProfileStatus",
+      "x": 36,
+      "y": 90,
+      "width": 342,
+      "height": 366,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#C8FF5A0F",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Header",
+      "x": 24,
+      "y": 12,
+      "width": 294,
+      "height": 44,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Avatar",
+      "x": 0,
+      "y": 6,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "AvatarInitial",
+      "x": 0,
+      "y": 12,
+      "width": 32,
+      "text": "A",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "HeaderTitle",
+      "x": 42,
+      "y": 16,
+      "width": 160,
+      "text": "Profile complete",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Pct",
+      "x": 214,
+      "y": 10,
+      "width": 80,
+      "height": 24,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 12,
+        "stroke": "#C8FF5A33",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 6,
+      "width": 80,
+      "text": "✦ 100%",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 10
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "HeaderRule",
+      "x": 24,
+      "y": 56,
+      "width": 294,
+      "height": 1,
+      "props": {
+        "fill": "#FFFFFF0F"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Ring",
+      "x": 125,
+      "y": 86,
+      "width": 92,
+      "height": 92,
+      "props": {
+        "fill": "#00000000",
+        "stroke": "#C8FF5A",
+        "strokeWeight": 5
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingIcon",
+      "x": 125,
+      "y": 104,
+      "width": 92,
+      "text": "✦",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 17,
+        "fill": "#C8FF5A",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingPct",
+      "x": 125,
+      "y": 128,
+      "width": 92,
+      "text": "100%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Ready",
+      "x": 24,
+      "y": 196,
+      "width": 294,
+      "text": "You’re all set,",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "ReadySub",
+      "x": 24,
+      "y": 230,
+      "width": 294,
+      "text": "Your prep is tailored to your goal — let’s make it count.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "center",
+        "lineHeight": "150%"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip/Name",
+      "x": 24,
+      "y": 268,
+      "width": 58,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 58,
+      "text": "Name",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 18
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip/Persona",
+      "x": 88,
+      "y": 268,
+      "width": 70,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 70,
+      "text": "Persona",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 20
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip/Goal",
+      "x": 164,
+      "y": 268,
+      "width": 48,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 48,
+      "text": "Goal",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 22
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip/Vibe",
+      "x": 218,
+      "y": 268,
+      "width": 50,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 50,
+      "text": "Vibe",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 24
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip/Details",
+      "x": 274,
+      "y": 268,
+      "width": 62,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 62,
+      "text": "Details",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 26
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "FootL",
+      "x": 24,
+      "y": 340,
+      "width": 160,
+      "text": "PROFILE READY",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "letterSpacing": "14%"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "FootR",
+      "x": 168,
+      "y": 340,
+      "width": 150,
+      "text": "STREAKS UNLOCKED",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A",
+        "letterSpacing": "14%",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 5
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Caption/2",
+      "x": 402,
+      "y": 64,
+      "width": 250,
+      "text": "2 · Your stats",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Height/2",
+      "x": 664,
+      "y": 64,
+      "width": 80,
+      "text": "321px",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Card/YourStats",
+      "x": 402,
+      "y": 90,
+      "width": 342,
+      "height": 321,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#C8FF5A0A",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Header",
+      "x": 16,
+      "y": 16,
+      "width": 310,
+      "height": 36,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 32
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 0,
+      "y": 0,
+      "width": 36,
+      "height": 36,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 33
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 9,
+      "width": 36,
+      "text": "↗",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 34
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "H1",
+      "x": 46,
+      "y": 2,
+      "width": 150,
+      "text": "YOUR STATS",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 33
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "H2",
+      "x": 46,
+      "y": 20,
+      "width": 150,
+      "text": "This week",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 33
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Details",
+      "x": 234,
+      "y": 6,
+      "width": 76,
+      "height": 24,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 33
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 6,
+      "width": 76,
+      "text": "Details ↗",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 38
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Tile/Accuracy",
+      "x": 16,
+      "y": 64,
+      "width": 150,
+      "height": 84,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 32
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 12,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#34D3991F",
+        "cornerRadius": 10
+      },
+      "parent": {
+        "$step": 40
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 7,
+      "width": 32,
+      "text": "◎",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#34D399"
+      },
+      "parent": {
+        "$step": 41
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Trend",
+      "x": 92,
+      "y": 14,
+      "width": 46,
+      "height": 18,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 40
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 46,
+      "text": "+4%",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 43
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 12,
+      "y": 46,
+      "width": 126,
+      "text": "85%",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 40
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 70,
+      "width": 126,
+      "text": "Accuracy",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 40
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Tile/Questions",
+      "x": 176,
+      "y": 64,
+      "width": 150,
+      "height": 84,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 32
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 12,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#22D3EE1F",
+        "cornerRadius": 10
+      },
+      "parent": {
+        "$step": 47
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 7,
+      "width": 32,
+      "text": "◎",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#22D3EE"
+      },
+      "parent": {
+        "$step": 48
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Trend",
+      "x": 92,
+      "y": 14,
+      "width": 46,
+      "height": 18,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 47
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 46,
+      "text": "+23",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 50
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 12,
+      "y": 46,
+      "width": 126,
+      "text": "2,100",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 47
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 70,
+      "width": 126,
+      "text": "Questions",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 47
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Tile/Percentile",
+      "x": 16,
+      "y": 158,
+      "width": 150,
+      "height": 84,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 32
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 12,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#A78BFA1F",
+        "cornerRadius": 10
+      },
+      "parent": {
+        "$step": 54
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 7,
+      "width": 32,
+      "text": "◎",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#A78BFA"
+      },
+      "parent": {
+        "$step": 55
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Trend",
+      "x": 92,
+      "y": 14,
+      "width": 46,
+      "height": 18,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 54
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 46,
+      "text": "Top 8%",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 57
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 12,
+      "y": 46,
+      "width": 126,
+      "text": "68%ile",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 54
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 70,
+      "width": 126,
+      "text": "Percentile",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 54
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Tile/Speed",
+      "x": 176,
+      "y": 158,
+      "width": 150,
+      "height": 84,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 32
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 12,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#FBBF241F",
+        "cornerRadius": 10
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 7,
+      "width": 32,
+      "text": "◎",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#FBBF24"
+      },
+      "parent": {
+        "$step": 62
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Trend",
+      "x": 92,
+      "y": 14,
+      "width": 46,
+      "height": 18,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 46,
+      "text": "-2s",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#B3B3B3"
+      },
+      "parent": {
+        "$step": 64
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 12,
+      "y": 46,
+      "width": 126,
+      "text": "72s avg",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 70,
+      "width": 126,
+      "text": "Speed",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Caption/3",
+      "x": 768,
+      "y": 64,
+      "width": 250,
+      "text": "3 · This week + habits",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Height/3",
+      "x": 1030,
+      "y": 64,
+      "width": 80,
+      "text": "424px",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Card/ThisWeek",
+      "x": 768,
+      "y": 90,
+      "width": 342,
+      "height": 424,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#34D3990F",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Header",
+      "x": 16,
+      "y": 16,
+      "width": 310,
+      "height": 40,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 0,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "props": {
+        "fill": "#34D3991F",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 10,
+      "width": 40,
+      "text": "▲",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fill": "#34D399"
+      },
+      "parent": {
+        "$step": 72
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 54,
+      "y": 4,
+      "width": 160,
+      "text": "THIS WEEK",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "letterSpacing": "18%"
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Count",
+      "x": 214,
+      "y": 12,
+      "width": 96,
+      "text": "● 3 day",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/0",
+      "x": 16,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "S",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 76
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/1",
+      "x": 63,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "M",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 78
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/2",
+      "x": 110,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "T",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 80
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/3",
+      "x": 157,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "W",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#4D5552"
+      },
+      "parent": {
+        "$step": 82
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/4",
+      "x": 204,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "T",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 84
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/5",
+      "x": 251,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "F",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Day/6",
+      "x": 298,
+      "y": 74,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "T",
+      "x": 0,
+      "y": 8,
+      "width": 28,
+      "text": "S",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#4D5552"
+      },
+      "parent": {
+        "$step": 88
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Rule",
+      "x": 16,
+      "y": 118,
+      "width": 310,
+      "height": 1,
+      "props": {
+        "fill": "#FFFFFF0F"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "HabitLabel",
+      "x": 16,
+      "y": 130,
+      "width": 200,
+      "text": "DAILY HABITS",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "letterSpacing": "18%"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "HabitTitle",
+      "x": 16,
+      "y": 148,
+      "width": 300,
+      "text": "Build consistency",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Ring",
+      "x": 16,
+      "y": 190,
+      "width": 76,
+      "height": 76,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 5
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingNum",
+      "x": 16,
+      "y": 200,
+      "width": 76,
+      "text": "3",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 20,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingDen",
+      "x": 16,
+      "y": 224,
+      "width": 76,
+      "text": "/ 5",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "RowIcon1",
+      "x": 112,
+      "y": 194,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 6,
+      "width": 28,
+      "text": "▲",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#34D399"
+      },
+      "parent": {
+        "$step": 96
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RowT1",
+      "x": 148,
+      "y": 196,
+      "width": 178,
+      "text": "3 day streak",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RowS1",
+      "x": 148,
+      "y": 212,
+      "width": 178,
+      "text": "Best 5 days",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "RowIcon2",
+      "x": 112,
+      "y": 240,
+      "width": 28,
+      "height": 28,
+      "props": {
+        "fill": "#FFFFFF0F",
+        "cornerRadius": 9
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 6,
+      "width": 28,
+      "text": "◎",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#34D399"
+      },
+      "parent": {
+        "$step": 100
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RowT2",
+      "x": 148,
+      "y": 242,
+      "width": 110,
+      "text": "Completion",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RowP2",
+      "x": 258,
+      "y": 242,
+      "width": 68,
+      "text": "78%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "BarTrack",
+      "x": 148,
+      "y": 262,
+      "width": 178,
+      "height": 4,
+      "props": {
+        "fill": "#FFFFFF1A",
+        "cornerRadius": 2
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "BarFill",
+      "x": 148,
+      "y": 262,
+      "width": 139,
+      "height": 4,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 2
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip1",
+      "x": 16,
+      "y": 300,
+      "width": 62,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 62,
+      "text": "Sprint",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#CCCCCC"
+      },
+      "parent": {
+        "$step": 106
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip2",
+      "x": 84,
+      "y": 300,
+      "width": 70,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 70,
+      "text": "Practice",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#CCCCCC"
+      },
+      "parent": {
+        "$step": 108
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Chip3",
+      "x": 160,
+      "y": 300,
+      "width": 50,
+      "height": 20,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 10,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 4,
+      "width": 50,
+      "text": "Read",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#CCCCCC"
+      },
+      "parent": {
+        "$step": 110
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "ChipMore",
+      "x": 216,
+      "y": 304,
+      "width": 24,
+      "text": "+2",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#CCCCCC"
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "ViewBtn",
+      "x": 16,
+      "y": 336,
+      "width": 310,
+      "height": 44,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 22
+      },
+      "parent": {
+        "$step": 70
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 14,
+      "width": 310,
+      "text": "VIEW HABITS  ↗",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 113
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Caption/4",
+      "x": 1134,
+      "y": 64,
+      "width": 250,
+      "text": "4 · Practice + technique",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Height/4",
+      "x": 1396,
+      "y": 64,
+      "width": 80,
+      "text": "313px",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Card/PracticeTechnique",
+      "x": 1134,
+      "y": 90,
+      "width": 342,
+      "height": 313,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 24,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Action/Practice",
+      "x": 12,
+      "y": 12,
+      "width": 318,
+      "height": 140,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#22D3EE14",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 117
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Top",
+      "x": 12,
+      "y": 10,
+      "width": 294,
+      "height": 36,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 118
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 0,
+      "y": 0,
+      "width": 36,
+      "height": 36,
+      "props": {
+        "fill": "#22D3EE14",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 119
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 9,
+      "width": 36,
+      "text": "▶",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#22D3EE"
+      },
+      "parent": {
+        "$step": 120
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 46,
+      "y": 12,
+      "width": 220,
+      "text": "PRACTICE MODE",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#22D3EE",
+        "letterSpacing": "18%"
+      },
+      "parent": {
+        "$step": 119
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 12,
+      "y": 52,
+      "width": 294,
+      "text": "Master with templates",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 118
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Desc",
+      "x": 12,
+      "y": 78,
+      "width": 294,
+      "text": "Guided exercises · Build speed & accuracy",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 118
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Cta",
+      "x": 12,
+      "y": 98,
+      "width": 294,
+      "height": 30,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#22D3EE",
+              "#22D3EE"
+            ]
+          }
+        ],
+        "cornerRadius": 15
+      },
+      "parent": {
+        "$step": 118
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 8,
+      "width": 294,
+      "text": "PRACTICE NOW",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 125
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Action/Technique",
+      "x": 12,
+      "y": 162,
+      "width": 318,
+      "height": 139,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#FBBF240F",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 117
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Top",
+      "x": 12,
+      "y": 10,
+      "width": 294,
+      "height": 36,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 0,
+      "y": 0,
+      "width": 36,
+      "height": 36,
+      "props": {
+        "fill": "#FBBF240F",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 128
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 9,
+      "width": 36,
+      "text": "■",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#FBBF24"
+      },
+      "parent": {
+        "$step": 129
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 46,
+      "y": 12,
+      "width": 220,
+      "text": "TECHNIQUE LIBRARY",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#FBBF24",
+        "letterSpacing": "18%"
+      },
+      "parent": {
+        "$step": 128
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 12,
+      "y": 52,
+      "width": 294,
+      "text": "Learn a technique",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Desc",
+      "x": 12,
+      "y": 78,
+      "width": 294,
+      "text": "Browse core methods · Master each approach",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Cta",
+      "x": 12,
+      "y": 97,
+      "width": 294,
+      "height": 30,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#FBBF24",
+              "#FBBF24"
+            ]
+          }
+        ],
+        "cornerRadius": 15
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 8,
+      "width": 294,
+      "text": "EXPLORE TECHNIQUES",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#05150D"
+      },
+      "parent": {
+        "$step": 134
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Caption/5",
+      "x": 1500,
+      "y": 64,
+      "width": 250,
+      "text": "5 · Readiness",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Height/5",
+      "x": 1762,
+      "y": 64,
+      "width": 80,
+      "text": "405px",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Card/Readiness",
+      "x": 1500,
+      "y": 90,
+      "width": 342,
+      "height": 405,
+      "props": {
+        "fills": [
+          {
+            "type": "linearGradient",
+            "stops": [
+              "#22D3EE14",
+              "#FFFFFF0A"
+            ]
+          }
+        ]
+      },
+      "parent": {
+        "$step": 0
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Progress",
+      "x": 20,
+      "y": 20,
+      "width": 302,
+      "height": 210,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 138
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Head",
+      "x": 0,
+      "y": 0,
+      "width": 302,
+      "height": 36,
+      "props": {
+        "fill": "#00000000"
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 0,
+      "y": 0,
+      "width": 36,
+      "height": 36,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 12
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 9,
+      "width": 36,
+      "text": "▲",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 141
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 48,
+      "y": 12,
+      "width": 190,
+      "text": "YOUR PROGRESS",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "letterSpacing": "16%"
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Preps",
+      "x": 244,
+      "y": 6,
+      "width": 58,
+      "height": 22,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 11
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 58,
+      "text": "1 prep",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 144
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Ring",
+      "x": 0,
+      "y": 48,
+      "width": 92,
+      "height": 92,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "stroke": "#C8FF5A",
+        "strokeWeight": 6
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingPct",
+      "x": 0,
+      "y": 76,
+      "width": 92,
+      "text": "84%",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 20,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RingCap",
+      "x": 0,
+      "y": 100,
+      "width": 92,
+      "text": "ready",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 8,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "K1",
+      "x": 108,
+      "y": 52,
+      "width": 194,
+      "text": "CURRICULUM PREPAREDNESS",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 10,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "letterSpacing": "10%"
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "K2",
+      "x": 108,
+      "y": 72,
+      "width": 194,
+      "text": "You’ve covered 2 of 5 topics expected for CAT.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#E5E5E5",
+        "lineHeight": "140%"
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "OnTrack",
+      "x": 108,
+      "y": 118,
+      "width": 84,
+      "height": 22,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 11,
+        "stroke": "#C8FF5A33",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 0,
+      "y": 5,
+      "width": 84,
+      "text": "● On track",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 9,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 151
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "ExamRow",
+      "x": 0,
+      "y": 156,
+      "width": 302,
+      "height": 42,
+      "props": {
+        "fill": "#FFFFFF0A",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF0F",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 139
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Icon",
+      "x": 12,
+      "y": 9,
+      "width": 24,
+      "height": 24,
+      "props": {
+        "fill": "#C8FF5A0F",
+        "cornerRadius": 8
+      },
+      "parent": {
+        "$step": 153
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Glyph",
+      "x": 0,
+      "y": 5,
+      "width": 24,
+      "text": "●",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 154
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Date",
+      "x": 46,
+      "y": 14,
+      "width": 200,
+      "text": "Exam Sep 12, 2026",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 153
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Edit",
+      "x": 274,
+      "y": 13,
+      "width": 20,
+      "text": "✎",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#5A5A5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 153
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Rule",
+      "x": 0,
+      "y": 250,
+      "width": 342,
+      "height": 1,
+      "props": {
+        "fill": "#FFFFFF0F"
+      },
+      "parent": {
+        "$step": 138
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BigDays",
+      "x": 0,
+      "y": 276,
+      "width": 342,
+      "text": "38",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 48,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 138
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BigCap",
+      "x": 0,
+      "y": 336,
+      "width": 342,
+      "text": "REMAINING FOR CAT",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#8B8B8B",
+        "letterSpacing": "28%",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 138
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BigSub",
+      "x": 0,
+      "y": 358,
+      "width": 342,
+      "text": "132h of focused practice",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#C8FF5A",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 138
+      }
+    }
+  }
+]

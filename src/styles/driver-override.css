@@ -1,0 +1,141 @@
+/* driver.js popover/overlay override — APK lime design language */
+:root {
+  --driver-popover-font-family: var(--font-inter), var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+.ea-tour-popover.driver-popover {
+  background: linear-gradient(180deg, #14170f 0%, #0c0e0a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  color: #f5f5f4;
+  max-width: min(320px, calc(100vw - 48px));
+}
+
+.ea-tour-popover.driver-popover .driver-popover-arrow {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #14170f;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--lime);
+  padding-top: 6px;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-description {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.ea-tour-popover.driver-popover .driver-popover-close-btn {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 22px;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ea-tour-popover.driver-popover .driver-popover-progress-text {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-footer {
+  margin-top: 12px;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-prev-btn,
+.ea-tour-popover.driver-popover .driver-popover-footer-btn {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.75);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ea-tour-popover.driver-popover .driver-popover-next-btn {
+  border: none;
+  background: var(--lime-solid);
+  color: #0a0c0a;
+  box-shadow: 0 0 24px var(--lime-25);
+}
+
+.ea-tour-popover.driver-popover .driver-popover-next-btn:hover {
+  background: var(--lime-light);
+}
+
+.driver-active .ea-tour-overlay.driver-overlay {
+  backdrop-filter: blur(2px);
+}
+
+/* ---- light theme: the popover is portaled to <body>, so use-driver tags it
+   with data-theme-scope + .light; these overrides keep it legible on light
+   surfaces without leaving the dark design language. ---- */
+.light.ea-tour-popover.driver-popover {
+  background: linear-gradient(180deg, #f8faf5 0%, #eef2e6 100%);
+  border: 1px solid rgba(10, 12, 10, 0.1);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  color: #17190f;
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-arrow {
+  border: 1px solid rgba(10, 12, 10, 0.1);
+  background: #f8faf5;
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-title {
+  color: var(--lime);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-description {
+  color: rgba(23, 25, 15, 0.65);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-close-btn {
+  color: rgba(23, 25, 15, 0.45);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-close-btn:hover {
+  color: #17190f;
+  background: rgba(10, 12, 10, 0.06);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-progress-text {
+  color: rgba(23, 25, 15, 0.4);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-prev-btn,
+.light.ea-tour-popover.driver-popover .driver-popover-footer-btn {
+  border: 1px solid rgba(10, 12, 10, 0.14);
+  background: rgba(10, 12, 10, 0.04);
+  color: rgba(23, 25, 15, 0.75);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-next-btn {
+  border: none;
+  background: #a3e635;
+  color: #0a0c0a;
+  box-shadow: 0 0 24px rgba(120, 180, 20, 0.25);
+}
+
+.light.ea-tour-popover.driver-popover .driver-popover-next-btn:hover {
+  background: #b3ee4a;
+}

@@ -1,0 +1,68 @@
+import type { NotificationItem } from "@/lib/types/notifications";
+
+export const NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "n1",
+    type: "sprint_reminder",
+    title: "Sprint Duel Starting Soon",
+    message: "Your 8PM Sprint Duel begins in 30 minutes. Warm up and get ready!",
+    time: "2m ago",
+    read: false,
+  },
+  {
+    id: "n2",
+    type: "sprint_reminder",
+    title: "Mock CAT #7 Reminder",
+    message: "Your mock test is scheduled for tomorrow at 10AM. Don't miss it!",
+    time: "1h ago",
+    read: false,
+  },
+  {
+    id: "n3",
+    type: "achievement",
+    title: "Achievement Unlocked: Speed Demon!",
+    message: "You averaged under 5 seconds per question. Incredible reflexes!",
+    time: "1d ago",
+    read: false,
+  },
+  {
+    id: "n4",
+    type: "challenge",
+    title: "Group Challenge Available",
+    message: "A new Group Challenge is live. Team up with friends and compete!",
+    time: "2d ago",
+    read: true,
+  },
+  {
+    id: "n5",
+    type: "achievement",
+    title: "New High Score",
+    message: "You set a new personal best in Logical Reasoning — 92%!",
+    time: "3d ago",
+    read: true,
+  },
+  {
+    id: "n6",
+    type: "system",
+    title: "Rank Update",
+    message: "You climbed to #47 in the Arena Rankings. Keep pushing!",
+    time: "4d ago",
+    read: true,
+  },
+  {
+    id: "n7",
+    type: "system",
+    title: "Weekly Report Ready",
+    message: "Your weekly performance summary is now available in Analytics.",
+    time: "5d ago",
+    read: true,
+  },
+  {
+    id: "n8",
+    type: "challenge",
+    title: "Sprint Duel Results",
+    message: "You placed 3rd in last night's Sprint Duel. +150 XP earned!",
+    time: "6d ago",
+    read: true,
+  },
+];

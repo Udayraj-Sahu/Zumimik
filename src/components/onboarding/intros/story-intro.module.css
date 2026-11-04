@@ -1,0 +1,986 @@
+/* Decode your day — scoped to .dd.
+   .dd is applied twice: by the StoryIntro body, and by the DdSheet portal root
+   (portalled to document.body, so it cannot rely on an ancestor for its
+   colours). Every surface talks in the global intro ladder from globals.css —
+   --page is the recessed well, --tile is the raised panel, --track is an inert
+   control — so no concrete colour is written here. */
+
+.dd {
+  color: var(--text);
+}
+
+.dd * {
+  box-sizing: border-box;
+}
+
+.dd p {
+  margin: 0;
+}
+
+.dd .mut {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.dd h2 {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  margin: 16px 0 8px;
+  text-transform: uppercase;
+}
+
+.dd .card {
+  background: var(--tile);
+  border: 1px solid var(--border-1);
+  border-radius: 16px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  padding: 12px;
+  position: relative;
+}
+
+.dd .card::before {
+  background: linear-gradient(90deg, transparent, var(--neon-border), transparent);
+  content: "";
+  height: 1px;
+  inset: 0 0 auto;
+  position: absolute;
+}
+
+.dd .big {
+  color: var(--neon);
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  margin: 4px 0 10px;
+  text-shadow: 0 0 24px var(--neon-border);
+}
+
+.dd .big small {
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+.dd .wins {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.dd .wins > div {
+  background: var(--page);
+  border-radius: 12px;
+  padding: 9px 6px;
+  text-align: center;
+}
+
+.dd .wins b {
+  display: block;
+  font-size: 22px;
+}
+
+.dd .wins span {
+  color: var(--text-muted);
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+.dd .bar {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(24, 1fr);
+  margin: 12px 0 4px;
+}
+
+.dd .bar i {
+  background: var(--track);
+  border-radius: 4px;
+  height: 22px;
+}
+
+.dd .bar i.a {
+  background: var(--cyan);
+}
+
+.dd .bar i.h {
+  background: var(--neon);
+  opacity: 0.55;
+}
+
+.dd .tk {
+  color: var(--text-dim);
+  display: flex;
+  font-size: 11px;
+  justify-content: space-between;
+}
+
+.dd .bh,
+.dd .hd {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 10px;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.dd .ic {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 50%;
+  display: grid;
+  flex: none;
+  font-size: 20px;
+  height: 40px;
+  place-items: center;
+  width: 40px;
+}
+
+.dd .t {
+  flex: 1;
+  min-width: 0;
+}
+
+.dd .t b,
+.dd .bh b {
+  display: block;
+  font-size: 15.5px;
+}
+
+.dd .t .s {
+  color: var(--text-muted);
+  display: block;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd .bh b {
+  flex: 1;
+}
+
+.dd .cnt {
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.dd .cnt.y {
+  color: var(--neon);
+}
+
+.dd .cv {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.dd .op .cv {
+  transform: rotate(180deg);
+}
+
+/* Tiles align flush with the group header above them: the card already carries
+   the inset, so re-padding here would double it. */
+.dd .bks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0;
+}
+
+.dd .it {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  margin: 0;
+  padding: 10px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.dd .it.on {
+  background: var(--neon-bg);
+  border-color: var(--neon);
+}
+
+.dd .it .ic {
+  background: var(--tile);
+  font-size: 18px;
+  height: 36px;
+  width: 36px;
+}
+
+.dd .sw {
+  background: var(--track);
+  border-radius: 999px;
+  flex: none;
+  height: 26px;
+  position: relative;
+  transition: background-color 0.2s;
+  width: 44px;
+}
+
+.dd .sw::after {
+  background: var(--text-muted);
+  border-radius: 50%;
+  content: "";
+  height: 20px;
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  transition: left 0.2s, background-color 0.2s;
+  width: 20px;
+}
+
+.dd .on > .hd .sw {
+  background: var(--lime-solid);
+}
+
+.dd .on > .hd .sw::after {
+  background: var(--on-accent);
+  left: 21px;
+}
+
+.dd .card.on {
+  border-color: var(--neon);
+}
+
+.dd .bd {
+  border-top: 1px solid var(--border-0);
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.dd .on > .bd {
+  display: block;
+}
+
+.dd .r {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.dd .r:first-child {
+  margin-top: 0;
+}
+
+.dd select {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 9px;
+}
+
+.dd .ch {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 11px;
+}
+
+.dd .ch.on {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.dd .dy {
+  border-radius: 10px;
+  height: 33px;
+  padding: 0;
+  width: 33px;
+}
+
+.dd .add {
+  background: none;
+  border: 1px dashed var(--text-muted);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  padding: 8px;
+  width: 100%;
+}
+
+.dd .q {
+  font-size: 14.5px;
+  font-weight: 700;
+  margin: 2px 0 8px;
+}
+
+.dd .cat {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 11px;
+}
+
+.dd .dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px 0;
+}
+
+.dd .dots i {
+  background: var(--track);
+  border-radius: 6px;
+  display: grid;
+  font-size: 12px;
+  font-style: normal;
+  height: 22px;
+  place-items: center;
+  width: 22px;
+}
+
+.dd .dots .p {
+  background: var(--neon);
+}
+
+.dd .dots .l {
+  background: var(--orange);
+}
+
+.dd .dots .n {
+  background: var(--text-muted);
+  opacity: 0.6;
+}
+
+.dd .sg {
+  align-items: center;
+  background: var(--page);
+  border: 1px solid var(--border-0);
+  border-radius: 12px;
+  display: flex;
+  font-size: 13.5px;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px 10px;
+}
+
+.dd .sg span {
+  flex: 1;
+}
+
+.dd .sg button {
+  background: none;
+  border: 1px solid var(--cyan);
+  border-radius: 10px;
+  color: var(--cyan);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.dd .sg button:disabled {
+  border-color: var(--border-1);
+  color: var(--text-muted);
+}
+
+.dd .rs {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  margin-right: 14px;
+  margin-top: 8px;
+  padding: 0;
+}
+
+.dd .it.on .t .s {
+  display: none;
+}
+
+.dd .sc2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dd .sl2 {
+  align-items: center;
+  background: var(--tile);
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 4px;
+  padding: 9px 12px;
+}
+
+.dd .sl2 b {
+  color: var(--orange);
+}
+
+.dd .pl2 {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.dd .nt {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 12px;
+}
+
+.dd .nt .ic {
+  background: var(--neon);
+  border: 0;
+  font-size: 15px;
+  height: 32px;
+  width: 32px;
+}
+
+.dd .nt small {
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+
+.dd .nt b {
+  display: block;
+  font-size: 14px;
+}
+
+.dd .nt p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.dd .nt.f {
+  animation: ddNudge 0.6s;
+}
+
+@keyframes ddNudge {
+  from {
+    opacity: 0.2;
+    transform: translateY(-8px);
+  }
+}
+
+.dd .t2 {
+  background: none;
+  border: 1px solid var(--cyan);
+  border-radius: 12px;
+  color: var(--cyan);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  margin-top: 8px;
+  padding: 11px;
+  width: 100%;
+}
+
+.dd .cta {
+  background: var(--lime-solid);
+  border: 0;
+  border-radius: 16px;
+  color: var(--on-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+  padding: 16px;
+  width: 100%;
+}
+
+.dd .cta:disabled {
+  opacity: 0.4;
+}
+
+.dd .sk {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-size: 14px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.dd .toast {
+  color: var(--neon);
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.dd .hh {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0 8px;
+}
+
+.dd .hh h2 {
+  margin: 0;
+}
+
+.dd .pl {
+  background: none;
+  border: 1px solid var(--cyan);
+  border-radius: 50%;
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 22px;
+  height: 34px;
+  line-height: 1;
+  padding: 0;
+  width: 34px;
+}
+
+.dd input,
+.dd textarea {
+  background: var(--page);
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  padding: 10px;
+  width: 100%;
+}
+
+.dd textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.dd .fm input {
+  margin-bottom: 8px;
+}
+
+.dd .cats {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.dd .cats .cat {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  font-size: 11.5px;
+  gap: 2px;
+  padding: 8px 2px;
+}
+
+.dd .cats .cat span {
+  display: block;
+  font-size: 20px;
+}
+
+.dd .ch:disabled {
+  opacity: 0.4;
+}
+
+.dd .dc {
+  text-align: center;
+}
+
+.dd .dc small {
+  color: var(--text-dim);
+  display: block;
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.dd .mix {
+  background: var(--track);
+  border-radius: 6px;
+  height: 8px;
+  margin: 10px 0 6px;
+  overflow: hidden;
+}
+
+.dd .mix i {
+  display: block;
+  height: 100%;
+}
+
+.dd .ok {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.dd .ok > div {
+  margin-top: 4px;
+}
+
+.dd .ok b {
+  color: var(--neon);
+  font-weight: 500;
+}
+
+.dd .sh {
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 60;
+}
+
+.dd .sp {
+  background: var(--tile);
+  border: 1px solid var(--mint);
+  border-radius: 20px 20px 0 0;
+  max-height: 92vh;
+  max-width: 460px;
+  overflow: auto;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  width: 100%;
+}
+
+.dd .sp h3 {
+  color: var(--mint);
+  display: flex;
+  font-size: 13px;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.dd .sp h3 button {
+  background: none;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.dd .wh {
+  background: var(--page);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 132px;
+  margin: 12px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.dd .wh::after {
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+  border: 1px solid var(--orange);
+  border-radius: 12px;
+  content: "";
+  height: 44px;
+  left: 8px;
+  pointer-events: none;
+  position: absolute;
+  right: 8px;
+  top: 44px;
+}
+
+.dd .wc {
+  height: 132px;
+  overflow-y: scroll;
+  padding: 44px 0;
+  scrollbar-width: none;
+  scroll-snap-type: y mandatory;
+}
+
+.dd .wc::-webkit-scrollbar {
+  display: none;
+}
+
+.dd .wc > div {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 20px;
+  font-weight: 700;
+  height: 44px;
+  line-height: 44px;
+  scroll-snap-align: center;
+  text-align: center;
+}
+
+.dd .wc > div.s {
+  color: var(--orange);
+}
+
+.dd .rp {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  margin: 12px 0 8px;
+}
+
+.dd .pill {
+  background: none;
+  border: 1px solid var(--mint);
+  border-radius: 999px;
+  color: var(--mint);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+  padding: 7px 14px;
+}
+
+.dd .dg {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dd .dg button {
+  background: var(--track);
+  border: 0;
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 0;
+}
+
+.dd .dg button.on {
+  background: var(--orange);
+  color: var(--on-accent);
+}
+
+.dd .go2 {
+  background: var(--orange);
+  border: 0;
+  border-radius: 12px;
+  color: var(--on-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-top: 12px;
+  padding: 15px;
+  width: 100%;
+}
+
+.dd .dl {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.dd button:focus-visible,
+.dd select:focus-visible,
+.dd input:focus-visible,
+.dd textarea:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* Wide shell layout (desktop + tablet): the summary and "tell us about your day"
+   share the first row; "where does time slip away?", "keep it moving" and "what
+   you'll see" share the second. The wrappers are `display: contents` below lg, so
+   the stacked mobile order is untouched. */
+.pg {
+  display: flex;
+  flex-direction: column;
+}
+
+.gHero,
+.gTell,
+.gWhere,
+.gKeep,
+.gWhat,
+.gFoot {
+  display: contents;
+}
+
+.gWhatHead {
+  display: none;
+}
+
+/* Tablet (md, 768px and up): the summary shares the first row with "tell us
+   about your day", "where does time slip away?" shares the second row with
+   "keep it moving", and "what you'll see" plus the footer span both columns.
+   The 1024px block below refines this into the six-column desktop layout. */
+@media (min-width: 768px) {
+  .pg {
+    align-items: start;
+    column-gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gHero,
+  .gTell,
+  .gWhere,
+  .gKeep,
+  .gWhat,
+  .gFoot {
+    display: block;
+  }
+
+  /* Row 1: summary + "tell us about your day". */
+  .gHero {
+    grid-column: 1 / 2;
+  }
+
+  .gTell {
+    align-self: stretch;
+    grid-column: 2 / 3;
+  }
+
+  .gTell .card {
+    height: 100%;
+  }
+
+  /* Row 2: "where does time slip away?" + "keep it moving". */
+  .gWhere {
+    grid-column: 1 / 2;
+  }
+
+  .gKeep {
+    grid-column: 2 / 3;
+  }
+
+  /* Rows 3 and 4: "what you'll see" and the footer span both columns. */
+  .gWhat {
+    grid-column: 1 / -1;
+  }
+
+  .gFoot {
+    grid-column: 1 / -1;
+  }
+
+  /* Both panels sit next to each other, so their heading boxes are matched
+     (the "where does time slip away?" row is 34px tall because of its round
+     + button) and their cards start on the same line. */
+  .gWhere .hh,
+  .gKeep > h2 {
+    align-items: center;
+    display: flex;
+    height: 34px;
+    margin: 16px 0 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pg {
+    align-items: start;
+    column-gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .gHero,
+  .gTell,
+  .gWhere,
+  .gKeep,
+  .gWhat,
+  .gFoot {
+    display: block;
+  }
+
+  /* Row 1: summary (~2/3) + "tell us about your day" (~1/3). */
+  .gHero {
+    grid-column: 1 / 5;
+  }
+
+  .gTell {
+    align-self: stretch;
+    grid-column: 5 / 7;
+  }
+
+  /* The "tell us about your day" card matches the summary card's height. */
+  .gTell .card {
+    height: 100%;
+  }
+
+  /* Row 2: the three panels, equal thirds. */
+  .gWhere {
+    grid-column: 1 / 3;
+  }
+
+  .gKeep {
+    grid-column: 3 / 5;
+  }
+
+  .gWhat {
+    grid-column: 5 / 7;
+  }
+
+  /* Give each column the same heading box (the "Where does time slip away?" row
+     is 34px tall because of its round + button) so the three cards below start
+     on the same line. The "Track my time" column has no heading text, so an
+     empty one keeps its card in line. */
+  .gWhere .hh,
+  .gKeep > h2,
+  .gWhatHead {
+    align-items: center;
+    display: flex;
+    height: 34px;
+    margin: 16px 0 8px;
+  }
+
+  .gFoot {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd .nt.f {
+    animation: none;
+  }
+
+  .dd .it,
+  .dd .sw,
+  .dd .cv {
+    transition: none;
+  }
+}

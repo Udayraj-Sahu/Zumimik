@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Exam Arena — Runtime Architecture",
+    "output": ".archify/architecture-exam-arena-20261031/exam-arena-architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/Udayraj-Sahu/ExamArena.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "6434430fa97b0092305951e845ef8d0f2bfc0a0e"
+    }
+  },
+  "components": [
+    {"id":"web_user","type":"external","label":"Web User","sublabel":"Browser client","pos":[40,190],"size":[150,64],"sources":[{"path":"src/app/layout.tsx","line":77,"end_line":88}]},
+    {"id":"android_shell","type":"external","label":"Android App","sublabel":"Capacitor WebView · out/","pos":[40,370],"size":[170,64],"sources":[{"path":"capacitor.config.ts","line":3,"end_line":9}]},
+    {"id":"next_app","type":"frontend","label":"Next.js App","sublabel":"App Router · static export","pos":[270,280],"size":[190,68],"sources":[{"path":"next.config.mjs","line":9,"end_line":22},{"path":"package.json","line":39}]},
+    {"id":"app_runtime","type":"frontend","label":"Root Runtime","sublabel":"AppEntry · online · platform init","pos":[530,280],"size":[220,68],"sources":[{"path":"src/app/layout.tsx","line":5,"end_line":8},{"path":"src/app/layout.tsx","line":108,"end_line":113}]},
+    {"id":"auth_entry","type":"frontend","label":"AppEntry & Auth Gate","sublabel":"Onboarding / protected routes","pos":[820,190],"size":[210,68],"sources":[{"path":"src/components/shell/app-entry.tsx","line":19,"end_line":23},{"path":"src/components/shell/app-entry.tsx","line":67,"end_line":96}]},
+    {"id":"query_provider","type":"frontend","label":"TanStack Query","sublabel":"QueryClient cache/provider","pos":[820,40],"size":[190,64],"sources":[{"path":"src/providers/query-provider.tsx","line":3,"end_line":18}]},
+    {"id":"zustand_state","type":"frontend","label":"Zustand State","sublabel":"Auth & client stores","pos":[1110,190],"size":[170,64],"sources":[{"path":"src/stores/auth-store.ts","line":1,"end_line":4},{"path":"src/stores/auth-store.ts","line":29,"end_line":45}]},
+    {"id":"auth_ui","type":"frontend","label":"Authentication UI","sublabel":"Google / phone sign-in","pos":[820,370],"size":[210,64],"sources":[{"path":"src/components/auth/auth-panel.tsx","line":52,"end_line":65},{"path":"src/components/auth/auth-panel.tsx","line":74,"end_line":83}]},
+    {"id":"firebase_auth","type":"cloud","label":"Firebase Authentication","sublabel":"Client SDK Auth","pos":[1110,370],"size":[210,64],"sources":[{"path":"src/lib/firebase/client.ts","line":7,"end_line":29},{"path":"src/lib/firebase/client.ts","line":34,"end_line":42}]},
+    {"id":"offline_sync","type":"backend","label":"Offline Sync","sublabel":"Cache & queued mutations","pos":[530,500],"size":[210,64],"sources":[{"path":"src/services/offline/sync.ts","line":14,"end_line":32},{"path":"src/services/offline/sync.ts","line":52,"end_line":70}]},
+    {"id":"dexie_db","type":"database","label":"Dexie / IndexedDB","sublabel":"Dashboard cache · feedback queue","pos":[820,500],"size":[220,64],"sources":[{"path":"src/services/offline/db.ts","line":1,"end_line":2},{"path":"src/services/offline/db.ts","line":19,"end_line":32}]},
+    {"id":"serwist","type":"frontend","label":"Serwist Service Worker","sublabel":"Precache · runtime caching","pos":[270,500],"size":[220,64],"sources":[{"path":"next.config.mjs","line":1,"end_line":7},{"path":"src/app/sw.ts","line":1,"end_line":19}]},
+    {"id":"capacitor_bridge","type":"frontend","label":"Capacitor Runtime","sublabel":"Native platform & app events","pos":[530,650],"size":[220,64],"sources":[{"path":"src/app/capacitor-init.tsx","line":12,"end_line":17},{"path":"src/app/capacitor-init.tsx","line":37,"end_line":51}]}
+  ],
+  "connections": [
+    {"id":"web-load","from":"web_user","to":"next_app","label":"Loads web app","variant":"emphasis"},
+    {"id":"android-webview","from":"android_shell","to":"next_app","label":"WebView · out/"},
+    {"id":"root-layout","from":"next_app","to":"app_runtime","label":"Root layout"},
+    {"id":"query-wrap","from":"app_runtime","to":"query_provider","label":"Wraps app"},
+    {"id":"entry-gate","from":"app_runtime","to":"auth_entry","label":"Renders entry"},
+    {"id":"auth-state","from":"auth_entry","to":"zustand_state","label":"Reads auth state"},
+    {"id":"sign-in-ui","from":"auth_entry","to":"auth_ui","label":"Unauthenticated flow"},
+    {"id":"firebase-signin","from":"auth_ui","to":"firebase_auth","label":"Google / phone auth"},
+    {"id":"offline-local","from":"offline_sync","to":"dexie_db","label":"Reads & writes cache"},
+    {"id":"worker-config","from":"next_app","to":"serwist","label":"Builds service worker"},
+    {"id":"native-init","from":"app_runtime","to":"capacitor_bridge","label":"Native initialization"}
+  ],
+  "cards": [
+    {"dot":"cyan","title":"Web & Android delivery","items":["Next.js is configured for static export.","Capacitor points its WebView at the generated out/ directory."]},
+    {"dot":"emerald","title":"Client state & offline data","items":["Zustand manages client state; TanStack Query provides the query client.","The offline service uses Dexie tables for dashboard cache and queued feedback."]},
+    {"dot":"rose","title":"External authentication","items":["The inspected Firebase integration initializes Firebase Auth for Google and phone sign-in.","This diagram does not imply Firestore, Analytics, or FCM usage."]}
+  ]
+}

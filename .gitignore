@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+public/sw.js
+*.local
+.env*.local
+.DS_Store
+
+# scratch/debug artifacts
+.tmp-*
+*.log
+
+# build/test artifacts
+tsconfig.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+app-debug.apk

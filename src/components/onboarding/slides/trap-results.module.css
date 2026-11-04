@@ -1,0 +1,138 @@
+.card {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  width: 100%;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  font-family: var(--font-inter), system-ui, sans-serif;
+  background: var(--panel);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  overflow: clip;
+}
+
+@supports not (overflow: clip) {
+  .card {
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+}
+
+.title {
+  margin: 0;
+  max-width: 280px;
+  font-size: clamp(17px, 4.6vw, 22px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.sub {
+  margin: 6px 0 0;
+  font-size: clamp(11px, 3vw, 12.5px);
+  line-height: 1.35;
+  color: var(--muted-foreground);
+}
+
+.panel {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  margin-top: 12px;
+  padding: 14px 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.q {
+  margin: 0;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: clamp(12.5px, 3.2vw, 15px);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+.bars {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 28px 1fr 42px;
+  align-items: center;
+  gap: 10px;
+}
+
+.val {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.track {
+  height: 18px;
+  background: var(--glass-border);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 9px;
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.right {
+  background: var(--neon);
+}
+
+.trap {
+  background: var(--red);
+}
+
+.other {
+  background: var(--muted-foreground);
+}
+
+.pct {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 11px;
+  text-align: right;
+  color: var(--muted-foreground);
+}
+
+.pctRight {
+  color: var(--neon);
+}
+
+.pctTrap {
+  color: var(--red);
+}
+
+.fix {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--lime-25);
+  background: var(--lime-07);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

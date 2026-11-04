@@ -1,0 +1,1766 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --color-white-rgb: 255 255 255;
+  --background: #0A0C0A;
+  --foreground: #ffffff;
+  --card: #14170F;
+  --card-foreground: #ffffff;
+  --popover: #0d0d0d;
+  --popover-foreground: #ffffff;
+  --primary: #C8FF5A;
+  --primary-foreground: #050505;
+  --secondary: #111111;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #8B8B8B;
+  --accent: #1a1a1a;
+  --accent-foreground: #C8FF5A;
+  --destructive: #FF4444;
+  --destructive-foreground: #ffffff;
+  --border: #24281F;
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #C8FF5A;
+  --radius: 0.5rem;
+  --chart-1: #C8FF5A;
+  --chart-2: #3B82F6;
+  --chart-3: #F59E0B;
+  --chart-4: #8B5CF6;
+  --chart-5: #FF4444;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #C8FF5A;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #C8FF5A;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #C8FF5A;
+  --surface: #171717;
+  --chrome: #0d0d0d;
+  --chrome-raised: #161616;
+  --chrome-border: #1f1f1f;
+  --chrome-muted: #8a8f87;
+  --chrome-hover: #c9cec4;
+  --chrome-foreground: #eaeae5;
+  --chrome-active: rgba(166, 255, 47, 0.06);
+  --chrome-avatar: #8a6a5a;
+  --cta-from: #C7F252;
+  --cta-to: #A8D43A;
+  /* Accent axis. These are the lime (default) values so any surface that never
+     receives a [data-accent] attribute still resolves the brand hue. The
+     [data-accent="<id>"] blocks near the end of this file override them.
+     Mirrored from accentThemes.lime.dark in src/lib/theme/theme-tokens.ts. */
+  --accent-soft: rgba(200, 255, 90, 0.12);
+  --accent-muted: rgba(200, 255, 90, 0.05);
+  --accent-border: rgba(200, 255, 90, 0.28);
+  /* Neutral hover surface. Distinct from --accent-foreground, which is the
+     accent-colored text/icon token. Kept mode-aware so light mode does not
+     tint its hover surfaces green. */
+  --surface-hover: #1a1a1a;
+
+  /* Welcome cloud. A single union-following filter: the four 1px offsets trace
+     a crisp rim (in --border) around the multi-shape silhouette, and the last
+     entry is the ambient lift. Because --card (#14170F) sits very close to
+     --background (#0A0C0A), the rim is what keeps the bubble readable in dark
+     mode. Defined as a token so the cloud stays theme-safe rather than
+     hard-coding colours in the component. */
+  --cloud-shadow-filter:
+    drop-shadow(1px 0 0 var(--border))
+    drop-shadow(-1px 0 0 var(--border))
+    drop-shadow(0 1px 0 var(--border))
+    drop-shadow(0 -1px 0 var(--border))
+    drop-shadow(0 12px 26px rgba(0, 0, 0, 0.6));
+
+  /* Responsive foundation tokens */
+  --page-padding: 16px;
+  --content-max-width: 64rem;
+  --header-height: 56px;
+  --bottom-nav-height: 64px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Elevation scale */
+  --z-fab: 40;
+  --z-nav: 50;
+  --z-dialog: 60;
+  --z-toast: 90;
+  --z-intro: 200;
+  --z-splash: 9999;
+
+}
+
+/* Android WebView often reports env(safe-area-inset-*) as 0; floor it to clear the status bar */
+:root[data-native-platform="android"] {
+  --sat: max(env(safe-area-inset-top, 0px), 24px);
+}
+
+/* Design palette (single source of truth; mirrors src/lib/theme/theme-tokens.ts) */
+:root {
+  --on-accent: #0A0C0A;
+  /* Appearance-menu swatch hues (Coral / Azure / Mint / Gold). Constant across
+     themes: the selected dot is ringed with the panel's own text token, so one
+     hue stays legible on light, dark and study panels alike. */
+  --swatch-coral: #E8684A;
+  --swatch-azure: #3B7BF0;
+  --swatch-mint: #1FA971;
+  --swatch-gold: #D4A52A;
+  /* Remaining app accents (reference menu adds these alongside the four above). */
+  --swatch-lime: #C8FF5A;
+  --swatch-cyan: #22D3EE;
+  --swatch-violet: #A78BFA;
+  --swatch-red: #FB7185;
+  /* Appearance menu screen filters. The theme store overwrites these on the
+     document root at runtime; the values here are the Off / full-brightness
+     defaults so the overlays are inert before hydration. */
+  --app-warmth: 0;
+  --app-brightness: 100;
+  --lime-solid: #C8FF4D;
+  --cta-lime-solid: #C7F252;
+  --amber-solid: #F59E0B;
+  --red-soft-solid: #ff5c5c;
+  --emerald-bright: #34D399;
+  --lime: #C8FF4D;
+  --lime-bright: #C8FF5A;
+  --cta-lime: #C7F252;
+  --lime-light: #B9F45C;
+  --lime-mid: #a8e62e;
+  --lime-mid-2: #9be66a;
+  --lime-dark: #9fd42f;
+  --lime-deeper: #8fca2a;
+  --lime-pale: #d4ff6e;
+  --lime-pale-2: #d7ff7e;
+  --lime-tint: #e8ffb0;
+  --lime-pale-3: #E9FFA8;
+  --green-soft: #7DDB6A;
+  --emerald: #34D399;
+  --emerald-solid: #10B981;
+  --emerald-light: #4ADE80;
+  --emerald-pale: #86efac;
+  --green-solid: #22C55E;
+  --cyan: #22D3EE;
+  --cyan-light: #3DD6F5;
+  --mint: #3DDC97;
+  --sky: #06b6d4;
+  --blue: #3B82F6;
+  --blue-light: #60A5FA;
+  --violet: #A78BFA;
+  --violet-purple-2: #B98CF0;
+  --violet-deep: #8B5CF6;
+  --violet-dark: #7C6CF0;
+  --purple: #A855F7;
+  --fuchsia: #E879F9;
+  --amber: #F59E0B;
+  --amber-dark: #D97706;
+  --amber-light: #F0A93D;
+  --yellow: #FBBF24;
+  --gold: #FFD700;
+  --orange: #FF6B35;
+  --rose: #FB7185;
+  --rose-pink: #F05C7A;
+  --red-soft: #ff5c5c;
+  --red: #EF4444;
+  --bronze: #CD7F32;
+  --silver: #C0C0C0;
+  --white: #ffffff;
+  --near-black: #050505;
+  --muted-green: #8B9086;
+  --slate: #9CA3AF;
+  --slate-dark: #6B7280;
+  --slate-darkest: #4B5563;
+  --slate-soft: #94A3B8;
+  --bg: #0A0C0A;
+  --bg-soft: #0A0C08;
+  --bg-2: #0a0c09;
+  --bg-blue: #07090F;
+  --bg-deep: #0b0d0c;
+  --bg-moss: #0a0b08;
+  --panel: #10140e;
+  --panel-2: #10150e;
+  --forest: #070907;
+  --forest-2: #070906;
+  --deep-black: #0d0d0d;
+  --deep-black-2: #111116;
+  --near-white-black: #1a1a1a;
+  --solid-black: #111111;
+  --warm-black: #1A1609;
+  --blackgreen: #051005;
+  --bg-black: #040604;
+  --panel-solid: #14170F;
+  --panel-warm: #161a14;
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-01: rgba(255,255,255,0.01);
+  --glass-012: rgba(255,255,255,0.012);
+  --glass-015: rgba(255,255,255,0.015);
+  --glass-02: rgba(255,255,255,0.02);
+  --glass-025: rgba(255,255,255,0.025);
+  --glass-03: rgba(255,255,255,0.03);
+  --glass-045: rgba(255,255,255,0.045);
+  --glass-05: rgba(255,255,255,0.05);
+  --glass-06: rgba(255,255,255,0.06);
+  --glass-07: rgba(255,255,255,0.07);
+  --glass-09: rgba(255,255,255,0.09);
+  --glass-10: rgba(255,255,255,0.1);
+  --glass-12: rgba(255,255,255,0.12);
+  --glass-14: rgba(255,255,255,0.14);
+  --glass-15: rgba(255,255,255,0.15);
+  --glass-18: rgba(255,255,255,0.18);
+  --glass-22: rgba(255,255,255,0.22);
+  --glass-25: rgba(255,255,255,0.25);
+  --glass-30: rgba(255,255,255,0.3);
+  --glass-35: rgba(255,255,255,0.35);
+  --glass-40: rgba(255,255,255,0.4);
+  --glass-45: rgba(255,255,255,0.45);
+  --glass-50: rgba(255,255,255,0.5);
+  --glass-55: rgba(255,255,255,0.55);
+  --glass-70: rgba(255,255,255,0.7);
+  --glass-75: rgba(255,255,255,0.75);
+  --glass-92: rgba(255,255,255,0.92);
+  --black-00: rgba(0,0,0,0);
+  --black-06: rgba(0,0,0,0.06);
+  --black-30: rgba(0,0,0,0.3);
+  --black-35: rgba(0,0,0,0.35);
+  --black-40: rgba(0,0,0,0.4);
+  --black-50: rgba(0,0,0,0.5);
+  --black-55: rgba(0,0,0,0.55);
+  --black-60: rgba(0,0,0,0.6);
+  --black-70: rgba(0,0,0,0.7);
+  --black-80: rgba(0,0,0,0.8);
+  --cta-03: rgba(199,242,82,0.03);
+  --cta-04: rgba(199,242,82,0.04);
+  --cta-05: rgba(199,242,82,0.05);
+  --cta-06: rgba(199,242,82,0.06);
+  --cta-08: rgba(199,242,82,0.08);
+  --cta-12: rgba(199,242,82,0.12);
+  --cta-14: rgba(199,242,82,0.14);
+  --cta-15: rgba(199,242,82,0.15);
+  --cta-18: rgba(199,242,82,0.18);
+  --cta-20: rgba(199,242,82,0.2);
+  --cta-25: rgba(199,242,82,0.25);
+  --cta-30: rgba(199,242,82,0.3);
+  --cta-35: rgba(199,242,82,0.35);
+  --cta-40: rgba(199,242,82,0.4);
+  --cta-45: rgba(199,242,82,0.45);
+  --cta-80: rgba(199,242,82,0.8);
+  --lime-10: rgba(200,255,77,0.1);
+  --lime-12: rgba(200,255,77,0.12);
+  --lime-14: rgba(200,255,77,0.14);
+  --lime-15: rgba(200,255,77,0.15);
+  --lime-18: rgba(200,255,77,0.18);
+  --lime-22: rgba(200,255,77,0.22);
+  --lime-25: rgba(200,255,77,0.25);
+  --lime-30: rgba(200,255,77,0.3);
+  --lime-32: rgba(200,255,77,0.32);
+  --lime-40: rgba(200,255,77,0.4);
+  --lime-45: rgba(200,255,77,0.45);
+  --lime-50: rgba(200,255,77,0.5);
+  --lime-bright-00: rgba(200,255,90,0.0);
+  --lime-bright-03: rgba(200,255,90,0.03);
+  --lime-bright-04: rgba(200,255,90,0.04);
+  --lime-bright-05: rgba(200,255,90,0.05);
+  --lime-bright-06: rgba(200,255,90,0.06);
+  --lime-bright-10: rgba(200,255,90,0.1);
+  --lime-bright-15: rgba(200,255,90,0.15);
+  --lime-bright-18: rgba(200,255,90,0.18);
+  --lime-bright-20: rgba(200,255,90,0.2);
+  --lime-bright-25: rgba(200,255,90,0.25);
+  --lime-bright-30: rgba(200,255,90,0.3);
+  --lime-bright-40: rgba(200,255,90,0.4);
+  --lime-bright-50: rgba(200,255,90,0.5);
+  --lime-mid-25: rgba(163,230,53,0.25);
+  --lime-mid-28: rgba(163,230,53,0.28);
+  --lime-mid-35: rgba(163,230,53,0.35);
+  --emerald-04: rgba(52,211,153,0.04);
+  --emerald-06: rgba(52,211,153,0.06);
+  --emerald-08: rgba(52,211,153,0.08);
+  --emerald-10: rgba(52,211,153,0.1);
+  --emerald-12: rgba(52,211,153,0.12);
+  --emerald-15: rgba(52,211,153,0.15);
+  --emerald-20: rgba(52,211,153,0.2);
+  --emerald-25: rgba(52,211,153,0.25);
+  --emerald-30: rgba(52,211,153,0.3);
+  --emerald-40: rgba(52,211,153,0.4);
+  --emerald-50: rgba(52,211,153,0.5);
+  --emerald-light-40: rgba(110,231,183,0.4);
+  --cyan-05: rgba(34,211,238,0.05);
+  --cyan-06: rgba(34,211,238,0.06);
+  --cyan-08: rgba(34,211,238,0.08);
+  --cyan-10: rgba(34,211,238,0.10);
+  --cyan-14: rgba(34,211,238,0.14);
+  --cyan-18: rgba(34,211,238,0.18);
+  --cyan-22: rgba(34,211,238,0.22);
+  --cyan-25: rgba(34,211,238,0.25);
+  --cyan-30: rgba(34,211,238,0.3);
+  --cyan-45: rgba(34,211,238,0.45);
+  --cyan-85: rgba(34,211,238,0.85);
+  --violet-purple-30: rgba(167,139,250,0.30);
+  --violet-purple-35: rgba(167,139,250,0.35);
+  --violet-purple-45: rgba(167,139,250,0.45);
+  --violet-deep-14: rgba(139,92,246,0.14);
+  --violet-deep-18: rgba(139,92,246,0.18);
+  --violet-deep-28: rgba(139,92,246,0.28);
+  --violet-deep-85: rgba(139,92,246,0.85);
+  /* Process card (HowItWorks slide): cyan / violet / neon step-badge tones.
+     Paired with the --cyan and --violet accent text tokens; --neon aliases the
+     brand lime so it flips with the theme automatically. */
+  --cyan-bg: rgba(34,211,238,0.10);
+  --cyan-border: rgba(34,211,238,0.30);
+  --violet-bg: rgba(167,139,250,0.12);
+  --violet-border: rgba(167,139,250,0.35);
+  --mint-bg: rgba(61,220,151,0.10);
+  --mint-border: rgba(61,220,151,0.30);
+  --neon: var(--lime);
+  --neon-bg: rgba(200,255,77,0.08);
+  --neon-border: rgba(200,255,77,0.26);
+  --amber-04: rgba(245,158,11,0.04);
+  --amber-06: rgba(245,158,11,0.06);
+  --amber-08: rgba(245,158,11,0.08);
+  --amber-14: rgba(245,158,11,0.14);
+  --amber-15: rgba(245,158,11,0.15);
+  --amber-20: rgba(245,158,11,0.2);
+  --amber-30: rgba(245,158,11,0.3);
+  --red-04: rgba(239,68,68,0.04);
+  --red-06: rgba(239,68,68,0.06);
+  --red-10: rgba(239,68,68,0.1);
+  --red-12: rgba(239,68,68,0.12);
+  --red-30: rgba(239,68,68,0.3);
+  --red-soft-06: rgba(255,92,92,0.06);
+  --red-soft-12: rgba(255,92,92,0.12);
+  --red-soft-25: rgba(255,92,92,0.25);
+  --rose-pink-12: rgba(240,92,122,0.12);
+  --violet-dark-12: rgba(124,108,240,0.12);
+  --cyan-light-12: rgba(61,214,245,0.12);
+  --violet-purple-2-12: rgba(185,140,240,0.12);
+  --amber-light-12: rgba(240,169,61,0.12);
+  --green-soft-12: rgba(125,219,106,0.12);
+  --slate-40: rgba(107,114,128,0.4);
+  --slate-50: rgba(107,114,128,0.5);
+  --slate-60: rgba(107,114,128,0.6);
+  --slate-soft-15: rgba(148,163,184,0.15);
+  --blue-06: rgba(59,130,246,0.06);
+  --screen-tint-85: rgba(10,12,10,0.85);
+  --screen-tint: rgba(10,12,10,0.99);
+  --overlay: rgba(14,17,13,0.98);
+  --overlay-solid: rgba(14,17,13,0.99);
+  --blackgreen-90: rgba(20,23,15,0.9);
+  --bronze-15: rgba(205,127,50,0.15);
+  --near-black-60: rgba(3,4,6,0.6);
+  --orange-15: rgba(255,107,53,0.15);
+  --blue-10: rgba(59,130,246,0.1);
+  --blue-70: rgba(59,130,246,0.7);
+  --amber-10: rgba(245,158,11,0.1);
+  --cta-lime-10: rgba(199,242,82,0.1);
+  --lime-06: rgba(200,255,77,0.06);
+  --bg-10: rgba(10,12,10,0.1);
+  --bg-60: rgba(10,12,10,0.6);
+  --lime-07: rgba(200,255,77,0.07);
+  --lime-20: rgba(200,255,77,0.2);
+  --lime-04: rgba(200,255,77,0.04);
+  --lime-08: rgba(200,255,77,0.08);
+  --lime-70: rgba(200,255,77,0.7);
+  --lime-85: rgba(200,255,77,0.85);
+  --red-soft-30: rgba(255,92,92,0.3);
+  --red-soft-10: rgba(255,92,92,0.1);
+  --violet-purple-70: rgba(167,139,250,0.7);
+  --lime-60: rgba(200,255,77,0.6);
+  --lime-16: rgba(200,255,77,0.16);
+  --lime-pale-3-70: rgba(233,255,168,0.7);
+  --lime-55: rgba(200,255,77,0.55);
+  --rose-15: rgba(251,113,133,0.15);
+  --lime-80: rgba(200,255,77,0.8);
+  --lime-35: rgba(200,255,77,0.35);
+  --lime-05: rgba(200,255,77,0.05);
+  --bg-blue-95: rgba(7,9,15,0.95);
+  --warm-black-95: rgba(26,22,9,0.95);
+  --lime-067: rgba(200,255,77,0.067);
+  --lime-125: rgba(200,255,77,0.125);
+  --lime-133: rgba(200,255,77,0.133);
+  --cyan-251: rgba(34,211,238,0.251);
+  --deep-black-2-cc: rgba(17,17,22,0.8);
+  --deep-black-2-ee: rgba(17,17,22,0.933);
+  --lime-bright-rgb: 200, 255, 90;
+  --slate-muted: rgb(120 130 125);
+
+  /* ── Intro surface ladder ──
+     Semantic vocabulary used by the intro overlays (Story, Arena, Pitch) so a
+     component can talk about page / surface / tile / hairline / text tiers
+     without picking a concrete panel colour. The surface and text aliases point
+     at tokens that already flip with the theme; the hairline ramp and the three
+     literal text/status values are restated per theme below. */
+  --page: var(--background);
+  --surface-0: var(--chrome);
+  --surface-1: var(--surface);
+  --tile: var(--card);
+  --track: var(--muted);
+  /* Hairline ramp: 0 = quiet divider, 1 = default edge, 2 = emphasised edge.
+     Deliberately not aliased to --border: that token is a solid dark green in
+     dark mode, which would sit *below* the white-alpha hairlines and invert the
+     order. An alpha ramp against the foreground flips theme by construction. */
+  --border-0: rgba(255, 255, 255, 0.07);
+  --border-1: rgba(255, 255, 255, 0.13);
+  --border-2: rgba(255, 255, 255, 0.22);
+  /* Text ramp naming matches the design system's vocabulary: body, supporting,
+     faint. --text-dim stays >= 4.5:1 against the tile it is used on. */
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-dim: #7c817d;
+  /* Status washes. --neon-bg/--neon-border and --cyan-* already exist above;
+     only the amber pair was missing from the family. */
+  --amber-bg: rgba(245, 158, 11, 0.10);
+  --amber-border: rgba(245, 158, 11, 0.30);
+}
+
+@media (min-width: 600px) {
+  :root {
+    --page-padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-padding: 40px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --header-height: 48px;
+    --bottom-nav-height: 56px;
+  }
+}
+
+.light {
+  color-scheme: light;
+  --color-white-rgb: 0 0 0;
+  --background: #F4F5F1;
+  --foreground: #0A0A0A;
+  --card: #FFFFFF;
+  --card-foreground: #0A0A0A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A0A0A;
+  /* Accent tokens: lime (default) so a .light scope with no [data-accent]
+     still resolves the brand hue. Overridden per-accent by the
+     .light[data-accent="<id>"] blocks below. These are the *text* variants,
+     darkened so accent text stays legible on near-white panels.
+     Previously this block forced #1A8C3A (a green that collided with the
+     success palette) regardless of the user's accent choice. */
+  --primary: #4D7C0F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0F0F0;
+  --secondary-foreground: #0A0A0A;
+  --muted: #E5E5E5;
+  --muted-foreground: #5A5A5A;
+  /* Neutral hover surface (was green-tinted #E8F5E9, which fought every
+     non-green accent). The accent-colored text token is --accent-foreground. */
+  --accent: #EFEFEF;
+  --surface-hover: #EFEFEF;
+  --accent-foreground: #4D7C0F;
+  --accent-soft: rgba(77, 124, 15, 0.10);
+  --accent-muted: rgba(77, 124, 15, 0.05);
+  --accent-border: rgba(77, 124, 15, 0.30);
+  --destructive: #B91C1C;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.12);
+  --ring: #4D7C0F;
+  /* CTA fills stay bright in both modes and always pair with dark text, so
+     these are deliberately not darkened. See the light-accent note below. */
+  --on-accent: #0A0C0A;
+  --cta-from: #C7F252;
+  --cta-to: #A8D43A;
+  --chart-1: #4D7C0F;
+  /* Chart hues are darkened for light surfaces so they clear WCAG AA (4.5:1)
+     as *text* on near-white panels. The raw brand hues (#3B82F6 / #F59E0B /
+     #8B5CF6) only reach ~3.2-4.2:1 on white and were the source of the
+     audit's contrast failures (text-chart-2/3/4). */
+  --chart-2: #1D4ED8;
+  --chart-3: #9C5707;
+  --chart-4: #6D28D9;
+  --chart-5: #B91C1C;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0A0A0A;
+  --sidebar-primary: #4D7C0F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EFEFEF;
+  --sidebar-accent-foreground: #4D7C0F;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-ring: #4D7C0F;
+  --surface: #F5F5F5;
+
+  /* Welcome cloud rim (see the :root definition): --card (#FFFFFF) is only a
+     touch lighter than --background (#F4F5F1), so the --border rim plus a
+     softer ambient shadow keep the white bubble defined on the off-white page. */
+  --cloud-shadow-filter:
+    drop-shadow(1px 0 0 var(--border))
+    drop-shadow(-1px 0 0 var(--border))
+    drop-shadow(0 1px 0 var(--border))
+    drop-shadow(0 -1px 0 var(--border))
+    drop-shadow(0 12px 26px rgba(0, 0, 0, 0.2));
+}
+
+
+/* ==== LIGHT THEME (auto) ==== */
+/* Flip-set design tokens + chrome light values. Generated; do not edit. */
+.light {
+  color-scheme: light;
+  --color-white-rgb: 0 0 0;
+  --surface: #F5F5F5;
+  --chrome: #FFFFFF;
+  --chrome-raised: #F4F5F1;
+  --chrome-border: rgba(0, 0, 0, 0.08);
+  --chrome-muted: #6B7280;
+  --chrome-hover: #374151;
+  --chrome-foreground: #0A0C0A;
+  --chrome-active: rgba(166, 255, 47, 0.14);
+  --chrome-avatar: #8a6a5a;
+  --bg: #F5F6F2;
+  --bg-soft: #F3F4F0;
+  --bg-2: #F0F1E9;
+  --bg-blue: #F1F3F8;
+  --bg-deep: #F3F5F1;
+  --bg-moss: #F0F2EA;
+  --panel: #FFFFFF;
+  --panel-2: #FFFFFF;
+  --forest: #E9EBE1;
+  --forest-2: #E6E8DD;
+  --deep-black-2: #F5F5F8;
+  --near-white-black: #E8E8E4;
+  --solid-black: #F4F4F4;
+  --warm-black: #FBFAF3;
+  --blackgreen: #EFF4EA;
+  --bg-black: #F9FAF7;
+  --panel-solid: #FFFFFF;
+  --panel-warm: #FDFDFA;
+  --glass-bg: #FFFFFF;
+  --glass-01: rgba(0,0,0,0.01);
+  --glass-012: rgba(0,0,0,0.012);
+  --glass-015: rgba(0,0,0,0.015);
+  --glass-03: rgba(0,0,0,0.03);
+  --glass-045: rgba(0,0,0,0.045);
+  --glass-05: rgba(0,0,0,0.05);
+  --glass-07: rgba(0,0,0,0.07);
+  --glass-09: rgba(0,0,0,0.09);
+  --glass-10: rgba(0,0,0,0.1);
+  --glass-12: rgba(0,0,0,0.12);
+  --glass-14: rgba(0,0,0,0.14);
+  --glass-15: rgba(0,0,0,0.15);
+  --glass-18: rgba(0,0,0,0.18);
+  --glass-22: rgba(0,0,0,0.22);
+  --glass-25: rgba(0,0,0,0.25);
+  --glass-30: rgba(0,0,0,0.3);
+  --glass-35: rgba(0,0,0,0.35);
+  --glass-40: rgba(0,0,0,0.4);
+  --glass-45: rgba(0,0,0,0.45);
+  --glass-50: rgba(0,0,0,0.5);
+  --glass-55: rgba(0,0,0,0.55);
+  --glass-70: rgba(0,0,0,0.7);
+  --glass-75: rgba(0,0,0,0.75);
+  --glass-92: rgba(0,0,0,0.92);
+  --screen-tint-85: rgba(255,255,255,0.9);
+  --screen-tint: rgba(255,255,255,0.99);
+  --overlay: rgba(255,255,255,0.98);
+  --overlay-solid: rgba(255,255,255,0.99);
+  --blackgreen-90: rgba(255,255,255,0.92);
+  --bg-10: rgba(0,0,0,0.06);
+  --bg-60: rgba(0,0,0,0.18);
+  --bg-blue-95: rgba(248,250,252,0.95);
+  --warm-black-95: rgba(255,255,255,0.97);
+  --deep-black-2-cc: rgba(255,255,255,0.85);
+  --deep-black-2-ee: rgba(255,255,255,0.95);
+}
+
+/* ==== LIGHT ACCENT OVERRIDES ==== */
+/* Accent tokens below are used as TEXT on the light flip-set surfaces.
+   In light mode they must darken so accent text stays legible on the
+   near-white panels. The *-solid / --emerald-bright tokens declared in
+   :root are immutable surfaces: the keep-lime CTA fills that pair bright
+   fill with dark --on-accent text in BOTH modes. Gradient-stop and tint
+   tokens (--lime-mid/dark/pale, --emerald-solid, --cta-*, --lime-0x, etc.)
+   are intentionally NOT overridden: they are fill-only, never text. */
+.light {
+  --lime: #3F6A0C;
+  --lime-bright: #3F6212;
+  --cta-lime: #4D7C0F;
+  --emerald: #047857;
+  --amber: #9C5707;
+  --red-soft: #B91C1C;
+  --cyan: #0E7490;
+  --mint: #15803D;
+  --fuchsia: #A21CAF;
+  --violet: #6D28D9;
+  --violet-deep: #5B21B6;
+  --blue: #1D4ED8;
+  --gold: #9C5707;
+  --orange: #C2410C;
+  --rose: #BE123C;
+  --rose-pink: #BE123C;
+  --bronze: #8A4B12;
+  --silver: #475569;
+  /* Hue-as-text companions: every hue that scripts read through `hueText()`
+     must re-darken here or its text stays bright on light surfaces. Values
+     target >= 4.5:1 on white / near-white panels. */
+  --green-soft: #15803D;
+  --emerald-solid: #047857;
+  --emerald-light: #15803D;
+  --emerald-bright: #047857;
+  --cyan-light: #0E7490;
+  --sky: #0369A1;
+  --blue-light: #1D4ED8;
+  --violet-purple-2: #6D28D9;
+  --violet-dark: #5B21B6;
+  --purple: #7E22CE;
+  --amber-dark: #B45309;
+  --amber-light: #B45309;
+  --yellow: #854D0E;
+  --red: #B91C1C;
+  --muted-green: #475569;
+  --slate: #475569;
+  --slate-dark: #334155;
+  --slate-darkest: #1E293B;
+  --slate-soft: #475569;
+  --slate-muted: rgb(71 85 105);
+  --lime-solid: #4D7C0F;
+  --amber-solid: #B45309;
+  --red-soft-solid: #B91C1C;
+  --lime-50: rgba(77,124,15,0.5);
+  --lime-70: rgba(77,124,15,0.7);
+  --lime-80: rgba(77,124,15,0.8);
+  --lime-85: rgba(77,124,15,0.85);
+  --blue-70: rgba(29,78,216,0.7);
+  --glass-border: rgba(0,0,0,0.12);
+  --glass-02: rgba(0,0,0,0.02);
+  --glass-025: rgba(0,0,0,0.025);
+  --glass-06: rgba(0,0,0,0.06);
+  /* Process card step tones: washes and borders darken with each hue so the
+     circular badges stay legible on near-white panels. --neon inherits the
+     flipped --lime above. */
+  --cyan-bg: rgba(14,116,144,0.08);
+  --cyan-border: rgba(14,116,144,0.30);
+  --violet-bg: rgba(109,40,217,0.08);
+  --violet-border: rgba(109,40,217,0.30);
+  --mint-bg: rgba(21,128,61,0.08);
+  --mint-border: rgba(21,128,61,0.30);
+  --neon-bg: rgba(63,106,12,0.08);
+  --neon-border: rgba(63,106,12,0.28);
+  /* Intro surface ladder (see the :root note). The surface and text aliases
+     follow their parents, which already flip here; the hairline ramp and the
+     literal members are restated because on white panels they need to *darken*
+     to hold the ramp order and keep >= 4.5:1. */
+  --page: var(--background);
+  --surface-0: var(--chrome);
+  --surface-1: var(--surface);
+  --tile: var(--card);
+  --track: var(--muted);
+  --border-0: rgba(10, 10, 10, 0.08);
+  --border-1: rgba(10, 10, 10, 0.14);
+  --border-2: rgba(10, 10, 10, 0.24);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-dim: #6b6b6b;
+  --amber-bg: rgba(156, 87, 7, 0.10);
+  --amber-border: rgba(156, 87, 7, 0.30);
+}
+
+/* ==== STUDY THEME ==== */
+/* Warm, low-blue reading variant of the dark palette (the "Study" mode in the
+   appearance menu). It deliberately stays on the dark axis: the light text
+   tokens keep their dark-mode contrast, Tailwind's `dark:` variants stay active,
+   and none of the `.light` overrides above apply. Only the surface ladder and
+   the neutral text tier are re-hued; accent tokens keep resolving their dark
+   set from the [data-accent="<id>"] blocks below. */
+.study {
+  color-scheme: dark;
+  --background: #17130D;
+  --foreground: #F2EBDD;
+  --card: #211B12;
+  --card-foreground: #F2EBDD;
+  --popover: #1B1610;
+  --popover-foreground: #F2EBDD;
+  --secondary: #241E15;
+  --secondary-foreground: #F2EBDD;
+  --muted: #2A2318;
+  --muted-foreground: #B6A992;
+  --accent: #241E15;
+  --border: #3A3020;
+  --input: rgba(242, 235, 221, 0.14);
+  --sidebar: #14100B;
+  --sidebar-foreground: #F2EBDD;
+  --sidebar-accent: #241E15;
+  --sidebar-border: rgba(242, 235, 221, 0.08);
+  --surface: #221C13;
+  --surface-hover: #2A2318;
+  --chrome: #15110C;
+  --chrome-raised: #211B12;
+  --chrome-border: #352B1C;
+  --chrome-muted: #A2957F;
+  --chrome-hover: #E7DECD;
+  --chrome-foreground: #EFE7D8;
+  --chrome-active: rgba(255, 235, 200, 0.06);
+  --bg: #17130D;
+  --bg-soft: #16120C;
+  --bg-2: #18140E;
+  --bg-blue: #15120D;
+  --bg-deep: #1A150E;
+  --bg-moss: #16130C;
+  --panel: #221C13;
+  --panel-2: #241E15;
+  --forest: #120F0A;
+  --forest-2: #110E09;
+  --deep-black-2: #1D1710;
+  --near-white-black: #2A2318;
+  --solid-black: #1F1911;
+  --warm-black: #241D10;
+  --blackgreen: #14150D;
+  --bg-black: #0F0C08;
+  --panel-solid: #241E15;
+  --panel-warm: #282115;
+  --glass-bg: rgba(255, 240, 214, 0.045);
+  --glass-border: rgba(255, 240, 214, 0.09);
+  --screen-tint-85: rgba(23, 19, 13, 0.85);
+  --screen-tint: rgba(23, 19, 13, 0.99);
+  --overlay: rgba(26, 21, 14, 0.98);
+  --overlay-solid: rgba(26, 21, 14, 0.99);
+  --blackgreen-90: rgba(32, 26, 16, 0.9);
+  --bg-10: rgba(23, 19, 13, 0.1);
+  --bg-60: rgba(23, 19, 13, 0.6);
+  --bg-blue-95: rgba(21, 18, 13, 0.95);
+  --warm-black-95: rgba(36, 29, 16, 0.95);
+  --deep-black-2-cc: rgba(29, 23, 16, 0.8);
+  --deep-black-2-ee: rgba(29, 23, 16, 0.933);
+  --text-dim: #A99C86;
+  --border-0: rgba(242, 235, 221, 0.08);
+  --border-1: rgba(242, 235, 221, 0.14);
+  --border-2: rgba(242, 235, 221, 0.22);
+  --cloud-shadow-filter:
+    drop-shadow(1px 0 0 var(--border))
+    drop-shadow(-1px 0 0 var(--border))
+    drop-shadow(0 1px 0 var(--border))
+    drop-shadow(0 -1px 0 var(--border))
+    drop-shadow(0 12px 26px rgba(0, 0, 0, 0.65));
+}
+
+/* ==== END STUDY THEME ==== */
+
+/* ==== SCREEN FILTERS (APPEARANCE MENU) ==== */
+/* Warm Tint and Brightness are written to `--app-warmth` (0-100) and
+   `--app-brightness` (50-100) by the theme store. Two fixed overlays apply them
+   without touching layout or stacking contexts inside the app: the black layer
+   dims for brightness, the amber layer warms with soft-light for tint. Both sit
+   above the app (including portaled dialogs) and never intercept input. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+body::before {
+  background-color: #000;
+  opacity: calc((100 - var(--app-brightness, 100)) * 0.006);
+}
+
+body::after {
+  background-color: #ffb061;
+  mix-blend-mode: soft-light;
+  opacity: calc(var(--app-warmth, 0) * 0.0012);
+}
+
+@media print {
+  body::before,
+  body::after {
+    display: none;
+  }
+}
+
+/* ==== END SCREEN FILTERS ==== */
+
+/* Glass cards sit as opaque white on the off-white page; without a shadow the
+   white-on-off-white delta alone is too subtle to read as elevation. This lifts
+   every `--glass-bg` surface (the shared card surface) while leaving dark mode
+   untouched. COMPAT LAYER: GlassCard now carries this shadow via its own
+   `light:shadow-…` utility; this rule still covers the ~29 files that set
+   `background: GLASS_BG` inline without GlassCard. Migrate those to GlassCard
+   (or a `light:` utility) and delete this scrape. */
+.light [style*="--glass-bg"] {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+/* Dashboard carousel slides paint only a faint `--glass-02` gradient base,
+   which over the off-white page left them indistinguishable from the page
+   background in light mode. Force a solid white card surface beneath the accent
+   gradient and lift them, so the carousel reads as distinct cards. Light-only;
+   dark mode is untouched. */
+.light [data-carousel-card] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 18px -10px rgba(16, 24, 40, 0.22);
+}
+
+/* Glass borders authored as `border-white/[x]` flip to near-invisible black
+   alphas in light mode. Raise the faint ones (5-8%) to a single, slightly
+   darker neutral so cards, carousels, badges, containers and dividers keep
+   definition on the off-white page. Stronger authored borders ([0.09]+) and
+   accent borders are left as written. Light-only. COMPAT LAYER: ~166 usages
+   across 20+ files (including story-intro.tsx, which is out of scope for
+   edits); the long-term fix is a `border-faint` utility swept through those
+   files, after which this scrape can be deleted. */
+.light [class*="border-white/[0.05]"],
+.light [class*="border-white/[0.06]"],
+.light [class*="border-white/[0.07]"],
+.light [class*="border-white/[0.08]"] {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ==== END LIGHT THEME ==== */
+
+/* ==== ACCENT-BOUND LIME ALIASES ==== */
+/* The app authored most accent surfaces against the `--lime*` / `--cta-lime*`
+   scales. Re-point those scales at the active accent tokens so every existing
+   consumer (dashboard, onboarding, arenas, story, paywall, portals) follows
+   Appearance Settings without per-component rewrites. Declared on the element
+   that owns `data-accent`, so the `var()` references resolve against that
+   scope's accent set (dark or light). Semantic status colors (emerald, red,
+   amber, cyan, violet) are untouched. Scopes without `data-accent` keep the
+   lime fallbacks on `:root` / `.light` above. */
+[data-accent] {
+  --lime: var(--accent-foreground);
+  --neon: var(--accent-foreground);
+  --neon-bg: var(--accent-08);
+  --neon-border: var(--accent-30);
+  --lime-bright: var(--accent-foreground);
+  --lime-solid: var(--cta-from);
+  --cta-lime: var(--cta-from);
+  --cta-lime-solid: var(--cta-from);
+  --lime-light: color-mix(in srgb, var(--cta-from) 72%, #ffffff);
+  --lime-mid: var(--cta-to);
+  --lime-mid-2: color-mix(in srgb, var(--cta-from) 78%, #ffffff);
+  --lime-dark: var(--cta-to);
+  --lime-deeper: color-mix(in srgb, var(--cta-to) 85%, #000000);
+  --lime-pale: color-mix(in srgb, var(--cta-from) 40%, #ffffff);
+  --lime-pale-2: color-mix(in srgb, var(--cta-from) 45%, #ffffff);
+  --lime-pale-3: color-mix(in srgb, var(--cta-from) 50%, #ffffff);
+  --lime-tint: color-mix(in srgb, var(--cta-from) 30%, #ffffff);
+  --lime-pale-3-70: color-mix(in srgb, var(--lime-pale-3) 70%, transparent);
+  --lime-04: color-mix(in srgb, var(--accent-foreground) 4%, transparent);
+  --lime-05: color-mix(in srgb, var(--accent-foreground) 5%, transparent);
+  --lime-06: color-mix(in srgb, var(--accent-foreground) 6%, transparent);
+  --lime-07: color-mix(in srgb, var(--accent-foreground) 7%, transparent);
+  --lime-08: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --lime-10: color-mix(in srgb, var(--accent-foreground) 10%, transparent);
+  --lime-12: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
+  --lime-14: color-mix(in srgb, var(--accent-foreground) 14%, transparent);
+  --lime-15: color-mix(in srgb, var(--accent-foreground) 15%, transparent);
+  --lime-16: color-mix(in srgb, var(--accent-foreground) 16%, transparent);
+  --lime-18: color-mix(in srgb, var(--accent-foreground) 18%, transparent);
+  --lime-20: color-mix(in srgb, var(--accent-foreground) 20%, transparent);
+  --lime-22: color-mix(in srgb, var(--accent-foreground) 22%, transparent);
+  --lime-25: color-mix(in srgb, var(--accent-foreground) 25%, transparent);
+  --lime-30: color-mix(in srgb, var(--accent-foreground) 30%, transparent);
+  --lime-32: color-mix(in srgb, var(--accent-foreground) 32%, transparent);
+  --lime-35: color-mix(in srgb, var(--accent-foreground) 35%, transparent);
+  --lime-40: color-mix(in srgb, var(--accent-foreground) 40%, transparent);
+  --lime-45: color-mix(in srgb, var(--accent-foreground) 45%, transparent);
+  --lime-50: color-mix(in srgb, var(--accent-foreground) 50%, transparent);
+  --lime-55: color-mix(in srgb, var(--accent-foreground) 55%, transparent);
+  --lime-60: color-mix(in srgb, var(--accent-foreground) 60%, transparent);
+  --lime-067: color-mix(in srgb, var(--accent-foreground) 6.7%, transparent);
+  --lime-67: color-mix(in srgb, var(--accent-foreground) 67%, transparent);
+  --lime-70: color-mix(in srgb, var(--accent-foreground) 70%, transparent);
+  --lime-80: color-mix(in srgb, var(--accent-foreground) 80%, transparent);
+  --lime-85: color-mix(in srgb, var(--accent-foreground) 85%, transparent);
+  --lime-125: color-mix(in srgb, var(--accent-foreground) 12.5%, transparent);
+  --lime-133: color-mix(in srgb, var(--accent-foreground) 13.3%, transparent);
+  --lime-bright-00: transparent;
+  --lime-bright-03: color-mix(in srgb, var(--accent-foreground) 3%, transparent);
+  --lime-bright-04: color-mix(in srgb, var(--accent-foreground) 4%, transparent);
+  --lime-bright-05: color-mix(in srgb, var(--accent-foreground) 5%, transparent);
+  --lime-bright-06: color-mix(in srgb, var(--accent-foreground) 6%, transparent);
+  --lime-bright-10: color-mix(in srgb, var(--accent-foreground) 10%, transparent);
+  --lime-bright-15: color-mix(in srgb, var(--accent-foreground) 15%, transparent);
+  --lime-bright-18: color-mix(in srgb, var(--accent-foreground) 18%, transparent);
+  --lime-bright-20: color-mix(in srgb, var(--accent-foreground) 20%, transparent);
+  --lime-bright-25: color-mix(in srgb, var(--accent-foreground) 25%, transparent);
+  --lime-bright-30: color-mix(in srgb, var(--accent-foreground) 30%, transparent);
+  --lime-bright-40: color-mix(in srgb, var(--accent-foreground) 40%, transparent);
+  --lime-bright-50: color-mix(in srgb, var(--accent-foreground) 50%, transparent);
+  --lime-mid-25: color-mix(in srgb, var(--cta-to) 25%, transparent);
+  --lime-mid-28: color-mix(in srgb, var(--cta-to) 28%, transparent);
+  --lime-mid-35: color-mix(in srgb, var(--cta-to) 35%, transparent);
+  --cta-lime-10: color-mix(in srgb, var(--cta-from) 10%, transparent);
+}
+
+/* ==== ACCENT THEMES ==== */
+/* User-selectable brand hue, independent of the light/dark axis.
+ *
+ * These blocks are the runtime half of `accentThemes` in src/lib/theme/theme-tokens.ts.
+ * `src/lib/accent-themes.test.ts` asserts the values below match that config
+ * exactly, so edit both together or the test fails.
+ *
+ * How an accent reaches the UI:
+ *   - `useThemeStore` sets `data-accent="<id>"` on every [data-theme-scope] root
+ *     (app shell, dialogs, paywall, onboarding, habit tracker) and React binds it
+ *     on the app-shell wrapper.
+ *   - `[data-accent="<id>"]` supplies the dark set; `.light[data-accent="<id>"]`
+ *     supplies the light set, and wins on specificity.
+ *   - Scopes that never receive the attribute (landing page, pre-hydration paint)
+ *     fall back to the lime values declared on `:root` and `.light` above.
+ *
+ * Only the semantic layer is re-hued. The `--lime-*` / `--cta-*` alpha scales
+ * stay lime on purpose so glass and tint surfaces keep their current weight
+ * regardless of accent, and status colors (emerald/red/amber) keep their meaning.
+ *
+ * Light-mode sets are the *text* variants: darkened so accent text clears 4.5:1
+ * on near-white panels. `onAccent` / `ctaFrom` / `ctaTo` are fill-only and stay
+ * bright in both modes because CTA fills always pair with dark text.
+ */
+
+[data-accent="lime"] {
+  --primary: #C8FF5A;
+  --primary-foreground: #050505;
+  --ring: #C8FF5A;
+  --accent-foreground: #C8FF5A;
+  --accent-soft: rgba(200, 255, 90, 0.12);
+  --accent-muted: rgba(200, 255, 90, 0.05);
+  --accent-border: rgba(200, 255, 90, 0.28);
+  --on-accent: #0A0C0A;
+  --cta-from: #C7F252;
+  --cta-to: #A8D43A;
+  --chart-1: #C8FF5A;
+  --accent-04: rgba(200, 255, 90, 0.04);
+  --accent-06: rgba(200, 255, 90, 0.06);
+  --accent-08: rgba(200, 255, 90, 0.08);
+  --accent-10: rgba(200, 255, 90, 0.1);
+  --accent-12: rgba(200, 255, 90, 0.12);
+  --accent-15: rgba(200, 255, 90, 0.15);
+  --accent-20: rgba(200, 255, 90, 0.2);
+  --accent-25: rgba(200, 255, 90, 0.25);
+  --accent-30: rgba(200, 255, 90, 0.3);
+  --accent-40: rgba(200, 255, 90, 0.4);
+  --accent-50: rgba(200, 255, 90, 0.5);
+  --sidebar-primary: #C8FF5A;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #C8FF5A;
+  --sidebar-ring: #C8FF5A;
+}
+
+[data-accent="emerald"] {
+  --primary: #34D399;
+  --primary-foreground: #050505;
+  --ring: #34D399;
+  --accent-foreground: #34D399;
+  --accent-soft: rgba(52, 211, 153, 0.12);
+  --accent-muted: rgba(52, 211, 153, 0.05);
+  --accent-border: rgba(52, 211, 153, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #10B981;
+  --cta-to: #059669;
+  --chart-1: #34D399;
+  --accent-04: rgba(52, 211, 153, 0.04);
+  --accent-06: rgba(52, 211, 153, 0.06);
+  --accent-08: rgba(52, 211, 153, 0.08);
+  --accent-10: rgba(52, 211, 153, 0.1);
+  --accent-12: rgba(52, 211, 153, 0.12);
+  --accent-15: rgba(52, 211, 153, 0.15);
+  --accent-20: rgba(52, 211, 153, 0.2);
+  --accent-25: rgba(52, 211, 153, 0.25);
+  --accent-30: rgba(52, 211, 153, 0.3);
+  --accent-40: rgba(52, 211, 153, 0.4);
+  --accent-50: rgba(52, 211, 153, 0.5);
+  --sidebar-primary: #34D399;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #34D399;
+  --sidebar-ring: #34D399;
+}
+
+[data-accent="cyan"] {
+  --primary: #22D3EE;
+  --primary-foreground: #050505;
+  --ring: #22D3EE;
+  --accent-foreground: #22D3EE;
+  --accent-soft: rgba(34, 211, 238, 0.12);
+  --accent-muted: rgba(34, 211, 238, 0.05);
+  --accent-border: rgba(34, 211, 238, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #06B6D4;
+  --cta-to: #0891B2;
+  --chart-1: #22D3EE;
+  --accent-04: rgba(34, 211, 238, 0.04);
+  --accent-06: rgba(34, 211, 238, 0.06);
+  --accent-08: rgba(34, 211, 238, 0.08);
+  --accent-10: rgba(34, 211, 238, 0.1);
+  --accent-12: rgba(34, 211, 238, 0.12);
+  --accent-15: rgba(34, 211, 238, 0.15);
+  --accent-20: rgba(34, 211, 238, 0.2);
+  --accent-25: rgba(34, 211, 238, 0.25);
+  --accent-30: rgba(34, 211, 238, 0.3);
+  --accent-40: rgba(34, 211, 238, 0.4);
+  --accent-50: rgba(34, 211, 238, 0.5);
+  --sidebar-primary: #22D3EE;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #22D3EE;
+  --sidebar-ring: #22D3EE;
+}
+
+[data-accent="violet"] {
+  --primary: #A78BFA;
+  --primary-foreground: #050505;
+  --ring: #A78BFA;
+  --accent-foreground: #A78BFA;
+  --accent-soft: rgba(167, 139, 250, 0.12);
+  --accent-muted: rgba(167, 139, 250, 0.05);
+  --accent-border: rgba(167, 139, 250, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #8B5CF6;
+  --cta-to: #7C6CF0;
+  --chart-1: #A78BFA;
+  --accent-04: rgba(167, 139, 250, 0.04);
+  --accent-06: rgba(167, 139, 250, 0.06);
+  --accent-08: rgba(167, 139, 250, 0.08);
+  --accent-10: rgba(167, 139, 250, 0.1);
+  --accent-12: rgba(167, 139, 250, 0.12);
+  --accent-15: rgba(167, 139, 250, 0.15);
+  --accent-20: rgba(167, 139, 250, 0.2);
+  --accent-25: rgba(167, 139, 250, 0.25);
+  --accent-30: rgba(167, 139, 250, 0.3);
+  --accent-40: rgba(167, 139, 250, 0.4);
+  --accent-50: rgba(167, 139, 250, 0.5);
+  --sidebar-primary: #A78BFA;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #A78BFA;
+  --sidebar-ring: #A78BFA;
+}
+
+[data-accent="amber"] {
+  --primary: #FBBF24;
+  --primary-foreground: #050505;
+  --ring: #FBBF24;
+  --accent-foreground: #FBBF24;
+  --accent-soft: rgba(251, 191, 36, 0.12);
+  --accent-muted: rgba(251, 191, 36, 0.05);
+  --accent-border: rgba(251, 191, 36, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #F59E0B;
+  --cta-to: #D97706;
+  --chart-1: #FBBF24;
+  --accent-04: rgba(251, 191, 36, 0.04);
+  --accent-06: rgba(251, 191, 36, 0.06);
+  --accent-08: rgba(251, 191, 36, 0.08);
+  --accent-10: rgba(251, 191, 36, 0.1);
+  --accent-12: rgba(251, 191, 36, 0.12);
+  --accent-15: rgba(251, 191, 36, 0.15);
+  --accent-20: rgba(251, 191, 36, 0.2);
+  --accent-25: rgba(251, 191, 36, 0.25);
+  --accent-30: rgba(251, 191, 36, 0.3);
+  --accent-40: rgba(251, 191, 36, 0.4);
+  --accent-50: rgba(251, 191, 36, 0.5);
+  --sidebar-primary: #FBBF24;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #FBBF24;
+  --sidebar-ring: #FBBF24;
+}
+
+[data-accent="red"] {
+  --primary: #FB7185;
+  --primary-foreground: #050505;
+  --ring: #FB7185;
+  --accent-foreground: #FB7185;
+  --accent-soft: rgba(251, 113, 133, 0.12);
+  --accent-muted: rgba(251, 113, 133, 0.05);
+  --accent-border: rgba(251, 113, 133, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #EF4444;
+  --cta-to: #E5484D;
+  --chart-1: #FB7185;
+  --accent-04: rgba(251, 113, 133, 0.04);
+  --accent-06: rgba(251, 113, 133, 0.06);
+  --accent-08: rgba(251, 113, 133, 0.08);
+  --accent-10: rgba(251, 113, 133, 0.1);
+  --accent-12: rgba(251, 113, 133, 0.12);
+  --accent-15: rgba(251, 113, 133, 0.15);
+  --accent-20: rgba(251, 113, 133, 0.2);
+  --accent-25: rgba(251, 113, 133, 0.25);
+  --accent-30: rgba(251, 113, 133, 0.3);
+  --accent-40: rgba(251, 113, 133, 0.4);
+  --accent-50: rgba(251, 113, 133, 0.5);
+  --sidebar-primary: #FB7185;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #FB7185;
+  --sidebar-ring: #FB7185;
+}
+
+[data-accent="orange"] {
+  --primary: #FF8A4C;
+  --primary-foreground: #050505;
+  --ring: #FF8A4C;
+  --accent-foreground: #FF8A4C;
+  --accent-soft: rgba(255, 138, 76, 0.12);
+  --accent-muted: rgba(255, 138, 76, 0.05);
+  --accent-border: rgba(255, 138, 76, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #FF6B35;
+  --cta-to: #EA580C;
+  --chart-1: #FF8A4C;
+  --accent-04: rgba(255, 138, 76, 0.04);
+  --accent-06: rgba(255, 138, 76, 0.06);
+  --accent-08: rgba(255, 138, 76, 0.08);
+  --accent-10: rgba(255, 138, 76, 0.1);
+  --accent-12: rgba(255, 138, 76, 0.12);
+  --accent-15: rgba(255, 138, 76, 0.15);
+  --accent-20: rgba(255, 138, 76, 0.2);
+  --accent-25: rgba(255, 138, 76, 0.25);
+  --accent-30: rgba(255, 138, 76, 0.3);
+  --accent-40: rgba(255, 138, 76, 0.4);
+  --accent-50: rgba(255, 138, 76, 0.5);
+  --sidebar-primary: #FF8A4C;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #FF8A4C;
+  --sidebar-ring: #FF8A4C;
+}
+
+[data-accent="blue"] {
+  --primary: #60A5FA;
+  --primary-foreground: #050505;
+  --ring: #60A5FA;
+  --accent-foreground: #60A5FA;
+  --accent-soft: rgba(96, 165, 250, 0.12);
+  --accent-muted: rgba(96, 165, 250, 0.05);
+  --accent-border: rgba(96, 165, 250, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #3B82F6;
+  --cta-to: #2F79EE;
+  --chart-1: #60A5FA;
+  --accent-04: rgba(96, 165, 250, 0.04);
+  --accent-06: rgba(96, 165, 250, 0.06);
+  --accent-08: rgba(96, 165, 250, 0.08);
+  --accent-10: rgba(96, 165, 250, 0.1);
+  --accent-12: rgba(96, 165, 250, 0.12);
+  --accent-15: rgba(96, 165, 250, 0.15);
+  --accent-20: rgba(96, 165, 250, 0.2);
+  --accent-25: rgba(96, 165, 250, 0.25);
+  --accent-30: rgba(96, 165, 250, 0.3);
+  --accent-40: rgba(96, 165, 250, 0.4);
+  --accent-50: rgba(96, 165, 250, 0.5);
+  --sidebar-primary: #60A5FA;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent-foreground: #60A5FA;
+  --sidebar-ring: #60A5FA;
+}
+
+/* ---- Light-mode accent sets (darkened for legibility on near-white) ---- */
+
+.light[data-accent="lime"] {
+  --primary: #4D7C0F;
+  --primary-foreground: #FFFFFF;
+  --ring: #4D7C0F;
+  --accent-foreground: #4D7C0F;
+  --accent-soft: rgba(77, 124, 15, 0.10);
+  --accent-muted: rgba(77, 124, 15, 0.05);
+  --accent-border: rgba(77, 124, 15, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #C7F252;
+  --cta-to: #A8D43A;
+  --chart-1: #4D7C0F;
+  --accent-04: rgba(77, 124, 15, 0.04);
+  --accent-06: rgba(77, 124, 15, 0.06);
+  --accent-08: rgba(77, 124, 15, 0.08);
+  --accent-10: rgba(77, 124, 15, 0.1);
+  --accent-12: rgba(77, 124, 15, 0.12);
+  --accent-15: rgba(77, 124, 15, 0.15);
+  --accent-20: rgba(77, 124, 15, 0.2);
+  --accent-25: rgba(77, 124, 15, 0.25);
+  --accent-30: rgba(77, 124, 15, 0.3);
+  --accent-40: rgba(77, 124, 15, 0.4);
+  --accent-50: rgba(77, 124, 15, 0.5);
+  --sidebar-primary: #4D7C0F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #4D7C0F;
+  --sidebar-ring: #4D7C0F;
+}
+
+.light[data-accent="emerald"] {
+  --primary: #047857;
+  --primary-foreground: #FFFFFF;
+  --ring: #047857;
+  --accent-foreground: #047857;
+  --accent-soft: rgba(4, 120, 87, 0.10);
+  --accent-muted: rgba(4, 120, 87, 0.05);
+  --accent-border: rgba(4, 120, 87, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #10B981;
+  --cta-to: #059669;
+  --chart-1: #047857;
+  --accent-04: rgba(4, 120, 87, 0.04);
+  --accent-06: rgba(4, 120, 87, 0.06);
+  --accent-08: rgba(4, 120, 87, 0.08);
+  --accent-10: rgba(4, 120, 87, 0.1);
+  --accent-12: rgba(4, 120, 87, 0.12);
+  --accent-15: rgba(4, 120, 87, 0.15);
+  --accent-20: rgba(4, 120, 87, 0.2);
+  --accent-25: rgba(4, 120, 87, 0.25);
+  --accent-30: rgba(4, 120, 87, 0.3);
+  --accent-40: rgba(4, 120, 87, 0.4);
+  --accent-50: rgba(4, 120, 87, 0.5);
+  --sidebar-primary: #047857;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #047857;
+  --sidebar-ring: #047857;
+}
+
+.light[data-accent="cyan"] {
+  --primary: #0E7490;
+  --primary-foreground: #FFFFFF;
+  --ring: #0E7490;
+  --accent-foreground: #0E7490;
+  --accent-soft: rgba(14, 116, 144, 0.10);
+  --accent-muted: rgba(14, 116, 144, 0.05);
+  --accent-border: rgba(14, 116, 144, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #06B6D4;
+  --cta-to: #0891B2;
+  --chart-1: #0E7490;
+  --accent-04: rgba(14, 116, 144, 0.04);
+  --accent-06: rgba(14, 116, 144, 0.06);
+  --accent-08: rgba(14, 116, 144, 0.08);
+  --accent-10: rgba(14, 116, 144, 0.1);
+  --accent-12: rgba(14, 116, 144, 0.12);
+  --accent-15: rgba(14, 116, 144, 0.15);
+  --accent-20: rgba(14, 116, 144, 0.2);
+  --accent-25: rgba(14, 116, 144, 0.25);
+  --accent-30: rgba(14, 116, 144, 0.3);
+  --accent-40: rgba(14, 116, 144, 0.4);
+  --accent-50: rgba(14, 116, 144, 0.5);
+  --sidebar-primary: #0E7490;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #0E7490;
+  --sidebar-ring: #0E7490;
+}
+
+.light[data-accent="violet"] {
+  --primary: #6D28D9;
+  --primary-foreground: #FFFFFF;
+  --ring: #6D28D9;
+  --accent-foreground: #6D28D9;
+  --accent-soft: rgba(109, 40, 217, 0.10);
+  --accent-muted: rgba(109, 40, 217, 0.05);
+  --accent-border: rgba(109, 40, 217, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #8B5CF6;
+  --cta-to: #7C6CF0;
+  --chart-1: #6D28D9;
+  --accent-04: rgba(109, 40, 217, 0.04);
+  --accent-06: rgba(109, 40, 217, 0.06);
+  --accent-08: rgba(109, 40, 217, 0.08);
+  --accent-10: rgba(109, 40, 217, 0.1);
+  --accent-12: rgba(109, 40, 217, 0.12);
+  --accent-15: rgba(109, 40, 217, 0.15);
+  --accent-20: rgba(109, 40, 217, 0.2);
+  --accent-25: rgba(109, 40, 217, 0.25);
+  --accent-30: rgba(109, 40, 217, 0.3);
+  --accent-40: rgba(109, 40, 217, 0.4);
+  --accent-50: rgba(109, 40, 217, 0.5);
+  --sidebar-primary: #6D28D9;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #6D28D9;
+  --sidebar-ring: #6D28D9;
+}
+
+.light[data-accent="amber"] {
+  --primary: #B45309;
+  --primary-foreground: #FFFFFF;
+  --ring: #B45309;
+  --accent-foreground: #B45309;
+  --accent-soft: rgba(180, 83, 9, 0.10);
+  --accent-muted: rgba(180, 83, 9, 0.05);
+  --accent-border: rgba(180, 83, 9, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #F59E0B;
+  --cta-to: #D97706;
+  --chart-1: #B45309;
+  --accent-04: rgba(180, 83, 9, 0.04);
+  --accent-06: rgba(180, 83, 9, 0.06);
+  --accent-08: rgba(180, 83, 9, 0.08);
+  --accent-10: rgba(180, 83, 9, 0.1);
+  --accent-12: rgba(180, 83, 9, 0.12);
+  --accent-15: rgba(180, 83, 9, 0.15);
+  --accent-20: rgba(180, 83, 9, 0.2);
+  --accent-25: rgba(180, 83, 9, 0.25);
+  --accent-30: rgba(180, 83, 9, 0.3);
+  --accent-40: rgba(180, 83, 9, 0.4);
+  --accent-50: rgba(180, 83, 9, 0.5);
+  --sidebar-primary: #B45309;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #B45309;
+  --sidebar-ring: #B45309;
+}
+
+.light[data-accent="red"] {
+  --primary: #B91C1C;
+  --primary-foreground: #FFFFFF;
+  --ring: #B91C1C;
+  --accent-foreground: #B91C1C;
+  --accent-soft: rgba(185, 28, 28, 0.10);
+  --accent-muted: rgba(185, 28, 28, 0.05);
+  --accent-border: rgba(185, 28, 28, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #EF4444;
+  --cta-to: #E5484D;
+  --chart-1: #B91C1C;
+  --accent-04: rgba(185, 28, 28, 0.04);
+  --accent-06: rgba(185, 28, 28, 0.06);
+  --accent-08: rgba(185, 28, 28, 0.08);
+  --accent-10: rgba(185, 28, 28, 0.1);
+  --accent-12: rgba(185, 28, 28, 0.12);
+  --accent-15: rgba(185, 28, 28, 0.15);
+  --accent-20: rgba(185, 28, 28, 0.2);
+  --accent-25: rgba(185, 28, 28, 0.25);
+  --accent-30: rgba(185, 28, 28, 0.3);
+  --accent-40: rgba(185, 28, 28, 0.4);
+  --accent-50: rgba(185, 28, 28, 0.5);
+  --sidebar-primary: #B91C1C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #B91C1C;
+  --sidebar-ring: #B91C1C;
+}
+
+.light[data-accent="orange"] {
+  --primary: #C2410C;
+  --primary-foreground: #FFFFFF;
+  --ring: #C2410C;
+  --accent-foreground: #C2410C;
+  --accent-soft: rgba(194, 65, 12, 0.10);
+  --accent-muted: rgba(194, 65, 12, 0.05);
+  --accent-border: rgba(194, 65, 12, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #FF6B35;
+  --cta-to: #EA580C;
+  --chart-1: #C2410C;
+  --accent-04: rgba(194, 65, 12, 0.04);
+  --accent-06: rgba(194, 65, 12, 0.06);
+  --accent-08: rgba(194, 65, 12, 0.08);
+  --accent-10: rgba(194, 65, 12, 0.1);
+  --accent-12: rgba(194, 65, 12, 0.12);
+  --accent-15: rgba(194, 65, 12, 0.15);
+  --accent-20: rgba(194, 65, 12, 0.2);
+  --accent-25: rgba(194, 65, 12, 0.25);
+  --accent-30: rgba(194, 65, 12, 0.3);
+  --accent-40: rgba(194, 65, 12, 0.4);
+  --accent-50: rgba(194, 65, 12, 0.5);
+  --sidebar-primary: #C2410C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #C2410C;
+  --sidebar-ring: #C2410C;
+}
+
+.light[data-accent="blue"] {
+  --primary: #1D4ED8;
+  --primary-foreground: #FFFFFF;
+  --ring: #1D4ED8;
+  --accent-foreground: #1D4ED8;
+  --accent-soft: rgba(29, 78, 216, 0.10);
+  --accent-muted: rgba(29, 78, 216, 0.05);
+  --accent-border: rgba(29, 78, 216, 0.30);
+  --on-accent: #0A0C0A;
+  --cta-from: #3B82F6;
+  --cta-to: #2F79EE;
+  --chart-1: #1D4ED8;
+  --accent-04: rgba(29, 78, 216, 0.04);
+  --accent-06: rgba(29, 78, 216, 0.06);
+  --accent-08: rgba(29, 78, 216, 0.08);
+  --accent-10: rgba(29, 78, 216, 0.1);
+  --accent-12: rgba(29, 78, 216, 0.12);
+  --accent-15: rgba(29, 78, 216, 0.15);
+  --accent-20: rgba(29, 78, 216, 0.2);
+  --accent-25: rgba(29, 78, 216, 0.25);
+  --accent-30: rgba(29, 78, 216, 0.3);
+  --accent-40: rgba(29, 78, 216, 0.4);
+  --accent-50: rgba(29, 78, 216, 0.5);
+  --sidebar-primary: #1D4ED8;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent-foreground: #1D4ED8;
+  --sidebar-ring: #1D4ED8;
+}
+
+/* ==== END ACCENT THEMES ==== */
+
+/* Intro/portal scopes flip tokens via .light but mount outside app-shell, so they never get its text-foreground class.
+   Re-assert the theme foreground so unclassed text (and dead text-muted-foreground/* variants) inherits the right
+   color instead of body's dark-mode white. Dark mode has no .light class, so it is untouched by construction. */
+.light {
+  color: var(--foreground);
+}
+
+/* Re-assert white-alpha utilities on surfaces that stay white-on-dark even in light mode (image covers, fixed-colored CTAs, avatars). */
+.light .keep-white {
+  --color-white-rgb: 255 255 255;
+  color: #fff;
+}
+
+
+
+/* Hide scrollbars everywhere but keep scroll functionality. Forced-colors
+ * users (e.g. Windows High Contrast) get real scrollbars back — hiding them
+ * there removes a required affordance. */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  *,
+  *::-webkit-scrollbar {
+    -ms-overflow-style: auto;
+    scrollbar-width: auto;
+    display: revert;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* overflow-x: hidden guards against known decorative absolutely-positioned
+   * blobs (w-[500px] h-[500px] radials) spilling sideways. The previous
+   * `max-width: 100vw` companion is removed: it double-guards the same axis
+   * while mis-measuring viewport width whenever a vertical scrollbar is
+   * present (100vw includes the scrollbar gutter). Renderers already use
+   * w-full + max-w-[…], so nothing legitimate needs the clip. */
+  html, body {
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Glass surface for Button variant="glass". Declared in <components> so
+     utilities-layer hover/active background classes still win the cascade. */
+  .btn-glass {
+    border-color: var(--glass-border);
+    background-color: var(--glass-bg);
+  }
+
+  /* Pill/tile surfaces are declared unlayered below so their border and
+     background states win over the layered Tailwind utilities. */
+}
+
+@layer utilities {
+  /* Seamless horizontal loop for the pitch track marquee. The track renders
+     its children twice, so translating exactly -50% lands on a pixel-identical
+     copy and the loop has no visible seam. */
+  .animate-marquee {
+    animation: marquee-scroll 26s linear infinite;
+  }
+
+  .animate-marquee-paused,
+  .animate-marquee:hover,
+  .animate-marquee:focus-within {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee {
+      animation: none;
+    }
+  }
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/*
+ * Pill badges + inner tiles.
+ * Unlayered on purpose: layered Tailwind utilities (border-[...], bg-[...]) are
+ * emitted after @layer components, so a layered hover rule would lose to them.
+ * These must win to control border/background on hover and press.
+ * Interactivity covers hover (pointer devices) and :active/:focus-visible (touch
+ * devices, incl. the Android WebView, where :hover never fires).
+ * All colours come from tokens that flip in .light, so both themes are covered.
+ */
+.pill {
+  border-radius: 9999px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--glass-border);
+  background-color: var(--glass-05);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Light mode only: a lit sheen so the pill reads as a raised, polished chip.
+   Declared unlayered so it also wins over utility box-shadows.
+
+   `.pill-sheen` is deliberately NOT in this selector list. It is only ever
+   applied alongside a caller's own accent background (e.g. `bg-primary/10`),
+   and this rule's `background-color` would win over that utility at equal
+   specificity, flattening the selected state. Its sheen is defined separately
+   below, background-free as documented. */
+.light .pill {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 60%);
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 16px -10px rgba(15, 23, 42, 0.3);
+}
+
+/* Shine-only variant for pills that already carry their own accent colours
+   (selected/active states). Sets only the gradient so the caller's
+   background-color and border survive. */
+.light .pill-sheen {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 60%);
+}
+
+.pill:hover,
+.pill:focus-visible {
+  border-color: var(--cta-25);
+  background-color: var(--glass-07);
+}
+
+.light .pill:hover,
+.light .pill:focus-visible {
+  border-color: rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 1px 2px rgba(15, 23, 42, 0.07),
+    0 8px 20px -10px rgba(15, 23, 42, 0.34);
+}
+
+/*
+ * Learn tab switcher (the 3D push keys: Topic Explorer / Adaptive Learning / Mock).
+ * The base rules are the existing dark-mode values verbatim. Light mode only gets
+ * overrides, because the effect is carved out of black inset shadows and white
+ * glass tokens, which read as smudges on a white surface. Dark mode is untouched.
+ */
+.tab-key {
+  background: var(--glass-02);
+  box-shadow:
+    inset 0 2px 4px var(--black-50),
+    inset 0 -1px 1px var(--glass-bg);
+}
+
+.tab-key[data-active="true"] {
+  background: linear-gradient(180deg, var(--cta-18), var(--cta-05));
+  box-shadow:
+    0 8px 18px var(--black-40),
+    0 2px 4px var(--black-30),
+    inset 0 1px 0 var(--glass-35),
+    inset 0 -2px 6px var(--black-35);
+}
+
+.tab-key-icon {
+  color: var(--glass-45);
+}
+
+.tab-key-icon[data-active="true"] {
+  color: var(--accent);
+}
+
+.tab-key-label {
+  color: var(--glass-50);
+  text-shadow: 0 1px 2px var(--black-80);
+}
+
+.tab-key-label[data-active="true"] {
+  color: var(--accent);
+  text-shadow: 0 1px 1px var(--black-60);
+}
+
+.tab-key-bevel {
+  background: linear-gradient(90deg, transparent, var(--glass-70), transparent);
+}
+
+.tab-key-drop {
+  background: radial-gradient(ellipse at center, var(--black-50), transparent 70%);
+}
+
+/* Light mode: flatten the carved-black look into a soft raised card. */
+.light .tab-key {
+  background: var(--glass-02);
+  box-shadow:
+    inset 0 1px 2px rgba(15, 23, 42, 0.05),
+    0 1px 1px rgba(15, 23, 42, 0.03);
+}
+
+.light .tab-key[data-active="true"] {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, var(--cta-06) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 16px -8px var(--cta-45);
+}
+
+.light .tab-key-icon {
+  color: var(--muted-foreground);
+}
+
+.light .tab-key-label {
+  color: var(--muted-foreground);
+  text-shadow: none;
+}
+
+.light .tab-key-label[data-active="true"] {
+  color: var(--accent);
+  text-shadow: none;
+}
+
+.light .tab-key-bevel {
+  background: linear-gradient(90deg, transparent, var(--cta-35), transparent);
+}
+
+.light .tab-key-drop {
+  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.10), transparent 70%);
+}
+
+/*
+ * Play tab switcher (Duels / Sprints / Arena / ...).
+ * Dark values mirror the previous inline styles. Light mode gets the sheen so the
+ * active tab reads as a raised chip instead of a faint white-on-white block.
+ */
+.tab-tile {
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  background: var(--glass-02);
+}
+
+.tab-tile[data-active="true"] {
+  border-color: var(--glass-10);
+  background: var(--glass-07);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.tab-tile-chip {
+  background: var(--glass-bg);
+}
+
+.light .tab-tile {
+  border-color: var(--glass-07);
+  background: var(--glass-02);
+}
+
+.light .tab-tile[data-active="true"] {
+  border-color: var(--cta-25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, var(--glass-05) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 22px -8px var(--cta-45);
+}
+
+.light .tab-tile:hover,
+.light .tab-tile:focus-visible {
+  border-color: var(--cta-35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 1px 2px rgba(15, 23, 42, 0.07),
+    0 10px 26px -10px var(--cta-45);
+}
+
+/*
+ * Desktop font upscale (web only).
+ * Applies at >=1024px (the app's desktop tier, same as --page-padding 40px).
+ * Below 1024px (Android phones, APK WebView, limited split-screen) all sizes are untouched.
+ * Desktop font re-scale. These rules intentionally override Tailwind's
+ * arbitrary-size utilities, so they live in @layer utilities (after the
+ * framework's utilities in source order) instead of floating unlayered where
+ * they would also beat every layered rule in the cascade. Components that
+ * genuinely need a fixed desktop size should use an inline style or
+ * !important, which still wins.
+ */
+@layer utilities {
+  @media (min-width: 1024px) {
+  .text-\[6px\] { font-size: 8px; }
+  .text-\[7px\] { font-size: 9px; }
+  .text-\[8px\] { font-size: 10px; }
+  .text-\[9px\] { font-size: 11px; }
+  .text-\[10px\] { font-size: 12px; }
+  .text-\[11px\] { font-size: 14px; }
+  .text-\[12px\] { font-size: 15px; }
+  .text-\[13px\] { font-size: 16px; }
+  .text-\[14px\] { font-size: 17px; }
+  .text-\[15px\] { font-size: 18px; }
+  .text-\[16px\] { font-size: 19px; }
+  .text-\[17px\] { font-size: 20px; }
+  .text-\[18px\] { font-size: 21px; }
+  .text-\[19px\] { font-size: 22px; }
+  .text-\[20px\] { font-size: 23px; }
+  .text-\[22px\] { font-size: 25px; }
+  .text-\[23px\] { font-size: 26px; }
+  .text-\[24px\] { font-size: 27px; }
+  .text-\[26px\] { font-size: 29px; }
+  .text-\[28px\] { font-size: 31px; }
+  .text-\[32px\] { font-size: 35px; }
+  .text-\[34px\] { font-size: 37px; }
+  .text-\[36px\] { font-size: 39px; }
+  .text-\[37px\] { font-size: 40px; }
+  .text-\[58px\] { font-size: 62px; }
+
+  .text-micro { font-size: 13px; }
+  .text-xs { font-size: 14px; }
+  .text-sm { font-size: 16px; }
+  .text-base { font-size: 18px; }
+  .text-lg { font-size: 20px; }
+  .text-xl { font-size: 22px; }
+  .text-2xl { font-size: 26px; }
+  .text-3xl { font-size: 32px; }
+  .text-4xl { font-size: 38px; }
+  .text-5xl { font-size: 50px; }
+  }
+}
+
+
+
+
+
+
+/* Responsive guards */
+html, body { max-width: 100%; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+table { width: 100%; }
+[style*="100vw"] { max-width: 100vw; }
+@media (max-width: 359px) { :root { --page-padding: 12px; } }
+@media (max-height: 640px) { :root { --header-height: 48px; } }
+

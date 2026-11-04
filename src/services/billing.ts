@@ -1,0 +1,53 @@
+import { apiGet } from "./api";
+import { IS_MOCK } from "@/lib/platform";
+
+/** GET /api/v1/billing/subscription — verified against the backend router (billing.py). */
+export type BackendSubscriptionResponse = {
+  tier: string;
+  subscription: {
+    id: string;
+    provider: string;
+    tier: string;
+    status: string;
+    effective_tier: string;
+    seats_count: number;
+    currency: string | null;
+    amount_minor: number | null;
+    current_period_start: string | null;
+    current_period_end: string | null;
+    trial_ends_at: string | null;
+    cancel_at_period_end: boolean;
+  } | null;
+  entitlement: { tier: string; expires_at: number; grace_days: number; signature: string };
+};
+
+export type Subscription = {
+  /** Entitled tier decided by the backend ("free" | "pro" | "bundle_2" | "bundle_3"). */
+  tier: string;
+  isPaid: boolean;
+  status: string | null;
+  periodEnd: string | null;
+  trialEndsAt: string | null;
+  cancelAtPeriodEnd: boolean;
+};
+
+export function mapSubscription(response: BackendSubscriptionResponse): Subscription {
+  // The entitlement is the backend's decision; the plan the UI selected is never proof of it.
+  const tier = response.entitlement?.tier ?? "free";
+  const sub = response.subscription;
+  return {
+    tier,
+    isPaid: tier !== "free",
+    status: sub?.status ?? null,
+    periodEnd: sub?.current_period_end ?? null,
+    trialEndsAt: sub?.trial_ends_at ?? null,
+    cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
+  };
+}
+
+export async function getSubscription(): Promise<Subscription> {
+  if (IS_MOCK) {
+    return { tier: "free", isPaid: false, status: null, periodEnd: null, trialEndsAt: null, cancelAtPeriodEnd: false };
+  }
+  return mapSubscription(await apiGet<BackendSubscriptionResponse>("/billing/subscription"));
+}

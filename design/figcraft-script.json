@@ -1,0 +1,4045 @@
+[
+  {
+    "command": "page.rename",
+    "params": {
+      "name": "Zuzumik"
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Home",
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "props": {
+        "fill": "#050505",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Greeting",
+      "x": 24,
+      "y": 48,
+      "width": 220,
+      "text": "Good evening,",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "UserName",
+      "x": 24,
+      "y": 66,
+      "width": 240,
+      "text": "Arjun M.",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 26,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Avatar",
+      "x": 318,
+      "y": 50,
+      "width": 48,
+      "height": 48,
+      "props": {
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "AvatarInitial",
+      "x": 318,
+      "y": 62,
+      "width": 48,
+      "text": "A",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 20,
+        "fontStyle": "bold",
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "StreakCard",
+      "x": 24,
+      "y": 120,
+      "width": 342,
+      "height": 96,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 20,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Streak",
+      "x": 20,
+      "y": 16,
+      "width": 200,
+      "text": "6 day streak",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 20,
+        "fontStyle": "bold",
+        "fill": "#FBBF24"
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Xp",
+      "x": 20,
+      "y": 44,
+      "width": 220,
+      "text": "2,340 XP earned",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "M",
+      "x": 20,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "T",
+      "x": 64,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "W",
+      "x": 108,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "T",
+      "x": 152,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "F",
+      "x": 196,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "S",
+      "x": 240,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "S",
+      "x": 284,
+      "y": 62,
+      "width": 32,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 6
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Stat/Accuracy",
+      "x": 24,
+      "y": 232,
+      "width": 110,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 16,
+      "y": 12,
+      "width": 78,
+      "text": "85%",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#FBBF24"
+      },
+      "parent": {
+        "$step": 16
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 16,
+      "y": 42,
+      "width": 78,
+      "text": "Accuracy",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 16
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Stat/Questions",
+      "x": 140,
+      "y": 232,
+      "width": 110,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 16,
+      "y": 12,
+      "width": 78,
+      "text": "2.1k",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#22D3EE"
+      },
+      "parent": {
+        "$step": 19
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 16,
+      "y": 42,
+      "width": 78,
+      "text": "Questions",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 19
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Stat/Speed",
+      "x": 256,
+      "y": 232,
+      "width": 110,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 16,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 16,
+      "y": 12,
+      "width": 78,
+      "text": "72",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#A78BFA"
+      },
+      "parent": {
+        "$step": 22
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 16,
+      "y": 42,
+      "width": 78,
+      "text": "Speed",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 22
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "TopicsTitle",
+      "x": 24,
+      "y": 324,
+      "width": 200,
+      "text": "Topics",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Topic/Quantitative Aptitude",
+      "x": 24,
+      "y": 356,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 20,
+      "y": 16,
+      "width": 230,
+      "text": "Quantitative Aptitude",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 26
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Pct",
+      "x": 274,
+      "y": 14,
+      "width": 48,
+      "text": "92%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 26
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 46,
+      "width": 302,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 26
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 46,
+      "width": 278,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 26
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Topic/Logical Reasoning",
+      "x": 24,
+      "y": 440,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 20,
+      "y": 16,
+      "width": 230,
+      "text": "Logical Reasoning",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 31
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Pct",
+      "x": 274,
+      "y": 14,
+      "width": 48,
+      "text": "78%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#22D3EE",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 31
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 46,
+      "width": 302,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 31
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 46,
+      "width": 236,
+      "height": 8,
+      "props": {
+        "fill": "#22D3EE",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 31
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Topic/Data Interpretation",
+      "x": 24,
+      "y": 524,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 20,
+      "y": 16,
+      "width": 230,
+      "text": "Data Interpretation",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 36
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Pct",
+      "x": 274,
+      "y": 14,
+      "width": 48,
+      "text": "85%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 36
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 46,
+      "width": 302,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 36
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 46,
+      "width": 257,
+      "height": 8,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 36
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Topic/Verbal Ability",
+      "x": 24,
+      "y": 608,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 20,
+      "y": 16,
+      "width": 230,
+      "text": "Verbal Ability",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 41
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Pct",
+      "x": 274,
+      "y": 14,
+      "width": 48,
+      "text": "64%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#FBBF24",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 41
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 46,
+      "width": 302,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 41
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 46,
+      "width": 193,
+      "height": 8,
+      "props": {
+        "fill": "#FBBF24",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 41
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Topic/General Knowledge",
+      "x": 24,
+      "y": 692,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 20,
+      "y": 16,
+      "width": 230,
+      "text": "General Knowledge",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 46
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Pct",
+      "x": 274,
+      "y": 14,
+      "width": 48,
+      "text": "41%",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#FB7185",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 46
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 46,
+      "width": 302,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 46
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 46,
+      "width": 124,
+      "height": 8,
+      "props": {
+        "fill": "#FB7185",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 46
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "BottomNav",
+      "x": 24,
+      "y": 772,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 24,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 1
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Nav/Home",
+      "x": 37,
+      "y": 21,
+      "width": 60,
+      "text": "Home",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 51
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Nav/Learn",
+      "x": 122,
+      "y": 21,
+      "width": 60,
+      "text": "Learn",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 51
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Nav/Play",
+      "x": 207,
+      "y": 21,
+      "width": 60,
+      "text": "Play",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 51
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Nav/Settings",
+      "x": 292,
+      "y": 21,
+      "width": 60,
+      "text": "Settings",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 51
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Arena",
+      "x": 470,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "props": {
+        "fill": "#050505",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 24,
+      "y": 46,
+      "width": 220,
+      "text": "Arena",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 26,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "LivePill",
+      "x": 24,
+      "y": 88,
+      "width": 130,
+      "height": 28,
+      "props": {
+        "fill": "#C8FF5A1F",
+        "cornerRadius": 14
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "LiveText",
+      "x": 34,
+      "y": 94,
+      "width": 116,
+      "text": "● LRDI Sprint",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "LiveTime",
+      "x": 24,
+      "y": 126,
+      "width": 200,
+      "text": "Today, 8:00 PM",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "QuestionCard",
+      "x": 24,
+      "y": 168,
+      "width": 342,
+      "height": 190,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 24,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "QNo",
+      "x": 20,
+      "y": 16,
+      "width": 120,
+      "text": "Q4 / 10",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Timer",
+      "x": 262,
+      "y": 16,
+      "width": 60,
+      "text": "00:42",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 20,
+      "y": 44,
+      "width": 302,
+      "height": 6,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 3
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Progress",
+      "x": 20,
+      "y": 44,
+      "width": 121,
+      "height": 6,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 3
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Question",
+      "x": 20,
+      "y": 72,
+      "width": 302,
+      "text": "Which of Newton's laws explains how a rocket moves forward?",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF",
+        "lineHeight": "140%"
+      },
+      "parent": {
+        "$step": 61
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Option/A",
+      "x": 24,
+      "y": 384,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Badge",
+      "x": 14,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 67
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BadgeText",
+      "x": 14,
+      "y": 19,
+      "width": 32,
+      "text": "A",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 67
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "OptionText",
+      "x": 60,
+      "y": 17,
+      "width": 250,
+      "text": "First law",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 67
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Option/B",
+      "x": 24,
+      "y": 456,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#C8FF5A1F",
+        "cornerRadius": 18,
+        "stroke": "#C8FF5A",
+        "strokeWeight": 2
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Badge",
+      "x": 14,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BadgeText",
+      "x": 14,
+      "y": 19,
+      "width": 32,
+      "text": "B",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "OptionText",
+      "x": 60,
+      "y": 17,
+      "width": 250,
+      "text": "Second law",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 71
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Option/C",
+      "x": 24,
+      "y": 528,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Badge",
+      "x": 14,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 75
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BadgeText",
+      "x": 14,
+      "y": 19,
+      "width": 32,
+      "text": "C",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 75
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "OptionText",
+      "x": 60,
+      "y": 17,
+      "width": 250,
+      "text": "Third law",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 75
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Option/D",
+      "x": 24,
+      "y": 600,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "Badge",
+      "x": 14,
+      "y": 12,
+      "width": 32,
+      "height": 32,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 79
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BadgeText",
+      "x": 14,
+      "y": 19,
+      "width": 32,
+      "text": "D",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 14,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 79
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "OptionText",
+      "x": 60,
+      "y": 17,
+      "width": 250,
+      "text": "Law of gravitation",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 79
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Confirm",
+      "x": 24,
+      "y": 700,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 28
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "ConfirmLabel",
+      "x": 0,
+      "y": 18,
+      "width": 342,
+      "text": "Confirm answer",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 83
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Hint",
+      "x": 24,
+      "y": 772,
+      "width": 342,
+      "text": "Answer within 42s to keep your streak",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B",
+        "textAlign": "center"
+      },
+      "parent": {
+        "$step": 56
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Analytics",
+      "x": 940,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "props": {
+        "fill": "#050505",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 24,
+      "y": 46,
+      "width": 220,
+      "text": "Analytics",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 26,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Subtitle",
+      "x": 24,
+      "y": 84,
+      "width": 240,
+      "text": "CAT · This week",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "AccuracyCard",
+      "x": 24,
+      "y": 116,
+      "width": 342,
+      "height": 120,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 24,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Big",
+      "x": 24,
+      "y": 18,
+      "width": 180,
+      "text": "85%",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 42,
+        "fontStyle": "bold",
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 89
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 26,
+      "y": 76,
+      "width": 220,
+      "text": "Overall accuracy",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 89
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Delta",
+      "x": 210,
+      "y": 26,
+      "width": 108,
+      "text": "+4% vs last week",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fontStyle": "bold",
+        "fill": "#34D399",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 89
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "SkillsCard",
+      "x": 24,
+      "y": 252,
+      "width": 342,
+      "height": 300,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 24,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "SkillsTitle",
+      "x": 20,
+      "y": 20,
+      "width": 220,
+      "text": "Skill radar",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Speed",
+      "x": 20,
+      "y": 62,
+      "width": 90,
+      "text": "Speed",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 64,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 64,
+      "width": 162,
+      "height": 8,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 61,
+      "width": 28,
+      "text": "90",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Logic",
+      "x": 20,
+      "y": 100,
+      "width": 90,
+      "text": "Logic",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 102,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 102,
+      "width": 135,
+      "height": 8,
+      "props": {
+        "fill": "#22D3EE",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 99,
+      "width": 28,
+      "text": "75",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Stamina",
+      "x": 20,
+      "y": 138,
+      "width": 90,
+      "text": "Stamina",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 140,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 140,
+      "width": 126,
+      "height": 8,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 137,
+      "width": 28,
+      "text": "70",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Focus",
+      "x": 20,
+      "y": 176,
+      "width": 90,
+      "text": "Focus",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 178,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 178,
+      "width": 144,
+      "height": 8,
+      "props": {
+        "fill": "#A78BFA",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 175,
+      "width": 28,
+      "text": "80",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Memory",
+      "x": 20,
+      "y": 214,
+      "width": 90,
+      "text": "Memory",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 216,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 216,
+      "width": 130,
+      "height": 8,
+      "props": {
+        "fill": "#FBBF24",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 213,
+      "width": 28,
+      "text": "72",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Skill/Reflex",
+      "x": 20,
+      "y": 252,
+      "width": 90,
+      "text": "Reflex",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Track",
+      "x": 120,
+      "y": 254,
+      "width": 180,
+      "height": 8,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "Fill",
+      "x": 120,
+      "y": 254,
+      "width": 153,
+      "height": 8,
+      "props": {
+        "fill": "#FB7185",
+        "cornerRadius": 4
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 306,
+      "y": 251,
+      "width": 28,
+      "text": "85",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 93
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Metric/Delay",
+      "x": 24,
+      "y": 568,
+      "width": 163,
+      "height": 96,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 20,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 16,
+      "y": 16,
+      "width": 130,
+      "text": "142ms",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#A78BFA"
+      },
+      "parent": {
+        "$step": 119
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 16,
+      "y": 56,
+      "width": 130,
+      "text": "Action delay",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 119
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Metric/Focus",
+      "x": 203,
+      "y": 568,
+      "width": 163,
+      "height": 96,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 20,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Value",
+      "x": 16,
+      "y": 16,
+      "width": 130,
+      "text": "89%",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 22,
+        "fontStyle": "bold",
+        "fill": "#22D3EE"
+      },
+      "parent": {
+        "$step": 122
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 16,
+      "y": 56,
+      "width": 130,
+      "text": "Focus density",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 122
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "OpenReport",
+      "x": 24,
+      "y": 700,
+      "width": 342,
+      "height": 56,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 28
+      },
+      "parent": {
+        "$step": 86
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "ReportLabel",
+      "x": 0,
+      "y": 18,
+      "width": 342,
+      "text": "Open full report",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 125
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Leaderboard",
+      "x": 1410,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "props": {
+        "fill": "#050505",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 24,
+      "y": 46,
+      "width": 260,
+      "text": "Leaderboard",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 26,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Subtitle",
+      "x": 24,
+      "y": 84,
+      "width": 240,
+      "text": "CAT · This season",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Rank/1",
+      "x": 24,
+      "y": 120,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "RankBadge",
+      "x": 16,
+      "y": 16,
+      "width": 40,
+      "height": 40,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 130
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RankText",
+      "x": 16,
+      "y": 27,
+      "width": 40,
+      "text": "1",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 130
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Name",
+      "x": 72,
+      "y": 24,
+      "width": 180,
+      "text": "Priya S.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 130
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "XP",
+      "x": 250,
+      "y": 25,
+      "width": 76,
+      "text": "4,820 XP",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 13,
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 130
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Rank/2",
+      "x": 24,
+      "y": 200,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "RankBadge",
+      "x": 16,
+      "y": 16,
+      "width": 40,
+      "height": 40,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 135
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RankText",
+      "x": 16,
+      "y": 27,
+      "width": 40,
+      "text": "2",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 135
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Name",
+      "x": 72,
+      "y": 24,
+      "width": 180,
+      "text": "Arjun M.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 135
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "XP",
+      "x": 250,
+      "y": 25,
+      "width": 76,
+      "text": "4,310 XP",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 13,
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 135
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Rank/3",
+      "x": 24,
+      "y": 280,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "RankBadge",
+      "x": 16,
+      "y": 16,
+      "width": 40,
+      "height": 40,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RankText",
+      "x": 16,
+      "y": 27,
+      "width": 40,
+      "text": "3",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#9CA3AF"
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Name",
+      "x": 72,
+      "y": 24,
+      "width": 180,
+      "text": "Rohan K.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "XP",
+      "x": 250,
+      "y": 25,
+      "width": 76,
+      "text": "3,990 XP",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 13,
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 140
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Rank/47",
+      "x": 24,
+      "y": 360,
+      "width": 342,
+      "height": 72,
+      "props": {
+        "fill": "#C8FF5A1F",
+        "cornerRadius": 18,
+        "stroke": "#C8FF5A",
+        "strokeWeight": 2
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "ellipse",
+      "name": "RankBadge",
+      "x": 16,
+      "y": 16,
+      "width": 40,
+      "height": 40,
+      "props": {
+        "fill": "#FFFFFF14"
+      },
+      "parent": {
+        "$step": 145
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "RankText",
+      "x": 16,
+      "y": 27,
+      "width": 40,
+      "text": "47",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Space Grotesk",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 145
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Name",
+      "x": 72,
+      "y": 24,
+      "width": 180,
+      "text": "You",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 16,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 145
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "XP",
+      "x": 250,
+      "y": 25,
+      "width": 76,
+      "text": "2,340 XP",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 13,
+        "fill": "#C8FF5A",
+        "textAlign": "right"
+      },
+      "parent": {
+        "$step": 145
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "UpcomingTitle",
+      "x": 24,
+      "y": 470,
+      "width": 220,
+      "text": "Upcoming",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 18,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Event/LRDI Sprint",
+      "x": 24,
+      "y": 502,
+      "width": 342,
+      "height": 76,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 20,
+      "y": 16,
+      "width": 220,
+      "text": "LRDI Sprint",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 151
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Time",
+      "x": 20,
+      "y": 42,
+      "width": 200,
+      "text": "Today, 8:00 PM",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 151
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "TagPill",
+      "x": 262,
+      "y": 24,
+      "width": 60,
+      "height": 26,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 13
+      },
+      "parent": {
+        "$step": 151
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "TagText",
+      "x": 262,
+      "y": 30,
+      "width": 60,
+      "text": "LIVE",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#FB7185"
+      },
+      "parent": {
+        "$step": 151
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Event/Mock CAT #7",
+      "x": 24,
+      "y": 590,
+      "width": 342,
+      "height": 76,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 20,
+      "y": 16,
+      "width": 220,
+      "text": "Mock CAT #7",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 156
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Time",
+      "x": 20,
+      "y": 42,
+      "width": 200,
+      "text": "Thu, 10:00 AM",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 156
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "TagPill",
+      "x": 262,
+      "y": 24,
+      "width": 60,
+      "height": 26,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 13
+      },
+      "parent": {
+        "$step": 156
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "TagText",
+      "x": 262,
+      "y": 30,
+      "width": 60,
+      "text": "MOCK",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#FBBF24"
+      },
+      "parent": {
+        "$step": 156
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Event/VA Sectional",
+      "x": 24,
+      "y": 678,
+      "width": 342,
+      "height": 76,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 18,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 127
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 20,
+      "y": 16,
+      "width": 220,
+      "text": "VA Sectional",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 161
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Time",
+      "x": 20,
+      "y": 42,
+      "width": 200,
+      "text": "Sat, 3:00 PM",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 12,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 161
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "rectangle",
+      "name": "TagPill",
+      "x": 262,
+      "y": 24,
+      "width": 60,
+      "height": 26,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 13
+      },
+      "parent": {
+        "$step": 161
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "TagText",
+      "x": 262,
+      "y": 30,
+      "width": 60,
+      "text": "GROUP",
+      "props": {
+        "textAlign": "center",
+        "fontFamily": "Inter",
+        "fontSize": 11,
+        "fontStyle": "bold",
+        "fill": "#22D3EE"
+      },
+      "parent": {
+        "$step": 161
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Tokens",
+      "x": 1880,
+      "y": 0,
+      "width": 420,
+      "height": 844,
+      "props": {
+        "fill": "#0B0D0A",
+        "clip": true
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Title",
+      "x": 24,
+      "y": 40,
+      "width": 372,
+      "text": "Zuzumik — Tokens",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 20,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "SurfacesLabel",
+      "x": 24,
+      "y": 82,
+      "width": 200,
+      "text": "SURFACES",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "letterSpacing": "6%"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/BG",
+      "x": 24,
+      "y": 102,
+      "width": 116,
+      "height": 64,
+      "props": {
+        "fill": "#050505",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 40,
+      "width": 96,
+      "text": "#050505",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 169
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Panel",
+      "x": 152,
+      "y": 102,
+      "width": 116,
+      "height": 64,
+      "props": {
+        "fill": "#10140E",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 40,
+      "width": 96,
+      "text": "#10140E",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 171
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Glass",
+      "x": 280,
+      "y": 102,
+      "width": 116,
+      "height": 64,
+      "props": {
+        "fill": "#FFFFFF14",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 40,
+      "width": 96,
+      "text": "#FFFFFF14",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 173
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "AccentLabel",
+      "x": 24,
+      "y": 190,
+      "width": 240,
+      "text": "BRAND & ACCENTS",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "letterSpacing": "6%"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Lime",
+      "x": 24,
+      "y": 210,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#C8FF5A",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 176
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Emerald",
+      "x": 152,
+      "y": 210,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#34D399",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 178
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Cyan",
+      "x": 280,
+      "y": 210,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#22D3EE",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#22D3EE",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 180
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Violet",
+      "x": 24,
+      "y": 278,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#A78BFA",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#A78BFA",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 182
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Amber",
+      "x": 152,
+      "y": 278,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#FBBF24",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#FBBF24",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 184
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Rose",
+      "x": 280,
+      "y": 278,
+      "width": 116,
+      "height": 56,
+      "props": {
+        "fill": "#FB7185",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 32,
+      "width": 96,
+      "text": "#FB7185",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#050505"
+      },
+      "parent": {
+        "$step": 186
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "TypeLabel",
+      "x": 24,
+      "y": 366,
+      "width": 200,
+      "text": "TEXT",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "letterSpacing": "6%"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "HeadSample",
+      "x": 24,
+      "y": 388,
+      "width": 372,
+      "text": "Space Grotesk",
+      "props": {
+        "fontFamily": "Space Grotesk",
+        "fontSize": 28,
+        "fontStyle": "bold",
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "BodySample",
+      "x": 24,
+      "y": 428,
+      "width": 372,
+      "text": "Inter — body copy, 16/150% for long paragraphs.",
+      "props": {
+        "fontFamily": "Inter",
+        "fontSize": 15,
+        "fill": "#9CA3AF",
+        "lineHeight": "150%"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "MonoSample",
+      "x": 24,
+      "y": 486,
+      "width": 372,
+      "text": "JetBrains Mono 14 — 00:42",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 14,
+        "fill": "#C8FF5A"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "ThemesLabel",
+      "x": 24,
+      "y": 532,
+      "width": 260,
+      "text": "ACCENT THEMES (DARK)",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B",
+        "letterSpacing": "6%"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Lime",
+      "x": 24,
+      "y": 552,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#C8FF5A",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Lime",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 193
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Emerald",
+      "x": 114,
+      "y": 552,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#34D399",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Emerald",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 195
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Cyan",
+      "x": 204,
+      "y": 552,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#22D3EE",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Cyan",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 197
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Violet",
+      "x": 294,
+      "y": 552,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#A78BFA",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Violet",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 199
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Amber",
+      "x": 24,
+      "y": 620,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#FBBF24",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Amber",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 201
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Red",
+      "x": 114,
+      "y": 620,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#FB7185",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Red",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 203
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Orange",
+      "x": 204,
+      "y": 620,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#FF8A4C",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Orange",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 205
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "frame",
+      "name": "Swatch/Blue",
+      "x": 294,
+      "y": 620,
+      "width": 60,
+      "height": 40,
+      "props": {
+        "fill": "#3B82F6",
+        "cornerRadius": 14,
+        "stroke": "#FFFFFF14",
+        "strokeWeight": 1
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Label",
+      "x": 12,
+      "y": 16,
+      "width": 40,
+      "text": "Blue",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 10,
+        "fill": "#FFFFFF"
+      },
+      "parent": {
+        "$step": 207
+      }
+    }
+  },
+  {
+    "command": "node.create",
+    "params": {
+      "type": "text",
+      "name": "Source",
+      "x": 24,
+      "y": 780,
+      "width": 372,
+      "text": "Source: src/lib/theme-tokens.ts",
+      "props": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": 11,
+        "fill": "#8B8B8B"
+      },
+      "parent": {
+        "$step": 166
+      }
+    }
+  }
+]

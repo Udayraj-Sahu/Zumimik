@@ -1,0 +1,102 @@
+{
+  "schema": "bible-strong/avatar-definition",
+  "schemaVersion": 1,
+  "name": "Pip",
+  "body": {
+    "primary": {
+      "type": "sphere",
+      "width": 240,
+      "height": 240,
+      "depth": 240.03671875,
+      "roundness": 1
+    },
+    "nodes": []
+  },
+  "colors": {
+    "body": "#c8ff5a",
+    "eyes": "#0a0c0a"
+  },
+  "expressions": {
+    "neutral": {
+      "head": { "x": 0, "y": 0, "z": 0 },
+      "eyes": {
+        "left": { "width": 20, "height": 50, "x": 0, "y": -7, "angle": 0 },
+        "right": { "width": 20, "height": 50, "x": 0, "y": -7, "angle": 0 },
+        "spacing": 35
+      },
+      "perspective": 1,
+      "motion": { "eyes": "none", "body": "none" }
+    },
+    "eyes-closed": {
+      "head": { "x": -8.752343750000001, "y": -8.743359375, "z": -10.773828125000001 },
+      "eyes": {
+        "left": { "width": 56.133984375, "height": 15.5, "x": 0, "y": 0, "angle": 0 },
+        "right": { "width": 56.133984375, "height": 15.15546875, "x": 0, "y": 0, "angle": 0 },
+        "spacing": 69.276171875
+      },
+      "perspective": 1,
+      "motion": { "eyes": "none", "body": "none" }
+    },
+    "upward-side-glance": {
+      "head": { "x": 7.3, "y": 27.8, "z": -16.1 },
+      "eyes": {
+        "left": { "width": 22.501171874999997, "height": 42.377734374999996, "x": 0, "y": -20.5, "angle": 0 },
+        "right": { "width": 22.501171874999997, "height": 42.377734374999996, "x": 0, "y": -20.5, "angle": 0 },
+        "spacing": 54.3
+      },
+      "perspective": 1,
+      "motion": { "eyes": "none", "body": "none" }
+    },
+    "curious-left": {
+      "head": { "x": -12.303515625, "y": -17.601171875, "z": 5.9109375 },
+      "eyes": {
+        "left": { "width": 20.605859374999994, "height": 47.769921874999994, "x": 0, "y": 0, "angle": 23.523046875000002 },
+        "right": { "width": 20.605859374999994, "height": 47.769921874999994, "x": 0, "y": 0, "angle": -24.042578125000002 },
+        "spacing": 54.9
+      },
+      "perspective": 1,
+      "motion": { "eyes": "none", "body": "none" }
+    }
+  },
+  "expressionOrder": ["neutral", "eyes-closed", "upward-side-glance", "curious-left"],
+  "animations": {
+    "waking": {
+      "playbackMode": "loop",
+      "steps": [
+        { "expression": "eyes-closed", "holdMs": 2300, "transitionMs": 500, "transition": "smooth" }
+      ],
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "metadata": {
+        "label": "waking",
+        "description": "Short wake-up sequence before returning to a neutral expression.",
+        "group": "Lifecycle"
+      }
+    },
+    "idle": {
+      "playbackMode": "loop",
+      "steps": [
+        { "expression": "upward-side-glance", "holdMs": 5200, "transitionMs": 500, "transition": "smooth" },
+        { "expression": "curious-left", "holdMs": 5200, "transitionMs": 500, "transition": "smooth" }
+      ],
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2600,
+        "minIntervalMs": 3400,
+        "maxIntervalMs": 6200,
+        "durationMs": 280
+      },
+      "metadata": {
+        "label": "idle",
+        "description": "Slow micro-movements with occasional blinking.",
+        "group": "Lifecycle"
+      }
+    }
+  },
+  "animationOrder": ["waking", "idle"]
+}

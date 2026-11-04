@@ -1,0 +1,123 @@
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  isolation: isolate;
+}
+
+.steps button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font: 600 11px/1.2 var(--font-jakarta), system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.labelText {
+  order: -1;
+}
+
+.steps button[aria-selected="true"] {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.steps button:disabled {
+  cursor: default;
+}
+
+.steps button i {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.steps button u {
+  display: block;
+  width: 28px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  position: relative;
+  overflow: hidden;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: background-color, transform;
+}
+
+.steps button u.filled {
+  background: var(--lime, #c8ff5a);
+}
+
+.steps button[aria-selected="true"] {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.steps button u.current::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--lime, #c8ff5a) 0%, rgba(200, 255, 90, 0.4) 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: steps-progress var(--step-duration, 3s) linear forwards;
+  will-change: transform;
+  pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.manual button u.current::after {
+  animation: none;
+  transform: scaleX(1);
+}
+
+@keyframes steps-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+:global(.light) .steps button {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:global(.light) .steps button[aria-selected="true"] {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+:global(.light) .steps button u {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+:global(.light) .steps button u.filled {
+  background: var(--lime-solid, #9fd42f);
+}
+
+:global(.light) .steps button u.current::after {
+  background: linear-gradient(90deg, var(--lime-solid, #9fd42f) 0%, rgba(159, 212, 47, 0.4) 100%);
+}
+
+@media (max-width: 640px) {
+  .steps {
+    gap: 6px;
+  }
+  .steps button {
+    font-size: 10px;
+    gap: 6px;
+    padding: 4px 4px;
+  }
+}
