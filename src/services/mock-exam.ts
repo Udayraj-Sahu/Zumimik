@@ -1,6 +1,7 @@
 import type { MockPaper } from "@/lib/types/mock-exam";
 import type { SprintSession } from "@/lib/types/sprint-session";
 import { apiGet } from "./api";
+import { mapMockBlueprints, type BackendBlueprintsResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -12,9 +13,8 @@ export async function getMockPapers(domain?: string): Promise<MockPaper[]> {
     await delay(250);
     return getMockPapersByDomain(domain);
   }
-  const params = new URLSearchParams();
-  if (domain) params.set("domain", domain);
-  return apiGet<MockPaper[]>(`/mock-exam/papers?${params.toString()}`);
+  const response = await apiGet<BackendBlueprintsResponse>("/mocks/blueprints");
+  return mapMockBlueprints(response, domain);
 }
 
 export async function getMockPaperSession(paperId: string, domain?: string): Promise<SprintSession> {

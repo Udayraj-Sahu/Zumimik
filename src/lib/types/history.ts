@@ -6,7 +6,7 @@ export type HistoryEntry = {
   score: number;
   total: number;
   accuracy: number;
-  xpEarned: number;
+  xpEarned?: number;
   totalTimeSpent: number;
   completedAt: string;
 };

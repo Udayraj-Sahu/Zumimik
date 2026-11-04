@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getFriends, getFriendActivity, getPendingRequests } from "@/services/friends";
+import { getFriendsSummary, getFriendActivity } from "@/services/friends";
 import type { Friend, FriendActivity } from "@/lib/types/friends";
 
 type FriendsData = {
@@ -9,10 +9,8 @@ type FriendsData = {
 };
 
 async function fetchFriendsData(): Promise<FriendsData> {
-  const [friends, activity, requests] = await Promise.all([
-    getFriends(), getFriendActivity(), getPendingRequests(),
-  ]);
-  return { friends, activity, requests };
+  const [summary, activity] = await Promise.all([getFriendsSummary(), getFriendActivity()]);
+  return { ...summary, activity };
 }
 
 export function useFriends() {

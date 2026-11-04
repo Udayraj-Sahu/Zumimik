@@ -1,5 +1,13 @@
 import type { TopicNode, TopicEdge } from "@/lib/types/technique";
 import { apiGet } from "./api";
+import {
+  mapBackendPracticeEdges,
+  mapBackendTechniqueSummaries,
+  mapBackendTopicCatalog,
+  type BackendPracticeCatalogResponse,
+  type BackendTechniqueSummaryResponse,
+  type BackendTopicCatalogResponse,
+} from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -10,7 +18,8 @@ export async function getSubjectTree(domain: string): Promise<TopicNode[]> {
     await delay(250);
     return mockGetTree(domain);
   }
-  return apiGet<TopicNode[]>(`/api/subjects/tree?domain=${domain}`);
+  const response = await apiGet<BackendTopicCatalogResponse>("/api/topics");
+  return mapBackendTopicCatalog(response);
 }
 
 export async function findNodeInTree(domain: string, nodeId: string): Promise<TopicNode | null> {
@@ -21,7 +30,8 @@ export async function findNodeInTree(domain: string, nodeId: string): Promise<To
     const tree = mockGetTree(domain);
     return mockFindNode(tree, nodeId);
   }
-  return apiGet<TopicNode | null>(`/api/subjects/tree/${nodeId}?domain=${domain}`);
+  const nodes = await getSubjectTree(domain);
+  return nodes.find((node) => node.id === nodeId) ?? null;
 }
 
 export async function getLeafTechniques(domain: string): Promise<TopicNode[]> {
@@ -32,7 +42,8 @@ export async function getLeafTechniques(domain: string): Promise<TopicNode[]> {
     const tree = mockGetTree(domain);
     return mockGetLeaves(tree);
   }
-  return apiGet<TopicNode[]>(`/api/subjects/techniques?domain=${domain}`);
+  const response = await apiGet<BackendTechniqueSummaryResponse>("/api/practice/techniques");
+  return mapBackendTechniqueSummaries(response);
 }
 
 export async function getSubjectEdges(): Promise<TopicEdge[]> {
@@ -42,7 +53,8 @@ export async function getSubjectEdges(): Promise<TopicEdge[]> {
     await delay(100);
     return mockGetEdges();
   }
-  return apiGet<TopicEdge[]>("/api/subjects/edges");
+  const response = await apiGet<BackendPracticeCatalogResponse>("/practice/catalog");
+  return mapBackendPracticeEdges(response);
 }
 
 export async function getPrerequisitesForTechnique(
@@ -54,7 +66,8 @@ export async function getPrerequisitesForTechnique(
     await delay(50);
     return mockGetPrereqs(techniqueId);
   }
-  return apiGet<TopicEdge[]>(`/api/subjects/techniques/${techniqueId}/prerequisites`);
+  const response = await apiGet<BackendPracticeCatalogResponse>("/practice/catalog");
+  return mapBackendPracticeEdges(response).filter((edge) => edge.sourceId === techniqueId);
 }
 
 export async function checkTechniqueUnlocked(
@@ -67,7 +80,5 @@ export async function checkTechniqueUnlocked(
     await delay(50);
     return mockIsUnlocked(techniqueId, masteredTechniqueIds);
   }
-  return apiGet<boolean>(
-    `/api/subjects/techniques/${techniqueId}/unlocked?mastered=${masteredTechniqueIds.join(",")}`,
-  );
+  return masteredTechniqueIds.includes(techniqueId);
 }

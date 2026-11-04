@@ -11,5 +11,5 @@ export type ReportTopic = {
   label: string;
   sprints: number;
   accuracy: number;
-  xp: number;
+  xp?: number;
 };

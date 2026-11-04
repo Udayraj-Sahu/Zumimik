@@ -14,8 +14,8 @@ export type AdaptiveTopicState = {
 export type AdaptiveDomainState = {
   domain: string;
   topics: AdaptiveTopicState[];
-  sessionCount: number;
-  totalTimeSpent: number;
+  sessionCount?: number;
+  totalTimeSpent?: number;
   lastSession: {
     topicId: string;
     topicLabel: string;

@@ -2,6 +2,7 @@ import type { ContentFeedbackRequest, ContentFeedbackResponse } from "@/lib/type
 import { apiPost } from "./api";
 import { useNetworkStore } from "@/stores/network-store";
 import { db } from "./offline/db";
+import { mapContentFeedback } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -14,7 +15,13 @@ export async function submitContentFeedback(data: ContentFeedbackRequest): Promi
     return mockSubmit(data);
   }
 
+  if (data.feedbackType === "thumbs_up") {
+    // The backend sync contract accepts content reports, not positive ratings.
+    return { id: `feedback-${Date.now()}`, status: "accepted", message: "Thanks for your feedback." };
+  }
+
   const { isOnline, addToQueue } = useNetworkStore.getState();
+  const backendPayload = mapContentFeedback(data);
 
   if (!isOnline) {
     feedbackIdCounter++;
@@ -28,11 +35,12 @@ export async function submitContentFeedback(data: ContentFeedbackRequest): Promi
     addToQueue({
       id,
       key: "content/feedback",
-      payload: data,
+      payload: backendPayload,
       timestamp: Date.now(),
     });
     return { id, status: "accepted", message: "Queued offline" };
   }
 
-  return apiPost<ContentFeedbackResponse>("/content/feedback", data);
+  await apiPost<{ status: "accepted"; key: string }>("/sync/content/feedback", backendPayload);
+  return { id: data.questionId, status: "accepted", message: "Feedback saved." };
 }

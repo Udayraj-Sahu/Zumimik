@@ -10,6 +10,7 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { GLASS_BG } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { formatHoursMinutes } from "@/lib/text";
+import { IS_MOCK } from "@/lib/platform";
 
 export default function ReportsPage() {
   usePageMeta("Reports — Zuzumik");
@@ -118,7 +119,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            <p className="text-micro font-bold uppercase tracking-[0.18em] text-muted-foreground/40 mb-3">Topic Breakdown</p>
+            <p className="text-micro font-bold uppercase tracking-[0.18em] text-muted-foreground/40 mb-3">{IS_MOCK ? "Topic Breakdown" : "Exam Breakdown"}</p>
             <div ref={topicRef} className="rounded-3xl border border-white/[0.06] backdrop-blur-xl overflow-hidden divide-y divide-white/[0.06]" style={{ background: GLASS_BG }}>
               {data.topics.map((t) => (
                 <div
@@ -130,7 +131,7 @@ export default function ReportsPage() {
                     <p className="text-[12px] font-semibold text-foreground/80">{t.label}</p>
                     <div className="flex items-center gap-3 text-micro text-muted-foreground/40 mt-0.5">
                       <span>{t.sprints} sprints</span>
-                      <span>{t.xp} XP</span>
+                      {t.xp !== undefined && <span>{t.xp} XP</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 max-[359px]:gap-2">

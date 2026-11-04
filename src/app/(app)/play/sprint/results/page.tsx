@@ -12,8 +12,7 @@ import { useSprintStore } from "@/stores/sprint-store";
 import { useRateStore } from "@/stores/rate-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import { recordAdaptiveSession } from "@/services/adaptive";
-import type { SessionOutcome } from "@/lib/types/adaptive";
+import { syncSprintResult } from "@/services/telemetry";
 import type { SprintResult, Question } from "@/lib/types/sprint-session";
 import { GLASS_BG } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
@@ -50,9 +49,16 @@ function SprintResultsContent() {
   const adaptiveDomain = searchParams.get("domain") ?? targetExam;
 
   const recordSession = useMutation({
-    mutationFn: recordAdaptiveSession,
-    onSuccess: (_data, outcome) => {
-      queryClient.invalidateQueries({ queryKey: ["adaptive-state", outcome.domain] });
+    mutationFn: (input: {
+      session: NonNullable<typeof lastSession>;
+      result: SprintResult;
+      domain?: string;
+      sessionType: string;
+    }) => syncSprintResult(input.session, input.result, input.domain, input.sessionType),
+    onSuccess: (_data, input) => {
+      if (input.sessionType === "adaptive" && input.domain) {
+        queryClient.invalidateQueries({ queryKey: ["adaptive-state", input.domain] });
+      }
     },
   });
 
@@ -63,22 +69,15 @@ function SprintResultsContent() {
   const recordedRef = useRef(false);
 
   useEffect(() => {
-    if (!isAdaptive || recordedRef.current) return;
-    if (!lastResult || !lastSession || !adaptiveDomain || !lastSession.topic) return;
+    if (recordedRef.current) return;
+    if (!lastResult || !lastSession || !lastSession.topic) return;
     recordedRef.current = true;
-    const outcome: SessionOutcome = {
-      domain: adaptiveDomain,
-      topicId: lastSession.topic,
-      topicLabel: lastSession.topicLabel,
-      difficulty: lastSession.difficulty,
-      score: lastResult.score,
-      total: lastResult.total,
-      accuracy: lastResult.accuracy,
-      xpEarned: lastResult.xpEarned,
-      totalTimeSpent: lastResult.totalTimeSpent,
-      ts: Date.now(),
-    };
-    recordSession.mutate(outcome);
+    recordSession.mutate({
+      session: lastSession,
+      result: lastResult,
+      domain: adaptiveDomain ?? undefined,
+      sessionType: isAdaptive ? "adaptive" : "sprint",
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdaptive, lastResult, lastSession, adaptiveDomain]);
 

@@ -8,5 +8,6 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
 
 export function apiUrl(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
+  if (clean.startsWith("/api/")) return `${API_BASE_URL}${clean}`;
   return `${API_BASE_URL}${API_PREFIX}${clean}`;
 }

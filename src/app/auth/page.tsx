@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { BLACK_06, CYAN, EMERALD_12, GLASS_05, GLASS_BORDER, RED_SOFT_12, SOLID_BLACK } from "@/lib/theme";
+import { useEffect, useRef, useState } from "react";
+import { CYAN, EMERALD_12, GLASS_05, GLASS_BORDER, RED_SOFT_12 } from "@/lib/theme";
 import gsap from "gsap";
 import {
   Check,
@@ -23,44 +23,11 @@ import {
 import type { PairingStatus } from "@/lib/types/pairing";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { ZuzumikWordmark } from "@/components/brand/zuzumik-wordmark";
+import { QRCodeSVG } from "qrcode.react";
+import { IS_MOCK } from "@/lib/platform";
 
 const ACCENT = "var(--primary)";
 const POLL_INTERVAL_MS = 2500;
-
-function hash8(v: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < v.length; i++) {
-    h ^= v.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0) % 256;
-}
-
-function QrGrid({ token }: { token: string }) {
-  const grid = useMemo(() => {
-    const size = 9;
-    const cells: boolean[] = [];
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        const onEdge = r === 0 || r === size - 1 || c === 0 || c === size - 1;
-        cells.push(onEdge || hash8(`${token}:${r}:${c}`) % 3 !== 0);
-      }
-    }
-    return cells;
-  }, [token]);
-
-  return (
-    <div className="grid grid-cols-9 gap-[3px] p-3 rounded-2xl bg-white">
-      {grid.map((on, i) => (
-        <div
-          key={i}
-          className="aspect-square rounded-[2px]"
-          style={{ background: on ? SOLID_BLACK : BLACK_06 }}
-        />
-      ))}
-    </div>
-  );
-}
 
 function countdownTo(expiresAt: string): string {
   const diff = new Date(expiresAt).getTime() - Date.now();
@@ -74,6 +41,7 @@ export default function AuthPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setToken = useAuthStore((s) => s.setToken);
   const setRefreshToken = useAuthStore((s) => s.setRefreshToken);
+  const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
 
   const createSession = useCreatePairingSession();
@@ -81,6 +49,9 @@ export default function AuthPage() {
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [code, setCode] = useState<string>("");
+  const [signature, setSignature] = useState<string>("");
+  const [pollToken, setPollToken] = useState<string>("");
+  const [createdAt, setCreatedAt] = useState<string>("");
   const [status, setStatus] = useState<PairingStatus>("pending");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [, setNow] = useState(Date.now());
@@ -115,6 +86,9 @@ export default function AuthPage() {
       onSuccess: (session) => {
         setSessionId(session.sessionId);
         setCode(session.code);
+        setSignature(session.signature ?? "");
+        setPollToken(session.pollToken ?? "");
+        setCreatedAt(session.createdAt);
         setStatus(session.status);
         setExpiresAt(session.expiresAt);
         setNow(Date.now());
@@ -145,11 +119,16 @@ export default function AuthPage() {
       const polledSession = activeSessionRef.current;
       if (!polledSession) return;
       try {
-        const session = await pollStatus.mutateAsync(polledSession);
+        const session = await pollStatus.mutateAsync(IS_MOCK
+          ? polledSession
+          : { code: polledSession, pollToken, createdAt, expiresAt });
         if (activeSessionRef.current !== polledSession) return;
         setStatus(session.status);
         setExpiresAt(session.expiresAt);
         if (session.status === "approved") {
+          if (session.token) setToken(session.token);
+          if (session.refreshToken) setRefreshToken(session.refreshToken);
+          if (session.user) setUser(session.user);
           if (pollingRef.current) clearInterval(pollingRef.current);
           setAlreadyApproved(true);
         } else if (session.status === "expired") {
@@ -165,23 +144,16 @@ export default function AuthPage() {
       activeSessionRef.current = null;
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // When approved, finish login on the web side
-  useEffect(() => {
-    if (alreadyApproved && sessionId) {
-      setToken("web-session-login");
-      setRefreshToken("web-session-refresh");
-    }
-  }, [alreadyApproved, sessionId, setToken, setRefreshToken]);
+  }, [sessionId, pollToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const expired = status === "expired" || (!!expiresAt && new Date(expiresAt).getTime() - Date.now() <= 0);
   const showScannerHint = status !== "approved" && !expired && !createError;
+  const qrPayload = signature ? JSON.stringify({ code, sig: signature }) : code;
 
   const handleCopy = async () => {
     if (!code) return;
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(qrPayload);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -259,7 +231,9 @@ export default function AuthPage() {
             <>
               <div className="mt-5 flex justify-center">
                 <div className="relative">
-                  <QrGrid token={code || "PENDING"} />
+                  <div className="rounded-2xl bg-white p-3">
+                    <QRCodeSVG value={qrPayload || "PENDING"} size={180} level="M" />
+                  </div>
                   <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ boxShadow: "0 0 30px var(--accent-25) inset" }} />
                 </div>
               </div>
@@ -267,7 +241,7 @@ export default function AuthPage() {
               <div className="mt-4 flex items-center justify-center gap-2">
                 <button type="button" onClick={handleCopy} disabled={!code} className="pill flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold text-foreground/70 transition-all hover:bg-[var(--glass-07)] active:scale-95 disabled:opacity-50">
                   {copied ? <Check size={13} className="text-[var(--emerald)]" /> : <Copy size={13} />}
-                  {copied ? "Code copied" : code ? `Code: ${code}` : "Generating code…"}
+                  {copied ? "Pairing data copied" : code ? `Code: ${code}` : "Generating code…"}
                 </button>
               </div>
 
@@ -321,7 +295,7 @@ export default function AuthPage() {
         </div>
 
         <p className="mt-5 text-center text-[10.5px] text-muted-foreground/60 leading-relaxed">
-          Scan the QR from your phone&apos;s Zuzumik app (<span className="text-muted-foreground/50">Scan to login on web</span>) to link this browser.<br />
+          Scan the QR or paste its signed pairing data on your phone to link this browser.<br />
           <span className="text-muted-foreground/40">In preview, the flow is simulated end-to-end.</span>
         </p>
       </div>

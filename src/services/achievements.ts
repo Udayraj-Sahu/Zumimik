@@ -1,5 +1,6 @@
 import type { AchievementItem } from "@/lib/types/achievements";
 import { apiGet } from "./api";
+import { mapBackendAchievements, type BackendAchievementsResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -11,5 +12,6 @@ export async function getAchievements(): Promise<AchievementItem[]> {
     await delay(200);
     return ACHIEVEMENTS;
   }
-  return apiGet<AchievementItem[]>("/achievements");
+  const response = await apiGet<BackendAchievementsResponse>("/social/achievements");
+  return mapBackendAchievements(response);
 }

@@ -125,14 +125,20 @@ export default function FriendsPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 max-[359px]:gap-1.5">
                   <p className="text-[12px] font-bold text-foreground/80 truncate">{f.name}</p>
-                  <span className="rounded-xl bg-white/[0.06] px-1.5 py-0.5 text-micro font-bold uppercase tracking-wider text-muted-foreground">
-                    {f.level}
-                  </span>
+                  {f.level && (
+                    <span className="rounded-xl bg-white/[0.06] px-1.5 py-0.5 text-micro font-bold uppercase tracking-wider text-muted-foreground">
+                      {f.level}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 text-micro text-muted-foreground/40 max-[359px]:gap-2">
-                  <span className="flex items-center gap-1 whitespace-nowrap"><Zap size={10} /> {f.xp.toLocaleString()} XP</span>
-                  <span className="flex items-center gap-1 whitespace-nowrap">Streak: {f.streak}d</span>
-                  <span className="whitespace-nowrap">{f.lastActive}</span>
+                  {f.xp !== undefined && (
+                    <span className="flex items-center gap-1 whitespace-nowrap"><Zap size={10} /> {f.xp.toLocaleString()} XP</span>
+                  )}
+                  {f.streak !== undefined && (
+                    <span className="flex items-center gap-1 whitespace-nowrap">Streak: {f.streak}d</span>
+                  )}
+                  {f.lastActive && <span className="whitespace-nowrap">{f.lastActive}</span>}
                 </div>
               </div>
               <button
@@ -192,7 +198,7 @@ export default function FriendsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-bold text-foreground/80">{f.name}</p>
-                    <p className="text-micro text-muted-foreground/40">{f.level} &middot; {f.xp.toLocaleString()} XP</p>
+                    <p className="text-micro text-muted-foreground/40">Friend request</p>
                   </div>
                   <div className="flex gap-2 max-[359px]:gap-1.5">
             <button

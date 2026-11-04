@@ -1,5 +1,11 @@
 import type { HistoryEntry } from "@/lib/types/history";
 import { apiGet } from "./api";
+import {
+  mapMockHistory,
+  mapMockHistoryFilters,
+  type BackendBlueprintsResponse,
+  type BackendMockHistoryResponse,
+} from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -11,8 +17,8 @@ export async function getHistory(domain?: string): Promise<HistoryEntry[]> {
     await delay(200);
     return HISTORY_ENTRIES;
   }
-  const params = domain ? `?domain=${domain}` : "";
-  return apiGet<HistoryEntry[]>(`/history${params}`);
+  const response = await apiGet<BackendMockHistoryResponse>("/mocks/history");
+  return mapMockHistory(response, domain);
 }
 
 export async function getTopicFilterOptions(domain?: string): Promise<{ id: string; label: string }[]> {
@@ -23,6 +29,6 @@ export async function getTopicFilterOptions(domain?: string): Promise<{ id: stri
     await delay(50);
     return getTopicFilters(domain ?? "cat");
   }
-  const params = domain ? `?domain=${domain}` : "";
-  return apiGet<{ id: string; label: string }[]>(`/history/filters${params}`);
+  const response = await apiGet<BackendBlueprintsResponse>("/mocks/blueprints");
+  return mapMockHistoryFilters(response, domain);
 }

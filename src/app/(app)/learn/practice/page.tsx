@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePracticeSession } from "@/hooks/queries/use-practice";
+import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { templatesKeys } from "@/hooks/queries/use-templates";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStepProgress } from "@/hooks/use-step-progress";
@@ -30,13 +31,15 @@ import { useTemplateStore } from "@/stores/template-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { getTopicsByDomain } from "@/lib/mock/sprint";
+import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
+import { syncSprintResult } from "@/services/telemetry";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
-import type { Question } from "@/lib/types/sprint-session";
+import type { Question, SprintResult } from "@/lib/types/sprint-session";
 import type { SolveAlongTemplate, RenderMode } from "@/lib/types/template";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { CTA_04, CTA_06, CTA_12, CTA_20, CTA_30, GLASS_015, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
+import { toast } from "@/stores/toast-store";
 
 type PracticeType = "mcq" | "templates";
 type Phase = "config" | "active" | "done";
@@ -47,7 +50,8 @@ export default function PracticePage() {
   const feedback = useFeedback();
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const domain = targetExam;
-  const sprintTopics = getTopicsByDomain(domain);
+  const { data: sprintData } = useSprintTopics(domain);
+  const sprintTopics = sprintData?.topics ?? [];
   const domainLabel = DOMAIN_LABELS[targetExam] || targetExam || "Templates";
   const searchParams = useSearchParams();
   const templateIdParam = searchParams.get("templateId");
@@ -67,7 +71,11 @@ export default function PracticePage() {
 
   const { data: session, isLoading, error: sessionError } = usePracticeSession(topic, 10, difficulty, targetExam);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number | string>>({});
+  const [answerCorrectness, setAnswerCorrectness] = useState<Record<string, boolean | null>>({});
+  const [answerTimes, setAnswerTimes] = useState<Record<string, number>>({});
+  const [textAnswer, setTextAnswer] = useState("");
+  const [textVerdict, setTextVerdict] = useState<AnswerCheckOutcome | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
   const [completed, setCompleted] = useState<{ correct: number; total: number } | null>(null);
@@ -76,12 +84,17 @@ export default function PracticePage() {
 
   const contentRef = useRef<HTMLDivElement>(null);
   const questionRef = useRef<HTMLDivElement>(null);
+  const questionStartedAtRef = useRef(Date.now());
   const { headerRef, animateSection } = useEntranceAnimations();
 
   useEffect(() => {
     if (questionRef.current) {
       gsap.fromTo(questionRef.current, { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.2, ease: "power2.out" });
     }
+  }, [currentIndex]);
+
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
   }, [currentIndex]);
 
   useEffect(() => {
@@ -96,6 +109,10 @@ export default function PracticePage() {
     if (!session || phase !== "active") return;
     setCurrentIndex(0);
     setAnswers({});
+    setAnswerCorrectness({});
+    setAnswerTimes({});
+    setTextAnswer("");
+    setTextVerdict(null);
     setRevealed(false);
     setHintOpen(false);
     setCompleted(null);
@@ -105,6 +122,10 @@ export default function PracticePage() {
     setPhase("active");
     setCurrentIndex(0);
     setAnswers({});
+    setAnswerCorrectness({});
+    setAnswerTimes({});
+    setTextAnswer("");
+    setTextVerdict(null);
     setRevealed(false);
     setHintOpen(false);
     setCompleted(null);
@@ -112,24 +133,78 @@ export default function PracticePage() {
 
   const handleSelect = (optionIndex: number) => {
     if (revealed || !session) return;
-    setAnswers((prev) => ({ ...prev, [session.questions[currentIndex].id]: optionIndex }));
+    const question = session.questions[currentIndex];
+    setAnswers((prev) => ({ ...prev, [question.id]: optionIndex }));
+    setAnswerTimes((prev) => ({
+      ...prev,
+      [question.id]: Math.max(0, (Date.now() - questionStartedAtRef.current) / 1000),
+    }));
     setRevealed(true);
-    const q = session.questions[currentIndex];
+    const q = question;
     if (optionIndex === q.correctIndex) {
       feedback.correct();
+      setAnswerCorrectness((previous) => ({ ...previous, [q.id]: true }));
     } else {
       feedback.wrong();
+      setAnswerCorrectness((previous) => ({ ...previous, [q.id]: false }));
     }
   };
 
-  const handleNext = () => {
+  const handleTextSubmit = () => {
+    if (revealed || !session) return;
+    const q = session.questions[currentIndex];
+    if (!q || !textAnswer.trim()) return;
+    const verdict = checkPracticeAnswer(textAnswer, q.expectedAnswer ?? null, q.answerCheck ?? "client_extract");
+    setTextVerdict(verdict);
+    if (verdict === "unparsable") return;
+
+    setAnswers((previous) => ({ ...previous, [q.id]: textAnswer }));
+    setAnswerTimes((previous) => ({
+      ...previous,
+      [q.id]: Math.max(0, (Date.now() - questionStartedAtRef.current) / 1000),
+    }));
+    setAnswerCorrectness((previous) => ({ ...previous, [q.id]: verdict === "deferred" ? null : verdict === "correct" }));
+    setRevealed(true);
+    if (verdict === "correct") feedback.correct();
+    if (verdict === "incorrect") feedback.wrong();
+  };
+
+  const handleNext = async () => {
     if (!session) return;
+    setTextAnswer("");
+    setTextVerdict(null);
     const isLast = currentIndex >= session.questions.length - 1;
     if (isLast) {
       feedback.complete();
-      const correct = session.questions.filter((q) => answers[q.id] === q.correctIndex).length;
-      setCompleted({ correct, total: session.questions.length });
+      const graded = Object.values(answerCorrectness).filter((value) => value !== null);
+      const correct = graded.filter(Boolean).length;
+      setCompleted({ correct, total: graded.length });
       setPhase("done");
+      const telemetryAnswers = session.questions.flatMap((question) => {
+        const answer = answers[question.id];
+        if (answer === undefined) return [];
+        const correctness = answerCorrectness[question.id]
+          ?? (typeof answer === "number" ? answer === question.correctIndex : null);
+        return [{
+          questionId: question.id,
+          selectedIndex: typeof answer === "number" ? answer : -1,
+          ...(typeof answer === "string" ? { answerText: answer } : {}),
+          correct: correctness,
+          timeSpent: answerTimes[question.id] ?? 0,
+        }];
+      });
+      const totalTimeSpent = telemetryAnswers.reduce((sum, answer) => sum + answer.timeSpent, 0);
+      const telemetryResult: SprintResult = {
+        answers: telemetryAnswers,
+        score: telemetryAnswers.filter((answer) => answer.correct === true).length,
+        total: telemetryAnswers.length,
+        accuracy: graded.length > 0 ? Math.round((correct / graded.length) * 100) : 0,
+        totalTimeSpent,
+        xpEarned: 0,
+      };
+      void syncSprintResult(session, telemetryResult, targetExam ?? undefined, "practice").catch(() => {
+        toast.error("Progress could not sync", "Check your connection and try again.");
+      });
     } else {
       setCurrentIndex((i) => i + 1);
       setRevealed(false);
@@ -143,6 +218,11 @@ export default function PracticePage() {
     if (!q) return;
     setCurrentIndex(index);
     setRevealed(answers[q.id] !== undefined);
+    setTextAnswer(typeof answers[q.id] === "string" ? answers[q.id] as string : "");
+    const correctness = answerCorrectness[q.id];
+    setTextVerdict(
+      correctness === null ? "deferred" : correctness === true ? "correct" : correctness === false ? "incorrect" : null,
+    );
     setHintOpen(false);
   };
 
@@ -792,8 +872,45 @@ export default function PracticePage() {
                 )}
               </div>
             )}
-            <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
-              {question.options.map((option, i) => {
+            {question.answerType === "text" ? (
+              <div className="flex flex-col gap-3">
+                <label className="text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+                  Your answer
+                  <input
+                    type="text"
+                    value={textAnswer}
+                    onChange={(event) => {
+                      setTextAnswer(event.target.value);
+                      setTextVerdict(null);
+                    }}
+                    disabled={revealed}
+                    className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[15px] font-semibold text-foreground outline-none focus:border-primary/40 disabled:opacity-70"
+                    placeholder="Enter a number"
+                  />
+                </label>
+                {textVerdict === "unparsable" && (
+                  <p role="alert" className="text-[12px] text-destructive">Enter a valid numeric answer.</p>
+                )}
+                {revealed && textVerdict === "correct" && (
+                  <p className="text-[12px] font-semibold text-primary">Correct.</p>
+                )}
+                {revealed && textVerdict === "incorrect" && (
+                  <p className="text-[12px] font-semibold text-destructive">
+                    Not quite. Expected answer: {question.expectedAnswer}
+                  </p>
+                )}
+                {revealed && textVerdict === "deferred" && (
+                  <p className="text-[12px] text-muted-foreground">This answer is awaiting server-side grading.</p>
+                )}
+                {!revealed && (
+                  <Button type="button" onClick={handleTextSubmit} disabled={!textAnswer.trim()}>
+                    Check answer <ChevronRight size={14} />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
+                {question.options.map((option, i) => {
                 const isSelected = answers[question.id] === i;
                 const isCorrect = i === question.correctIndex;
                 let style: React.CSSProperties = { borderColor: GLASS_BORDER, background: GLASS_BG };
@@ -830,8 +947,9 @@ export default function PracticePage() {
                     {revealed && isSelected && !isCorrect && <X size={18} className="text-destructive shrink-0" />}
                   </button>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            )}
 
             {revealed && (
               <div className="mt-5 space-y-3">

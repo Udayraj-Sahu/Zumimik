@@ -510,12 +510,12 @@ function GuidedLearningBlock({ ctx }: { ctx: VariantCtx }) {
 function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
   const accuracy = ctx.data?.lastSession?.accuracy ?? 0;
   const avgSec =
-    ctx.data && ctx.data.totalTimeSpent > 0 && ctx.data.sessionCount > 0
+    ctx.data && (ctx.data.totalTimeSpent ?? 0) > 0 && (ctx.data.sessionCount ?? 0) > 0
       ? Math.max(
           3,
           Math.round(
-            ctx.data.totalTimeSpent /
-              (ctx.data.sessionCount * Math.max(ctx.data.topics.length, 1)) /
+            (ctx.data.totalTimeSpent ?? 0) /
+              ((ctx.data.sessionCount ?? 0) * Math.max(ctx.data.topics.length, 1)) /
               6,
           ),
         )

@@ -1,5 +1,6 @@
 import type { SprintSession } from "@/lib/types/sprint-session";
 import { apiGet } from "./api";
+import { mapBackendPracticeSession, type BackendPracticeSessionResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -16,7 +17,7 @@ export async function getPracticeSession(
     await delay(150);
     return generateSprintSession(topic, length, difficulty, domain);
   }
-  const params = new URLSearchParams({ topic, length: String(length), difficulty });
-  if (domain) params.set("domain", domain);
-  return apiGet<SprintSession>(`/practice?${params.toString()}`);
+  const params = new URLSearchParams({ topic, size: String(length) });
+  const response = await apiGet<BackendPracticeSessionResponse>(`/practice/session?${params.toString()}`);
+  return mapBackendPracticeSession(response, { topic, difficulty, domain });
 }

@@ -4,6 +4,7 @@ import {
   pollPairingStatus,
   scanPairingCode,
   approvePairing,
+  type PairingPollInput,
 } from "@/services/pairing";
 import type { PairingSession, PairingApproval } from "@/lib/types/pairing";
 
@@ -14,8 +15,8 @@ export function useCreatePairingSession() {
 }
 
 export function usePollPairingStatus() {
-  return useMutation<PairingSession, Error, string>({
-    mutationFn: (sessionId) => pollPairingStatus(sessionId),
+  return useMutation<PairingSession, Error, string | PairingPollInput>({
+    mutationFn: (input) => pollPairingStatus(input),
   });
 }
 

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CYAN, LIME_BRIGHT, PURPLE, YELLOW } from "@/lib/theme";
 import gsap from "gsap";
-import { Globe, Smartphone, Zap, Target, Trophy } from "lucide-react";
+import { Globe, Mail, Smartphone, Zap, Target, Trophy } from "lucide-react";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { useRouter } from "next/navigation";
 import { ZuzumikWordmark } from "@/components/brand/zuzumik-wordmark";
+import { AuthModal } from "@/components/auth/auth-modal";
+import { IS_MOCK } from "@/lib/platform";
 
 const FEATURES = [
   { icon: Zap, label: "Speed Drills", color: LIME_BRIGHT },
@@ -20,6 +22,7 @@ export default function OnboardingPage() {
   const authLogin = useAuthStore((s) => s.login);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
+  const [showAuth, setShowAuth] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
@@ -73,6 +76,11 @@ export default function OnboardingPage() {
   if (isAuthenticated) return null;
 
   const handleLogin = (method: "google" | "phone") => {
+    if (!IS_MOCK) {
+      setShowAuth(true);
+      return;
+    }
+
     const name = method === "google" ? "Google User" : "Phone User";
 
     gsap.to(buttonsRef.current, {
@@ -169,22 +177,26 @@ export default function OnboardingPage() {
             className="group flex items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm font-bold text-foreground outline-none transition-all hover:border-primary/30 hover:bg-accent/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring md:flex-1 max-[359px]:gap-2.5 max-[359px]:px-4 max-[359px]:py-3.5"
           >
             <span className="grid size-8 place-items-center rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-              <Globe size={16} className="text-foreground/80" />
+              {IS_MOCK ? <Globe size={16} className="text-foreground/80" /> : <Mail size={16} className="text-foreground/80" />}
             </span>
-            Continue with Google
+            {IS_MOCK ? "Continue with Google" : "Continue with email"}
           </button>
-          <button
-            type="button"
-            onClick={() => handleLogin("phone")}
-            className="group flex items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm font-bold text-foreground outline-none transition-all hover:border-primary/30 hover:bg-accent/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring md:flex-1 max-[359px]:gap-2.5 max-[359px]:px-4 max-[359px]:py-3.5"
-          >
-            <span className="grid size-8 place-items-center rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-              <Smartphone size={16} className="text-foreground/80" />
-            </span>
-            Continue with Phone
-          </button>
+          {IS_MOCK && (
+            <button
+              type="button"
+              onClick={() => handleLogin("phone")}
+              className="group flex items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm font-bold text-foreground outline-none transition-all hover:border-primary/30 hover:bg-accent/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring md:flex-1 max-[359px]:gap-2.5 max-[359px]:px-4 max-[359px]:py-3.5"
+            >
+              <span className="grid size-8 place-items-center rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
+                <Smartphone size={16} className="text-foreground/80" />
+              </span>
+              Continue with Phone
+            </button>
+          )}
         </div>
       </div>
+
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {/* Footer */}
       <div ref={footerRef} className="relative pb-8 max-[359px]:pb-6 max-[359px]:pt-3 pt-4 text-center px-6 max-[359px]:px-4">

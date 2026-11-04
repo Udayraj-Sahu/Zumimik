@@ -23,6 +23,10 @@ const CATEGORIES: { id: AchievementCategory | "all"; label: string }[] = [
   { id: "accuracy", label: "Accuracy" },
   { id: "speed", label: "Speed" },
   { id: "social", label: "Social" },
+  { id: "competitive", label: "Competitive" },
+  { id: "collaborative", label: "Collaborative" },
+  { id: "milestone", label: "Milestone" },
+  { id: "special", label: "Special" },
 ];
 
 const TIER_STYLES: Record<AchievementTier, { ring: string; ringTrack: string; label: string }> = {

@@ -61,7 +61,9 @@ describe("security surface", () => {
       for (const m of text.matchAll(/process\.env\.([A-Z0-9_]+)/g)) names.add(m[1]);
     }
     expect(names.size).toBeGreaterThan(0);
-    for (const name of names) expect(name).toMatch(/^NEXT_PUBLIC_/);
+    for (const name of names) {
+      expect(name === "NODE_ENV" || name.startsWith("NEXT_PUBLIC_")).toBe(true);
+    }
   });
 
   it("3. no console.log / debugger statements ship in src", () => {
@@ -99,6 +101,7 @@ describe("security surface", () => {
     expect(mod.IS_MOCK).toBe(false);
     expect(mod.API_BASE_URL).toBe("https://api.example.com");
     expect(mod.apiUrl("sync/foo")).toBe("https://api.example.com/api/v1/sync/foo");
+    expect(mod.apiUrl("/api/topics")).toBe("https://api.example.com/api/topics");
     expect(mod.SITE_NAME).toBe("Zuzumik");
   });
 

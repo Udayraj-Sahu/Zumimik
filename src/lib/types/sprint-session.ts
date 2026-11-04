@@ -5,6 +5,10 @@ export type Question = {
   text: string;
   options: string[];
   correctIndex: number;
+  answerType?: "choice" | "text";
+  expectedAnswer?: number | null;
+  answerCheck?: "client_extract" | "server_sympy";
+  feedsMastery?: boolean;
   timeLimit: number;
   difficulty?: number;
   hint?: string;
@@ -28,7 +32,8 @@ export type SprintSession = {
 export type SprintAnswer = {
   questionId: string;
   selectedIndex: number;
-  correct: boolean;
+  answerText?: string;
+  correct: boolean | null;
   timeSpent: number;
 };
 

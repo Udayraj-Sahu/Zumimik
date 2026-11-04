@@ -1,5 +1,6 @@
 import type { AnalyticsStats, WeeklyDatum, RecentActivityItem } from "@/lib/types/analytics";
 import { apiGet } from "./api";
+import { mapBackendRecentActivity } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -11,7 +12,7 @@ export async function getAnalyticsStats(): Promise<AnalyticsStats> {
     await delay(200);
     return ANALYTICS_STATS;
   }
-  return apiGet<AnalyticsStats>("/analytics/stats");
+  return apiGet<AnalyticsStats>("/dashboard/stats");
 }
 
 export async function getWeeklyActivity(): Promise<WeeklyDatum[]> {
@@ -22,7 +23,11 @@ export async function getWeeklyActivity(): Promise<WeeklyDatum[]> {
     await delay(150);
     return WEEKLY_DATA;
   }
-  return apiGet<WeeklyDatum[]>("/analytics/weekly");
+  const streak = await apiGet<{ days: boolean[]; labels: string[] }>("/dashboard/streak");
+  return streak.days.map((active, index) => ({
+    day: streak.labels[index] ?? "",
+    pct: active ? 100 : 0,
+  }));
 }
 
 export async function getRecentActivity(): Promise<RecentActivityItem[]> {
@@ -33,5 +38,8 @@ export async function getRecentActivity(): Promise<RecentActivityItem[]> {
     await delay(100);
     return RECENT_ACTIVITY;
   }
-  return apiGet<RecentActivityItem[]>("/analytics/recent");
+  const recent = await apiGet<Array<{ label: string; score: string; time: string }>>(
+    "/dashboard/recent-activity",
+  );
+  return mapBackendRecentActivity(recent);
 }

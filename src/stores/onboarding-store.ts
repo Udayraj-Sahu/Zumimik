@@ -30,7 +30,7 @@ type OnboardingState = {
   name: string;
   email: string;
   phone: string;
-  authMethod: "google" | "phone" | null;
+  authMethod: "google" | "phone" | "email" | null;
   targetExam: string;
   level: string;
   isOnboarded: boolean;
@@ -67,7 +67,7 @@ type OnboardingState = {
   reclaimConfigs: Record<string, ReclaimConfig>;
   planLane: string;
 
-  setAuthData: (data: { name?: string; email?: string; phone?: string; authMethod: "google" | "phone" }) => void;
+  setAuthData: (data: { name?: string; email?: string; phone?: string; authMethod: "google" | "phone" | "email" }) => void;
   setTargetExam: (exam: string) => void;
   setLevel: (level: string) => void;
   nextStep: () => void;
@@ -115,7 +115,7 @@ const initial = {
   name: "",
   email: "",
   phone: "",
-  authMethod: null as "google" | "phone" | null,
+  authMethod: null as "google" | "phone" | "email" | null,
   targetExam: "",
   level: "",
   isOnboarded: false,

@@ -1,10 +1,10 @@
 import type { AnalyticsStats, WeeklyDatum, RecentActivityItem } from "@/lib/types/analytics";
 
 export const ANALYTICS_STATS: AnalyticsStats = {
-  totalSessions: 47,
-  avgScore: 82,
-  bestStreak: 12,
-  arenaRank: 47,
+  accuracy: 82,
+  questions: 470,
+  percentile: 47,
+  speed: 34,
 };
 
 export const WEEKLY_DATA: WeeklyDatum[] = [

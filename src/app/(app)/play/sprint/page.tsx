@@ -13,6 +13,7 @@ import { useFeedback } from "@/hooks/use-feedback";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
+import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
 import type { Question } from "@/lib/types/sprint-session";
 import TrustBadge from "@/components/ui/trust-badge";
 import ContentFeedback from "@/components/ui/content-feedback";
@@ -41,7 +42,7 @@ function SprintContent() {
   const clearSnapshot = useResumeStore((s) => s.clearSnapshot);
   const {
     status, currentIndex, timeLeft, answers,
-    initSprint, resumeSprint, answerCurrent, nextQuestion, tick, jumpTo, completeSprint,
+    initSprint, resumeSprint, answerCurrent, answerTextCurrent, nextQuestion, tick, jumpTo, completeSprint,
   } = useSprintStore();
 
   const isResume = resumeParam && !!snapshot && snapshot.kind === "sprint" && snapshot.topic === topic;
@@ -53,6 +54,8 @@ function SprintContent() {
   const activeDifficulty = isResume ? snapshot.difficulty : data?.difficulty;
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [textAnswer, setTextAnswer] = useState("");
+  const [textVerdict, setTextVerdict] = useState<AnswerCheckOutcome | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout>>();
   const feedbackRef = useRef<HTMLDivElement>(null);
@@ -217,6 +220,31 @@ function SprintContent() {
     }, 1200);
   };
 
+  const handleTextSubmit = () => {
+    if (showFeedback || status !== "active") return;
+    const q = activeQuestions[currentIndex];
+    if (!q || !textAnswer.trim()) return;
+    const verdict = checkPracticeAnswer(textAnswer, q.expectedAnswer ?? null, q.answerCheck ?? "client_extract");
+    setTextVerdict(verdict);
+    if (verdict === "unparsable") return;
+
+    answerTextCurrent(q.id, textAnswer, verdict === "deferred" ? null : verdict === "correct");
+    setShowFeedback(true);
+    if (verdict === "correct") feedback.correct();
+    if (verdict === "incorrect") feedback.wrong();
+    autoAdvanceRef.current = setTimeout(() => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+      if (currentIndex >= activeQuestions.length - 1) finishSprint();
+      else {
+        setSelectedIndex(null);
+        setTextAnswer("");
+        setTextVerdict(null);
+        setShowFeedback(false);
+        nextQuestion();
+      }
+    }, 1200);
+  };
+
   const handleNext = () => {
     if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     const isLast = currentIndex >= activeQuestions.length - 1;
@@ -224,6 +252,8 @@ function SprintContent() {
       finishSprint();
     } else {
       setSelectedIndex(null);
+      setTextAnswer("");
+      setTextVerdict(null);
       setShowFeedback(false);
       nextQuestion();
     }
@@ -233,6 +263,17 @@ function SprintContent() {
     if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     if (index < 0 || index >= activeQuestions.length) return;
     setSelectedIndex(null);
+    const existingAnswer = answers[activeQuestions[index].id];
+    setTextAnswer(existingAnswer?.answerText ?? "");
+    setTextVerdict(
+      existingAnswer?.correct === null
+        ? "deferred"
+        : existingAnswer?.correct === true
+          ? "correct"
+          : existingAnswer?.correct === false
+            ? "incorrect"
+            : null,
+    );
     setShowFeedback(false);
     jumpTo(index);
   };
@@ -383,8 +424,39 @@ function SprintContent() {
               {question.text}
             </p>
 
-            <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
-              {question.options.map((option, i) => {
+            {question.answerType === "text" ? (
+              <div className="flex flex-col gap-3">
+                <label className="text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+                  Your answer
+                  <input
+                    type="text"
+                    value={textAnswer}
+                    onChange={(event) => {
+                      setTextAnswer(event.target.value);
+                      setTextVerdict(null);
+                    }}
+                    disabled={showFeedback}
+                    className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[15px] font-semibold text-foreground outline-none focus:border-primary/40 disabled:opacity-70"
+                    placeholder="Enter a number"
+                  />
+                </label>
+                {textVerdict === "unparsable" && <p role="alert" className="text-[12px] text-destructive">Enter a valid numeric answer.</p>}
+                {showFeedback && textVerdict === "correct" && <p className="text-[12px] font-semibold text-primary">Correct.</p>}
+                {showFeedback && textVerdict === "incorrect" && (
+                  <p className="text-[12px] font-semibold text-destructive">Not quite. Expected answer: {question.expectedAnswer}</p>
+                )}
+                {showFeedback && textVerdict === "deferred" && (
+                  <p className="text-[12px] text-muted-foreground">Answer recorded for server review.</p>
+                )}
+                {!showFeedback && (
+                  <Button type="button" onClick={handleTextSubmit} disabled={!textAnswer.trim()}>
+                    Submit answer <ChevronRight size={14} />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
+                {question.options.map((option, i) => {
                 const isSelected = selectedIndex === i;
                 const isCorrect = i === question.correctIndex;
                 let variantStyles: React.CSSProperties = { backgroundColor: GLASS_BG, borderColor: GLASS_BORDER };
@@ -428,8 +500,9 @@ function SprintContent() {
                     )}
                   </button>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            )}
 
             {showFeedback && (
               <div className="mt-5 max-[359px]:mt-4">

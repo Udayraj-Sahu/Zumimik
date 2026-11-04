@@ -6,10 +6,16 @@ export type PairingSession = {
   status: PairingStatus;
   expiresAt: string;
   createdAt: string;
+  signature?: string;
+  pollToken?: string;
+  user?: { id: string; name: string; email: string; role: string; tier?: string };
+  token?: string;
+  refreshToken?: string;
 };
 
 export type PairingApproval = {
-  token: string;
-  refreshToken: string;
-  sessionId: string;
+  status?: "approved";
+  token?: string;
+  refreshToken?: string;
+  sessionId?: string;
 };

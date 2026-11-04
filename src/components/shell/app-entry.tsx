@@ -7,6 +7,9 @@ import { SplashScreen } from "@/components/shell/splash-screen";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { isNativeRuntime } from "@/lib/native/is-native";
+import { isDevAuthBypassEnabled } from "@/lib/platform/dev-auth-bypass";
+
+const DEV_AUTH_BYPASS = isDevAuthBypassEnabled();
 
 // The whole onboarding flow lives in a single ~3k-line module; statically
 // importing it here would pull it into every route's client bundle via the
@@ -22,12 +25,25 @@ export function AppEntry({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const platformRef = useRef<"native" | "web">("web");
+  const devBypassStarted = useRef(false);
 
   // Cold app open → queue the dashboard welcome (no-op if one already played
   // earlier in this same session, so it never repeats within a session).
   useEffect(() => {
     useWelcomeStore.getState().requestOnAppOpen();
   }, []);
+
+  useEffect(() => {
+    if (!DEV_AUTH_BYPASS || isAuthenticated || devBypassStarted.current) return;
+    devBypassStarted.current = true;
+    void useAuthStore.getState().loginMockUser({ name: "Dev Guest" });
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (DEV_AUTH_BYPASS && isAuthenticated && pathname === "/") {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, pathname, router]);
 
   useLayoutEffect(() => {
     document.documentElement.classList.remove("loading");
@@ -72,7 +88,7 @@ export function AppEntry({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/play");
 
   useEffect(() => {
-    if (state === "web" && !isAuthenticated && isProtectedAppRoute) {
+    if (state === "web" && !isAuthenticated && !DEV_AUTH_BYPASS && isProtectedAppRoute) {
       router.replace("/onboarding");
     }
   }, [state, isAuthenticated, pathname, router, isProtectedAppRoute]);
@@ -89,6 +105,7 @@ export function AppEntry({ children }: { children: React.ReactNode }) {
   if (state === "native") return <SplashScreen onComplete={handleSplashComplete} />;
 
   if (!isAuthenticated) {
+    if (DEV_AUTH_BYPASS) return null;
     if (pathname === "/" && platformRef.current === "web") return <>{children}</>;
     return <OnboardingPage />;
   }

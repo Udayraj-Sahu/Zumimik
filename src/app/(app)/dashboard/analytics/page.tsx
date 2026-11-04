@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
             <TrendingUp size={12} className="text-primary" />
             <h1 className="text-micro font-semibold tracking-[0.22em] text-primary/80">ANALYTICS</h1>
           </div>
-          <p className="text-[12px] text-muted-foreground/45 font-normal mt-1">Deep-dive performance metrics from your last {stats.totalSessions} sessions.</p>
+          <p className="text-[12px] text-muted-foreground/45 font-normal mt-1">Performance across {stats.questions} answered questions.</p>
         </div>
 
         <div className="flex flex-col gap-6 mt-6 max-[359px]:gap-4">
@@ -56,10 +56,10 @@ export default function AnalyticsPage() {
             className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-[359px]:gap-2"
           >
             {[
-              { label: "TOTAL SESSIONS", value: String(stats.totalSessions) },
-              { label: "AVG SCORE", value: `${stats.avgScore}%` },
-              { label: "BEST STREAK", value: `${stats.bestStreak}d` },
-              { label: "ARENA RANK", value: `#${stats.arenaRank}` },
+              { label: "ACCURACY", value: `${stats.accuracy}%` },
+              { label: "QUESTIONS", value: String(stats.questions) },
+              { label: "PERCENTILE", value: `${stats.percentile}%` },
+              { label: "AVG SPEED", value: `${stats.speed}s` },
             ].map((s, i) => (
               <GlassCard key={i} className="p-4 max-[359px]:p-3" style={{ border: "1px solid var(--glass-06)" }}>
                 <p className="text-micro font-bold uppercase tracking-[0.18em] text-muted-foreground/40 mb-1.5">

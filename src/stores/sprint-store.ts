@@ -4,6 +4,8 @@ import type { Question, SprintAnswer, SprintResult } from "@/lib/types/sprint-se
 export type AnswerEntry = {
   selectedIndex: number;
   timeSpent: number;
+  answerText?: string;
+  correct?: boolean | null;
 };
 
 export type SprintSessionMeta = { questions: Question[]; topic: string; topicLabel: string; difficulty: string };
@@ -29,6 +31,7 @@ type SprintState = {
   initSprint: (totalTime: number) => void;
   resumeSprint: (point: ResumePoint) => void;
   answerCurrent: (questionId: string, optionIndex: number) => void;
+  answerTextCurrent: (questionId: string, answerText: string, correct: boolean | null) => void;
   nextQuestion: () => void;
   tick: () => void;
   jumpTo: (index: number) => void;
@@ -81,6 +84,19 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       };
     }),
 
+  answerTextCurrent: (questionId, answerText, correct) =>
+    set((state) => {
+      const now = Date.now();
+      const timeSpent = state.questionStartTime ? (now - state.questionStartTime) / 1000 : 0;
+      return {
+        answers: {
+          ...state.answers,
+          [questionId]: { selectedIndex: -1, answerText, correct, timeSpent },
+        },
+        questionStartTime: now,
+      };
+    }),
+
   nextQuestion: () =>
     set((state) => ({
       currentIndex: state.currentIndex + 1,
@@ -118,12 +134,14 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       return {
         questionId: q.id,
         selectedIndex: a?.selectedIndex ?? -1,
-        correct: a?.selectedIndex === q.correctIndex,
+        ...(a?.answerText !== undefined ? { answerText: a.answerText } : {}),
+        correct: a?.correct ?? (q.answerType === "text" ? null : a?.selectedIndex === q.correctIndex),
         timeSpent: a?.timeSpent ?? 0,
       };
     });
     const score = answerList.filter((a) => a.correct).length;
-    const accuracy = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+    const graded = answerList.filter((answer) => answer.correct !== null).length;
+    const accuracy = graded > 0 ? Math.round((score / graded) * 100) : 0;
     const xpEarned = Math.round(score * 10 + (accuracy >= 80 ? 50 : 0) + (accuracy >= 100 ? 100 : 0));
 
     return { answers: answerList, score, total: questions.length, accuracy, totalTimeSpent, xpEarned };

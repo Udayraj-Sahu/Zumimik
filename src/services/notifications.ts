@@ -1,5 +1,6 @@
 import type { NotificationItem } from "@/lib/types/notifications";
 import { apiGet } from "./api";
+import { mapDashboardEventsToNotifications } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -11,5 +12,6 @@ export async function getNotifications(): Promise<NotificationItem[]> {
     await delay(200);
     return NOTIFICATIONS;
   }
-  return apiGet<NotificationItem[]>("/notifications");
+  const events = await apiGet<Array<{ title: string; time: string; tag: string }>>("/dashboard/events");
+  return mapDashboardEventsToNotifications(events);
 }

@@ -2,26 +2,35 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
-import { Globe, Smartphone, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Globe, Smartphone, Mail, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isFirebaseConfigured, getFirebaseAuth, getFirebaseGoogleProvider } from "@/lib/firebase/client";
 
 import { IS_MOCK } from "@/lib/platform";
 
+export type AuthSuccessData =
+  | {
+      authMethod: "email";
+      email: string;
+      password: string;
+      displayName?: string;
+      intent: "login" | "register";
+    }
+  | { name?: string; phone?: string; idToken?: string; authMethod: "google" | "phone" };
+
 type AuthPanelProps = {
-  onAuthSuccess: (data: {
-    name?: string;
-    phone?: string;
-    idToken?: string;
-    authMethod: "google" | "phone";
-  }) => void;
+  onAuthSuccess: (data: AuthSuccessData) => void | Promise<void>;
   onPauseAutoSlide?: () => void;
   onResumeAutoSlide?: () => void;
 };
 
 export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }: AuthPanelProps) {
-  const [mode, setMode] = useState<"select" | "phone-input" | "otp" | "verifying">("select");
+  const [mode, setMode] = useState<"select" | "email" | "phone-input" | "otp" | "verifying">("select");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [emailIntent, setEmailIntent] = useState<"login" | "register">("login");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +77,10 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
   const enterOtp = async () => {
     if (phone.replace(/\D/g, "").length < 10) return;
     setError(null);
+    if (!IS_MOCK && !firebaseAvailable) {
+      setError("Phone sign-in is not configured. Sign in with email and password instead.");
+      return;
+    }
     pauseRef.current = true;
     onPauseAutoSlide?.();
 
@@ -104,6 +117,10 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
 
   const handleGoogle = async () => {
     setError(null);
+    if (!IS_MOCK && !firebaseAvailable) {
+      setError("Google sign-in is not configured. Sign in with email and password instead.");
+      return;
+    }
     if (firebaseAvailable) {
       setIsLoading(true);
       try {
@@ -111,7 +128,7 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
         const { signInWithPopup } = await import("firebase/auth");
         const result = await signInWithPopup(auth, provider);
         const idToken = await result.user.getIdToken();
-        onAuthSuccess({
+        await onAuthSuccess({
           name: result.user.displayName || "Google User",
           idToken,
           authMethod: "google",
@@ -128,7 +145,30 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
         setIsLoading(false);
       }
     } else {
-      onAuthSuccess({ name: "Google User", authMethod: "google" });
+      try {
+        await onAuthSuccess({ name: "Google User", authMethod: "google" });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Google sign-in failed");
+      }
+    }
+  };
+
+  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setIsLoading(true);
+    try {
+      await onAuthSuccess({
+        authMethod: "email",
+        email: email.trim(),
+        password,
+        ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
+        intent: emailIntent,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Email sign-in failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,7 +190,7 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
           const otpString = next.join("");
           const result = await confirmationResultRef.current.confirm(otpString);
           const idToken = await result.user.getIdToken();
-          onAuthSuccess({ phone, idToken, authMethod: "phone" });
+          await onAuthSuccess({ phone, idToken, authMethod: "phone" });
         } catch (err: unknown) {
           setOtp(["", "", "", "", "", ""]);
           inputRefs.current[0]?.focus();
@@ -173,7 +213,10 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       } else {
         setMode("verifying");
         setTimeout(() => {
-          onAuthSuccess({ phone, authMethod: "phone" });
+          Promise.resolve(onAuthSuccess({ phone, authMethod: "phone" })).catch((err) => {
+            setError(err instanceof Error ? err.message : "Phone sign-in failed");
+            setMode("otp");
+          });
         }, 1000);
       }
     }
@@ -230,11 +273,16 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
 
       {mode === "select" && (
         <>
+          {!IS_MOCK && !firebaseAvailable && (
+            <p role="status" className="text-center text-fluid-xs text-muted-foreground/70">
+              Google and phone sign-in are not configured for this backend. Use email and password.
+            </p>
+          )}
           <button
             data-step-el
             type="button"
             onClick={handleGoogle}
-            disabled={isLoading}
+            disabled={isLoading || (!IS_MOCK && !firebaseAvailable)}
             className="group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-4 text-fluid-base font-semibold text-foreground outline-none transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
           >
             <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
@@ -257,14 +305,98 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
               setError(null);
               setMode("phone-input");
             }}
-            disabled={isLoading}
+            disabled={isLoading || (!IS_MOCK && !firebaseAvailable)}
             className="group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-4 text-fluid-base font-semibold text-foreground outline-none transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
           >
             <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
             <Smartphone size={20} className="text-muted-foreground" aria-hidden="true" />
             Continue with Phone Number
           </button>
+          <button
+            data-step-el
+            type="button"
+            onClick={() => {
+              setError(null);
+              setEmailIntent("login");
+              setMode("email");
+            }}
+            disabled={isLoading}
+            className="group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-4 text-fluid-base font-semibold text-foreground outline-none transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <Mail size={20} className="text-muted-foreground" aria-hidden="true" />
+            Continue with email
+          </button>
         </>
+      )}
+
+      {mode === "email" && (
+        <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-3">
+          <p data-step-el className="text-fluid-sm font-semibold text-foreground/80">
+            {emailIntent === "login" ? "Sign in with email" : "Create your account"}
+          </p>
+          {emailIntent === "register" && (
+            <input
+              type="text"
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              placeholder="Your name (optional)"
+              autoComplete="name"
+              className="w-full rounded-xl border border-border/60 bg-card px-4 py-3 text-fluid-base text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+          )}
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Email address"
+            aria-label="Email address"
+            autoComplete="email"
+            required
+            className="w-full rounded-xl border border-border/60 bg-card px-4 py-3 text-fluid-base text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            aria-label="Password"
+            autoComplete={emailIntent === "login" ? "current-password" : "new-password"}
+            minLength={emailIntent === "register" ? 8 : undefined}
+            required
+            className="w-full rounded-xl border border-border/60 bg-card px-4 py-3 text-fluid-base text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+          />
+          <button
+            data-step-el
+            type="submit"
+            disabled={isLoading || !email.trim() || !password}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-fluid-sm font-bold uppercase tracking-widest text-primary-foreground outline-none transition-all hover:opacity-90 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:pointer-events-none"
+          >
+            {isLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <ArrowRight size={16} />}
+            {isLoading ? "Please wait..." : emailIntent === "login" ? "Sign in" : "Create account"}
+          </button>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setMode("select");
+              }}
+              className="min-h-[44px] px-2 text-fluid-xs text-muted-foreground/70 underline underline-offset-2 hover:text-foreground"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setEmailIntent((intent) => (intent === "login" ? "register" : "login"));
+              }}
+              className="min-h-[44px] px-2 text-fluid-xs text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              {emailIntent === "login" ? "Create account" : "Already registered? Sign in"}
+            </button>
+          </div>
+        </form>
       )}
 
       {mode === "phone-input" && (

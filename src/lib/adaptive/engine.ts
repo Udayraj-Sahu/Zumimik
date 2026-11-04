@@ -73,8 +73,8 @@ export function applyOutcome(state: AdaptiveDomainState, outcome: SessionOutcome
   return {
     ...state,
     topics,
-    sessionCount: state.sessionCount + 1,
-    totalTimeSpent: state.totalTimeSpent + outcome.totalTimeSpent,
+    sessionCount: (state.sessionCount ?? 0) + 1,
+    totalTimeSpent: (state.totalTimeSpent ?? 0) + outcome.totalTimeSpent,
     lastSession: {
       topicId: outcome.topicId,
       topicLabel: outcome.topicLabel,
@@ -104,7 +104,7 @@ export function recommendPlan(
   const weak = sorted[0] ?? null;
   const practiceTopic = sorted[1] ?? sorted[0] ?? null;
 
-  const session = state.sessionCount;
+  const session = state.sessionCount ?? 0;
   const mock = session > 0 && session % MOCK_EVERY === MOCK_EVERY - 1
     ? { topicId: "mock", topicLabel: "Full-length Mock", difficulty: "Advanced", length: 15 }
     : null;

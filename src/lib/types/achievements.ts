@@ -1,5 +1,13 @@
 export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
-export type AchievementCategory = "streak" | "accuracy" | "speed" | "social";
+export type AchievementCategory =
+  | "streak"
+  | "accuracy"
+  | "speed"
+  | "social"
+  | "competitive"
+  | "collaborative"
+  | "milestone"
+  | "special";
 
 export type AchievementItem = {
   id: string;

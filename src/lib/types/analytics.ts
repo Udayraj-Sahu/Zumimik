@@ -1,8 +1,8 @@
 export type AnalyticsStats = {
-  totalSessions: number;
-  avgScore: number;
-  bestStreak: number;
-  arenaRank: number;
+  accuracy: number;
+  questions: number;
+  percentile: number;
+  speed: number;
 };
 
 export type WeeklyDatum = {

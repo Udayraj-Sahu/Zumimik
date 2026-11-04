@@ -11,5 +11,5 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     await delay(250);
     return LEADERBOARD_ENTRIES;
   }
-  return apiGet<LeaderboardEntry[]>("/leaderboard");
+  return apiGet<LeaderboardEntry[]>("/dashboard/leaderboard");
 }

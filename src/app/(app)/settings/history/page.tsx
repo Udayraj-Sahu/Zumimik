@@ -13,8 +13,18 @@ import type { HistoryEntry } from "@/lib/types/history";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { GLASS_BG } from "@/lib/theme";
 import { formatTime } from "@/lib/text";
+import { IS_MOCK } from "@/lib/platform";
+
+const DIFFICULTY_OPTIONS = IS_MOCK
+  ? DIFFICULTY_FILTER
+  : [
+      { id: "all", label: "All" },
+      { id: "Mock exam", label: "Mock" },
+      { id: "Practice", label: "Practice" },
+    ];
 
 function formatDate(iso: string): string {
+  if (!iso) return "Date unavailable";
   const d = new Date(iso);
   const now = new Date();
   const diff = now.getTime() - d.getTime();
@@ -55,8 +65,12 @@ function HistoryRow({
           <span>{entry.difficulty}</span>
           <span>&middot;</span>
           <span>{entry.score}/{entry.total}</span>
-          <span>&middot;</span>
-          <span>+{entry.xpEarned} XP</span>
+          {entry.xpEarned !== undefined && (
+            <>
+              <span>&middot;</span>
+              <span>+{entry.xpEarned} XP</span>
+            </>
+          )}
         </div>
       </div>
       <div className="text-right shrink-0">
@@ -69,7 +83,7 @@ function HistoryRow({
 }
 
 export default function HistoryPage() {
-  usePageMeta("Sprint History — Zuzumik");
+  usePageMeta("History — Zuzumik");
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const domain = targetExam;
   const TOPICS_FILTER_HISTORY = getTopicFilters(domain);
@@ -121,7 +135,9 @@ export default function HistoryPage() {
           <Clock size={12} className="text-primary" />
           <h1 className="text-micro font-semibold tracking-[0.22em] text-primary/80">HISTORY</h1>
         </div>
-        <p className="text-[12px] text-muted-foreground/45 font-normal mt-1">Review your past sprint performances</p>
+         <p className="text-[12px] text-muted-foreground/45 font-normal mt-1">
+           {IS_MOCK ? "Review your past sprint performances" : "Review your completed mock exams"}
+         </p>
       </div>
 
       <div ref={animateSection} data-section-index="0" className="mt-5 space-y-2 max-[359px]:space-y-1.5">
@@ -140,7 +156,7 @@ export default function HistoryPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 max-[359px]:gap-1.5">
           <div className="flex flex-wrap gap-1 max-[359px]:gap-0.5">
-            {DIFFICULTY_FILTER.map((d) => (
+            {DIFFICULTY_OPTIONS.map((d) => (
               <button
                 key={d.id}
                 type="button"
@@ -197,7 +213,7 @@ export default function HistoryPage() {
               </div>
               <div className="rounded-xl p-2" style={{ backgroundColor: GLASS_BG }}>
                 <p className="text-micro text-muted-foreground/40">XP</p>
-                <p className="text-[13px] font-bold text-chart-2">+{selected.xpEarned}</p>
+                <p className="text-[13px] font-bold text-chart-2">{selected.xpEarned ?? "—"}</p>
               </div>
             </div>
             <div className="flex items-center justify-between text-micro text-muted-foreground/40">

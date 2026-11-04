@@ -45,7 +45,7 @@ export function computeStreak(entries: HistoryEntry[]): StreakData {
   if (entries.length === 0) {
     return { current: 0, xp: 0, days: [false, false, false, false, false, false, false], labels: ["M", "T", "W", "T", "F", "S", "S"] };
   }
-  const xp = entries.reduce((sum, e) => sum + e.xpEarned, 0);
+  const xp = entries.reduce((sum, e) => sum + (e.xpEarned ?? 0), 0);
   const daySet = new Set<string>();
   for (const e of entries) {
     const d = new Date(e.completedAt);

@@ -4,10 +4,11 @@ import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { X } from "lucide-react";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
-import { AuthPanel } from "./auth-panel";
+import { AuthPanel, type AuthSuccessData } from "./auth-panel";
 import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useRouter } from "next/navigation";
+import { IS_MOCK } from "@/lib/platform";
 
 type AuthModalProps = {
   onClose: () => void;
@@ -20,6 +21,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const setAuthData = useOnboardingStore((s) => s.setAuthData);
   const authLogin = useAuthStore((s) => s.login);
+  const authRegister = useAuthStore((s) => s.register);
+  const authLoginMockUser = useAuthStore((s) => s.loginMockUser);
   const authLoginWithFirebase = useAuthStore((s) => s.loginWithFirebase);
 
   useEffect(() => {
@@ -36,17 +39,30 @@ export function AuthModal({ onClose }: AuthModalProps) {
     }
   }, [onClose]);
 
-  const handleAuthSuccess = async (data: {
-    name?: string;
-    phone?: string;
-    idToken?: string;
-    authMethod: "google" | "phone";
-  }) => {
-    setAuthData(data);
-    if (data.idToken) {
-      await authLoginWithFirebase(data.idToken, data.authMethod);
+  const handleAuthSuccess = async (data: AuthSuccessData) => {
+    if (data.authMethod === "email") {
+      if (data.intent === "register") {
+        await authRegister(data.email, data.password, data.displayName);
+      } else {
+        await authLogin(data.email, data.password);
+      }
+      setAuthData({
+        name: data.displayName ?? data.email.split("@")[0],
+        email: data.email,
+        authMethod: "email",
+      });
     } else {
-      await authLogin(data.phone ?? `${data.name ?? "User"}@google.com`, "mock-password");
+      setAuthData(data);
+      if (data.idToken) {
+        await authLoginWithFirebase(data.idToken, data.authMethod);
+      } else if (IS_MOCK) {
+        await authLoginMockUser({
+          name: data.name ?? "User",
+          ...(data.phone ? { phone: data.phone } : {}),
+        });
+      } else {
+        throw new Error("Google and phone sign-in are not configured for this backend. Use email instead.");
+      }
     }
     router.push("/dashboard");
   };

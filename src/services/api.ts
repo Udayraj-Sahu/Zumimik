@@ -8,6 +8,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public detail?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
@@ -48,6 +49,28 @@ async function safeRead(res: Response): Promise<unknown> {
   } catch {
     return text;
   }
+}
+
+function messageFromErrorBody(data: unknown, status: number, statusText: string): string {
+  if (data && typeof data === "object" && "detail" in data) {
+    const detail = (data as { detail?: unknown }).detail;
+    if (typeof detail === "string") return detail;
+    if (detail && typeof detail === "object" && "message" in detail) {
+      const message = (detail as { message?: unknown }).message;
+      if (typeof message === "string") return message;
+    }
+    if (Array.isArray(detail)) {
+      const messages = detail.flatMap((issue: { loc?: unknown[]; msg?: unknown }) => {
+        if (typeof issue?.msg !== "string") return [];
+        const field = Array.isArray(issue.loc)
+          ? issue.loc.filter((part): part is string => typeof part === "string" && part !== "body").at(-1)
+          : undefined;
+        return [field ? `${field}: ${issue.msg}` : issue.msg];
+      });
+      if (messages.length) return messages.join("; ");
+    }
+  }
+  return `API error: ${status} ${statusText}`;
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -136,7 +159,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError(401, "Session expired");
   }
   if (!res.ok) {
-    throw new ApiError(res.status, `API error: ${res.status} ${res.statusText}`);
+    const errorData = await safeRead(res);
+    throw new ApiError(
+      res.status,
+      messageFromErrorBody(errorData, res.status, res.statusText),
+      errorData,
+    );
   }
   const data = await safeRead(res);
   return data as T;

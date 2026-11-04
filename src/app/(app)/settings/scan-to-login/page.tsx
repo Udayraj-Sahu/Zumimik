@@ -20,6 +20,8 @@ import { useScanPairingCode, useApprovePairing } from "@/hooks/queries/use-pairi
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { cn } from "@/lib/utils";
+import { IS_MOCK } from "@/lib/platform";
+import { parseSignedPairingPayload } from "@/services/backend-adapters";
 
 const STEP_ICON = { phone: Smartphone, web: Globe, check: Check };
 
@@ -37,10 +39,10 @@ export default function ScanToLoginPage() {
   const displayCode = entered;
 
   const handleCodeChange = (raw: string) => {
-    setEntered(raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
+    setEntered(IS_MOCK ? raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) : raw.trim());
   };
 
-  const dirty = displayCode.length !== 8;
+  const dirty = IS_MOCK ? displayCode.length !== 8 : parseSignedPairingPayload(displayCode) === null;
 
   const handleScan = async () => {
     if (dirty) return;
@@ -101,19 +103,23 @@ export default function ScanToLoginPage() {
                   <MonitorSmartphone size={18} className="text-primary" />
                 </div>
                 <div>
-                  <p className="text-[15px] font-bold text-foreground leading-tight">Enter the pairing code</p>
-                  <p className="text-[10.5px] text-muted-foreground/45 font-normal">Shown on the web screen with the QR</p>
+          <p className="text-[15px] font-bold text-foreground leading-tight">Enter the pairing code</p>
+          <p className="text-[10.5px] text-muted-foreground/45 font-normal">
+            {IS_MOCK ? "Shown on the web screen" : "Paste the signed payload copied from the web QR"}
+          </p>
                 </div>
               </div>
 
               <div className="mt-5">
-                <label className="text-micro font-semibold tracking-[0.14em] text-muted-foreground/40 uppercase whitespace-nowrap">8-digit code</label>
+                <label className="text-micro font-semibold tracking-[0.14em] text-muted-foreground/40 uppercase whitespace-nowrap">
+                  {IS_MOCK ? "8-digit code" : "Signed pairing payload"}
+                </label>
                 <input
                   value={displayCode}
                   onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder="E.g. 7K2M9QD"
-                  maxLength={8}
-                  autoCapitalize="characters"
+                  placeholder={IS_MOCK ? "E.g. 7K2M9QD" : "Paste JSON from the web QR"}
+                  maxLength={IS_MOCK ? 8 : 180}
+                  autoCapitalize={IS_MOCK ? "characters" : "off"}
                   autoCorrect="off"
                   spellCheck={false}
                   className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-4 text-center text-[22px] font-extrabold tracking-[0.3em] text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 max-[359px]:px-3 max-[359px]:py-3"
