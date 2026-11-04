@@ -5,34 +5,52 @@ import { BG, CTA_35, CYAN, CYAN_14, CYAN_18, CYAN_85, GLASS_02, GLASS_03, GLASS_
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSubjectTree } from "@/hooks/queries/use-explorer";
+import { useSubjectTree, useExplorerMastery } from "@/hooks/queries/use-explorer";
+import { useSprintTopics } from "@/hooks/queries/use-sprint";
+import { MasteryPanel } from "@/components/explorer/mastery-panel";
+import { IS_MOCK } from "@/lib/platform";
 import { useAllTechniques } from "@/hooks/queries/use-technique";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { MindMap } from "@/components/explorer/mind-map";
 import { Compass, GraduationCap, Lock, Plus, ArrowRight, Layers, ClipboardList, AlertTriangle } from "lucide-react";
 import { DOMAIN_LABELS } from "@/lib/types/template";
-import { getTechniqueIdsForTopic } from "@/lib/mock/topic-node-map";
 import type { TopicNode } from "@/lib/types/technique";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
-import { globalTopicsNotice } from "@/lib/exam-scope";
+import { globalTopicsNotice, resolveExplorerScope } from "@/lib/exam-scope";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 
-function nodeInTree(node: TopicNode, id: string): boolean {
-  if (node.id === id || node.slug === id) return true;
-  return (node.children ?? []).some((c) => nodeInTree(c, id));
+const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+/** The real id of the first node matching an id, slug or title (case/punctuation-insensitive), else null. */
+function findNodeId(node: TopicNode, key: string): string | null {
+  const k = norm(key);
+  if (node.id === key || node.slug === k || norm(node.id) === k || norm(node.title) === k) return node.id;
+  for (const child of node.children ?? []) {
+    const hit = findNodeId(child, key);
+    if (hit) return hit;
+  }
+  return null;
 }
 
-function findNodeInTrees(trees: TopicNode[], domain: string, topic: string): { subjectIndex: number; nodeId: string | null } {
+function nodeInTree(node: TopicNode, id: string): boolean {
+  return findNodeId(node, id) !== null;
+}
+
+function findNodeInTrees(trees: TopicNode[], topic: string): { subjectIndex: number; nodeId: string | null } {
   for (let i = 0; i < trees.length; i++) {
-    if (nodeInTree(trees[i], topic)) return { subjectIndex: i, nodeId: topic };
-  }
-  const techs = getTechniqueIdsForTopic(domain, topic);
-  for (let i = 0; i < trees.length; i++) {
-    if (techs.some((id) => nodeInTree(trees[i], id))) return { subjectIndex: i, nodeId: null };
+    const hit = findNodeId(trees[i], topic);
+    if (hit) return { subjectIndex: i, nodeId: hit };
   }
   return { subjectIndex: -1, nodeId: null };
+}
+
+/** Mock mode only: the bundled topic -> technique fixture map. It is never loaded in real mode. */
+async function findNodeViaFixtureMap(trees: TopicNode[], domain: string, topic: string): Promise<number> {
+  const { getTechniqueIdsForTopic } = await import("@/lib/mock/topic-node-map");
+  const techs = getTechniqueIdsForTopic(domain, topic);
+  return trees.findIndex((tree) => techs.some((id) => nodeInTree(tree, id)));
 }
 
 function countConquestStats(subject: TopicNode): { topics: number; practiceSets: number } {
@@ -75,14 +93,30 @@ function ExplorerContent() {
   const [paramsProcessed, setParamsProcessed] = useState(false);
   const [showAddPrep, setShowAddPrep] = useState(false);
 
-  const { data: trees, isLoading, isError: treesError } = useSubjectTree(activeDomain);
+  const activePath = useOnboardingStore((s) => s.activePath);
+  // Exam and learning path are separate inputs; neither one changes which topics the backend returns.
+  const scope = resolveExplorerScope(activeDomain, activePath);
+
+  const { data: trees, isLoading, isError: treesError, refetch: refetchTrees } = useSubjectTree(activeDomain);
   const subjects = useMemo(() => trees ?? [], [trees]);
 
-  const { data: allTechniques, isError: techniquesError } = useAllTechniques();
+  // Mock mode: bundled lessons decide which technique nodes open. Real mode: a node opens Practice only when the
+  // practice catalog actually serves that skill (technique names are :Skill names, the catalog's vocabulary).
+  const { data: allTechniques, isError: techniquesError } = useAllTechniques(IS_MOCK);
+  const {
+    data: catalogData,
+    isError: catalogError,
+    refetch: refetchCatalog,
+  } = useSprintTopics(activeDomain, !IS_MOCK);
   const availableTechniqueIds = useMemo(
-    () => new Set((allTechniques ?? []).map((t) => t.id)),
-    [allTechniques],
+    () =>
+      IS_MOCK
+        ? new Set((allTechniques ?? []).map((t) => t.id))
+        : new Set((catalogData?.topics ?? []).map((t) => t.id)),
+    [allTechniques, catalogData],
   );
+  const { data: mastery, isLoading: masteryLoading, isError: masteryError, refetch: refetchMastery } = useExplorerMastery();
+  const loadFailed = treesError || (IS_MOCK ? techniquesError : catalogError);
 
   useEffect(() => {
     if (paramsProcessed) return;
@@ -91,10 +125,14 @@ function ExplorerContent() {
       return;
     }
     if (!trees || trees.length === 0) return;
-    const { subjectIndex, nodeId } = findNodeInTrees(trees, activeDomain, urlTopic);
+    const { subjectIndex, nodeId } = findNodeInTrees(trees, urlTopic);
     if (nodeId) {
       setFocusNodeId(nodeId);
       if (subjectIndex >= 0) setActiveSubject(subjectIndex);
+    } else if (IS_MOCK) {
+      void findNodeViaFixtureMap(trees, activeDomain, urlTopic).then((index) => {
+        if (index >= 0) setActiveSubject(index);
+      });
     }
     setParamsProcessed(true);
     router.replace("/learn/explorer", { scroll: false });
@@ -169,13 +207,24 @@ function ExplorerContent() {
   return (
     <PageContainer className="overflow-x-clip">
       <div className="mx-auto w-full md:max-w-3xl">
-      {(treesError || techniquesError) && (
+      {loadFailed && (
         <div
           role="alert"
+          data-testid="explorer-error"
           className="mb-4 flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-[12px] font-medium text-destructive"
         >
           <AlertTriangle size={14} className="shrink-0" />
-          <span>Couldn&apos;t load the study map. Please try again.</span>
+          <span className="flex-1">Couldn&apos;t load the study map. Please try again.</span>
+          <button
+            type="button"
+            onClick={() => {
+              if (treesError) void refetchTrees();
+              if (!IS_MOCK && catalogError) void refetchCatalog();
+            }}
+            className="rounded-full border border-destructive/40 px-3 py-1 text-micro font-bold uppercase tracking-wider outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Retry
+          </button>
         </div>
       )}
       {/* Header */}
@@ -185,12 +234,16 @@ function ExplorerContent() {
           <span className="text-micro font-semibold tracking-[0.22em] text-primary/80">EXPLORER</span>
         </div>
         <h1 className="text-[24px] font-bold tracking-[-0.02em] text-foreground leading-tight">
-          Explore <span className="text-primary">Topics</span>
+          Explore <span className="text-primary">{IS_MOCK ? label : "Topics"}</span>
         </h1>
         <p className="mt-1.5 text-[12px] text-muted-foreground/45 font-normal">Tap nodes to branch out and explore your study map.</p>
-        <p data-testid="global-topics-notice" className="mt-1.5 text-[11px] text-muted-foreground/50">
-          {globalTopicsNotice(label)}
-        </p>
+        {!IS_MOCK && (
+          <p data-testid="global-topics-notice" className="mt-1.5 text-[11px] text-muted-foreground/50">
+            {scope.examCatalogUnavailable
+              ? `The exam-specific catalog for ${label} is not configured. ${globalTopicsNotice(label)}`
+              : globalTopicsNotice(null)}
+          </p>
+        )}
       </div>
 
       {/* Exam switcher — sliding segmented control */}
@@ -327,6 +380,12 @@ function ExplorerContent() {
         </div>
       )}
 
+      {!IS_MOCK && !isLoading && !loadFailed && subjects.length === 0 && (
+        <p role="status" data-testid="explorer-empty" className="mt-6 rounded-2xl p-5 text-center text-[13px] text-muted-foreground/60" style={{ background: GLASS_03 }}>
+          No topics are available yet.
+        </p>
+      )}
+
       {/* Mind map */}
       <div ref={animateSection} data-section-index={3} className="relative mt-6">
         <AnimatePresence mode="wait" initial={false}>
@@ -342,10 +401,20 @@ function ExplorerContent() {
               isLoading={isLoading}
               focusNodeId={focusNodeId ?? undefined}
               availableTechniqueIds={availableTechniqueIds}
+              techniqueHref={IS_MOCK ? undefined : (id) => `/learn/practice?skill=${encodeURIComponent(id)}`}
             />
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <MasteryPanel
+        mastery={mastery}
+        isLoading={masteryLoading}
+        isError={masteryError}
+        onRetry={() => void refetchMastery()}
+        practicable={availableTechniqueIds}
+        examLabel={label}
+      />
       </div>
     </PageContainer>
   );

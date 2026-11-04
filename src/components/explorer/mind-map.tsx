@@ -23,11 +23,14 @@ export function MindMap({
   isLoading,
   focusNodeId,
   availableTechniqueIds,
+  techniqueHref,
 }: {
   tree: TopicNode | null;
   isLoading: boolean;
   focusNodeId?: string;
   availableTechniqueIds?: Set<string>;
+  /** Where a technique node leads. Defaults to the bundled lesson page; real mode points it at Practice. */
+  techniqueHref?: (techniqueId: string) => string;
 }) {
   const router = useRouter();
   const [path, setPath] = useState<TopicNode[]>([]);
@@ -69,7 +72,7 @@ export function MindMap({
     if (node.children && node.children.length > 0) {
       toggleExpanded(node.id);
     } else if (node.type === "technique" && node.techniqueId) {
-      router.push(`/learn/technique/${node.techniqueId}`);
+      router.push(techniqueHref ? techniqueHref(node.techniqueId) : `/learn/technique/${node.techniqueId}`);
     }
   };
 

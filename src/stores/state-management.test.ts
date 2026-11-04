@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { stubLoginFetch } from "@/lib/test-support/stub-login-fetch";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -253,6 +254,7 @@ async function bootCleanState(): Promise<void> {
 beforeEach(async () => {
   vi.useRealTimers();
   vi.restoreAllMocks();
+  stubLoginFetch();
   await bootCleanState();
 });
 
@@ -307,7 +309,7 @@ describe("state management edge cases", () => {
     useSettingsStore.getState().setSoundEnabled(false);
     usePlanStore.getState().recordMock();
     usePlanStore.getState().recordMock();
-    usePlanStore.getState().setPro();
+    usePlanStore.getState().setPlanFromEntitlement("pro");
     useRateStore.getState().increment();
     useRateStore.getState().increment();
     useRateStore.getState().increment();
@@ -343,7 +345,7 @@ describe("state management edge cases", () => {
     useSettingsStore.getState().reset();
     expect(settingsData()).toEqual(BASELINE.settings);
 
-    usePlanStore.getState().setPro();
+    usePlanStore.getState().setPlanFromEntitlement("pro");
     usePlanStore.getState().recordMock();
     usePlanStore.getState().reset();
     expect(planData()).toEqual(BASELINE.plan);
@@ -405,7 +407,7 @@ describe("state management edge cases", () => {
   it("5. persisted state: re-hydrating from storage rebuilds the exact last state", async () => {
     useAuthStore.getState().setToken("tk-5");
     useSettingsStore.getState().setSoundEnabled(false);
-    usePlanStore.getState().setPro();
+    usePlanStore.getState().setPlanFromEntitlement("pro");
     useRateStore.getState().increment();
     useWalkthroughStore.getState().complete();
     useOnboardingStore.getState().finishOnboarding();
@@ -456,7 +458,7 @@ describe("state management edge cases", () => {
 
   it("7. refresh state: a full reload restores the session from persistence", async () => {
     useAuthStore.getState().setToken("tk-7");
-    usePlanStore.getState().setPro();
+    usePlanStore.getState().setPlanFromEntitlement("pro");
     usePlanStore.getState().recordMock();
     useRateStore.getState().increment();
     useWalkthroughStore.getState().complete();
@@ -643,7 +645,7 @@ describe("state management edge cases", () => {
     useToastStore.setState({ toasts: [] });
     useAuthStore.getState().setToken("tk-13");
     useSettingsStore.getState().setSoundEnabled(false);
-    usePlanStore.getState().setPro();
+    usePlanStore.getState().setPlanFromEntitlement("pro");
     useRateStore.getState().increment();
     useWalkthroughStore.getState().complete();
     useOnboardingStore.getState().finishOnboarding();

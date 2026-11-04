@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { stubLoginFetch } from "@/lib/test-support/stub-login-fetch";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -33,6 +34,7 @@ const SECRET_PATTERNS: RegExp[] = [
 ];
 
 beforeEach(() => {
+  stubLoginFetch();
   localStorage.clear();
   useAuthStore.setState({ user: null, token: null, refreshToken: null, isAuthenticated: false });
 });
@@ -105,11 +107,13 @@ describe("security surface", () => {
     expect(mod.SITE_NAME).toBe("Zuzumik");
   });
 
-  it("7. mock mode is the safe default when NEXT_PUBLIC_API_MOCK is unset", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", undefined as never);
-    vi.resetModules();
-    const mod = await import("@/lib/platform");
-    expect(mod.IS_MOCK).toBe(true);
+  it("7. real backend is the default; mock fixtures need an explicit NEXT_PUBLIC_API_MOCK=true", async () => {
+    for (const [value, expected] of [[undefined, false], ["false", false], ["true", true]] as const) {
+      vi.stubEnv("NEXT_PUBLIC_API_MOCK", value as never);
+      vi.resetModules();
+      const mod = await import("@/lib/platform");
+      expect(mod.IS_MOCK).toBe(expected);
+    }
   });
 
   it("8. logout clears auth user + token + refreshToken in state AND in the persisted blob", async () => {

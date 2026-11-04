@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Arena Integration Status</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #14181f; --muted: #5b6573; --line: #e2e6ec;
+    --pass: #15803d; --pass-bg: #e3f6ea; --part: #a16207; --part-bg: #fdf3d6;
+    --block: #b42318; --block-bg: #fde7e4; --todo: #475467; --todo-bg: #eceff3; --accent: #2563eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --panel: #161b22; --ink: #e8ecf1; --muted: #9aa5b4; --line: #262d38;
+      --pass: #4ade80; --pass-bg: #12301d; --part: #facc15; --part-bg: #33290b;
+      --block: #f87171; --block-bg: #3a1614; --todo: #aab4c2; --todo-bg: #232a34; --accent: #60a5fa;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 32px 0 12px; }
+  p.sub { color: var(--muted); margin: 0 0 20px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card b { display: block; font-size: 28px; line-height: 1.1; }
+  .card span { color: var(--muted); font-size: 13px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: color-mix(in srgb, var(--panel) 92%, var(--ink) 8%); }
+  tr:last-child td { border-bottom: 0; }
+  td.n { font-weight: 600; white-space: nowrap; }
+  td small { display: block; color: var(--muted); margin-top: 2px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .PASS { color: var(--pass); background: var(--pass-bg); }
+  .PARTIAL { color: var(--part); background: var(--part-bg); }
+  .BLOCKED { color: var(--block); background: var(--block-bg); }
+  .TODO, .NOT-VERIFIED { color: var(--todo); background: var(--todo-bg); }
+  .bar { height: 8px; width: 120px; background: var(--todo-bg); border-radius: 999px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  ul { margin: 6px 0; padding-left: 20px; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--part); border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+  .scroll { overflow-x: auto; }
+  code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--todo-bg); padding: 1px 5px; border-radius: 4px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Exam Arena: frontend and backend integration status</h1>
+  <p class="sub">Staging <code>examarena-staging.duckdns.org</code> · snapshot 2026-11-04 · nothing deployed or committed from this pass</p>
+
+  <div class="note">
+    <b>How to read this.</b> "Runtime verified" means a real call to staging with the test account succeeded and returned the shape the frontend expects.
+    Only read (GET) calls and the token endpoints were run. Writes (practice sync, mock exam submit, profile save, friend responses) are covered by unit tests against the verified
+    contract but were <b>not run against staging</b>, so they are marked unverified rather than passing.
+  </div>
+
+  <div class="cards">
+    <div class="card"><b>27</b><span>GET endpoints returning 200 with the expected shape</span></div>
+    <div class="card"><b>2</b><span>modules fully integrated (Dashboard, Explorer)</span></div>
+    <div class="card"><b>9</b><span>modules partially integrated</span></div>
+    <div class="card"><b>4</b><span>blocked by a missing or disabled backend (+1 not started)</span></div>
+    <div class="card"><b>543 / 555</b><span>unit tests passing (12 old failures)</span></div>
+  </div>
+
+  <h2>Progress by module</h2>
+  <div class="panel scroll"><table>
+    <thead><tr><th>Module</th><th>Status</th><th>Progress</th><th>Connected APIs</th><th>Runtime verification</th><th>Gaps</th></tr></thead>
+    <tbody>
+      <tr><td class="n">A. Authentication</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:80%"></i></div></td>
+        <td><code>POST /auth/login</code> <code>/register</code> <code>/refresh</code> <code>/logout</code> <code>GET /auth/me</code></td>
+        <td>Login, <code>/me</code>, refresh with rotation: <b>verified</b>. Logout revocation: unit-tested only.</td>
+        <td>Single-flight refresh added (parallel 401s used to log users out). Google/phone return 501.</td></tr>
+      <tr><td class="n">A. Onboarding save and restore</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:65%"></i></div></td>
+        <td><code>PATCH /auth/me</code>, <code>GET /auth/me</code></td>
+        <td>Read shape verified. <b>Write not run</b> (would change the test account); contract taken from OpenAPI.</td>
+        <td>Backend null/empty semantics, enums and storage in <code>behavioral_profile</code> are unconfirmed. See A1 in the backend report.</td></tr>
+      <tr><td class="n">B. Dashboard</td><td><span class="tag PASS">PASS</span></td><td><div class="bar"><i style="width:100%"></i></div></td>
+        <td><code>/dashboard/topics radar metrics stats streak events leaderboard recent-activity</code></td>
+        <td>All 8 verified (200).</td><td>Percentile and streak come from the server as-is.</td></tr>
+      <tr><td class="n">C. Practice</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:75%"></i></div></td>
+        <td><code>GET /practice/catalog</code> <code>POST /practice/session</code> <code>POST /sync</code> <code>GET /practice/mastery</code></td>
+        <td>Catalog and mastery verified. Session POST and sync not run.</td>
+        <td><b>Mastery does not change from practice</b>: the backend needs client BKT snapshots. Difficulty is cosmetic.</td></tr>
+      <tr><td class="n">D. Explorer / topics</td><td><span class="tag PASS">PASS</span></td><td><div class="bar"><i style="width:100%"></i></div></td>
+        <td><code>GET /api/topics</code> <code>/api/practice/techniques?limit=500</code> <code>/practice/catalog</code> <code>/dashboard/topics</code></td>
+        <td>All verified (200).</td><td>Global only: no exam-specific catalog exists. Labelled as global in the UI.</td></tr>
+      <tr><td class="n">E. Mock exams</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:70%"></i></div></td>
+        <td><code>/mocks/blueprints</code> <code>/history</code> <code>POST /configure</code> <code>/submit-answer</code> <code>/submit</code> <code>GET /results</code></td>
+        <td>Blueprints and history verified. Configure/submit not run (they create attempts).</td>
+        <td>No typed-answer input, no passage rendering, no offline queue.</td></tr>
+      <tr><td class="n">F. Duel / multiplayer</td><td><span class="tag BLOCKED">BLOCKED</span></td><td><div class="bar"><i style="width:0%"></i></div></td>
+        <td>Socket.IO game server (source exists)</td><td>Not inspected or tested.</td>
+        <td>Client protocol undocumented; reachability on staging unknown. The REST <code>/duel/*</code> routes the UI used do not exist.</td></tr>
+      <tr><td class="n">G. Social</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:60%"></i></div></td>
+        <td><code>GET /social/friends</code> <code>/achievements</code> <code>POST /social/friends/respond</code></td>
+        <td>Reads verified. Respond is unit-tested, not run.</td>
+        <td>Accept/Reject were unwired and are now connected. No add-friend/QR UI; ghosts and daily challenge have no UI. Clubs/feed: see K.</td></tr>
+      <tr><td class="n">H. Planner</td><td><span class="tag BLOCKED">BLOCKED</span></td><td><div class="bar"><i style="width:0%"></i></div></td>
+        <td>none</td><td>n/a</td><td>No planner routes exist. UI shows an unavailable state.</td></tr>
+      <tr><td class="n">I. Offline and sync</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:55%"></i></div></td>
+        <td><code>POST /sync</code> <code>POST /sync/content/feedback</code></td>
+        <td>Not run (writes).</td>
+        <td>Practice sync builds events once and retries with the same ids (idempotent). The offline queue was not re-verified; mock exams are not queued.</td></tr>
+      <tr><td class="n">J. Billing and entitlements</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:60%"></i></div></td>
+        <td><code>GET /billing/subscription</code> <code>/billing/plans</code></td>
+        <td>Both verified (200).</td>
+        <td>Plan and Pro access come only from the entitlement. Checkout is not wired (provider SDK needed). Family (200) is not connected.</td></tr>
+      <tr><td class="n">J. Referral</td><td><span class="tag BLOCKED">BLOCKED</span></td><td><div class="bar"><i style="width:70%"></i></div></td>
+        <td><code>GET /referral</code></td><td>404: flag <code>referral_ladder</code> is off.</td>
+        <td>Connected in code (server code, no local random code); cannot be verified until the flag is enabled.</td></tr>
+      <tr><td class="n">K. Notifications</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:40%"></i></div></td>
+        <td><code>GET /dashboard/events</code></td><td>Verified (200).</td><td>Only a derived list; no feed, read state or push.</td></tr>
+      <tr><td class="n">K. QR pairing</td><td><span class="tag PARTIAL">PARTIAL</span></td><td><div class="bar"><i style="width:70%"></i></div></td>
+        <td><code>/auth/scanner-login/generate verify poll</code></td><td>Not run.</td><td>Wired in code. Linked-device list and revoke do not exist.</td></tr>
+      <tr><td class="n">K. Clubs / hubs, feed</td><td><span class="tag BLOCKED">BLOCKED</span></td><td><div class="bar"><i style="width:0%"></i></div></td>
+        <td><code>/hub/*</code> exists</td><td>404: flag <code>virtual_hubs</code> is off.</td>
+        <td>Hubs lack moderator, cover, description and activity fields the Clubs UI needs. Feed has no API. UI shows an unavailable state.</td></tr>
+      <tr><td class="n">K. Ads, tournaments, beta, chat, location</td><td><span class="tag TODO">TODO</span></td><td><div class="bar"><i style="width:5%"></i></div></td>
+        <td><code>/ads</code> <code>/tournament</code> <code>/beta</code> <code>/chat</code> <code>/location</code></td>
+        <td>Beta status and chat policy return 200; ads, tournaments are flag-off.</td>
+        <td>No frontend feature uses them yet.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>What the frontend does and what the backend must do</h2>
+  <div class="panel scroll"><table>
+    <thead><tr><th>Area</th><th>Frontend responsibility (done or in the code)</th><th>Backend responsibility (open)</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Tokens</td><td>One refresh per expiry; offline never logs out; real rejection clears local data.</td><td>None open. Tokens are healthy (HS256, 15 min, rotation with reuse detection).</td></tr>
+      <tr><td class="n">Onboarding</td><td>Hydrate from <code>/auth/me</code>; save with PATCH; complete only after 2xx; never send empty values.</td><td>Define null/empty semantics, validate enums, stop storing answers in <code>behavioral_profile</code>.</td></tr>
+      <tr><td class="n">Mastery</td><td>Sends attempt events and refreshes caches after a confirmed sync.</td><td>Compute mastery from attempts (or ship the BKT engine).</td></tr>
+      <tr><td class="n">Exam-specific content</td><td>Labels everything global; switch ready behind one flag.</td><td>Exam tag and filter on topics, skills and catalog.</td></tr>
+      <tr><td class="n">Missing modules</td><td>Honest unavailable states; no fabricated data in real mode.</td><td>Planner, linked devices, notifications, feed, club fields, duel protocol.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Runtime verification (read-only, test account)</h2>
+  <div class="panel"><table>
+    <thead><tr><th>Result</th><th>Endpoints</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag PASS">200</span></td><td><code>/health /api/config /api/topics /api/practice/techniques /auth/me /practice/catalog /practice/mastery</code>
+        <code>/dashboard/*</code> (8) <code>/mocks/blueprints /mocks/history /social/friends /social/achievements /social/policy /social/daily /social/ghosts</code>
+        <code>/billing/plans /billing/subscription /beta/status /family /chat/policy</code></td></tr>
+      <tr><td><span class="tag BLOCKED">404</span></td><td><code>/referral /hub/mine /hub/search /ads/units</code>: feature flags off on staging (<code>referral_ladder, virtual_hubs, ad_engine</code>)</td></tr>
+      <tr><td><span class="tag NOT-VERIFIED">not run</span></td><td>Every write: <code>POST /sync</code>, practice and mock-exam sessions, <code>PATCH /auth/me</code> beyond the earlier probes, <code>POST /social/friends/respond</code>, logout, checkout.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Mock and local-only functionality</h2>
+  <ul>
+    <li>Mock fixtures load only when <code>NEXT_PUBLIC_API_MOCK=true</code>; real mode never falls back to them.</li>
+    <li>Bundled, non-user content: help FAQ, technique lesson text, solve-along templates (authored content, not account data).</li>
+    <li>Local-only user data (no backend field): date of birth detail beyond <code>dob</code>, exam dates, reminder and focus settings, plan lane, habit tracking, theme.</li>
+    <li>Profile edit page saves locally only.</li>
+  </ul>
+
+  <h2>Web and Android</h2>
+  <ul>
+    <li><b>Web:</b> production build passes; reads verified against staging from a script. Browser-level end-to-end runs with a signed-in session were not performed in this pass.</li>
+    <li><b>Android APK:</b> a debug APK was built earlier from the staging configuration. It was <b>not rebuilt for this pass and not tested on a device</b>. Web success does not prove APK compatibility.</li>
+  </ul>
+
+  <h2>Tests and checks</h2>
+  <ul>
+    <li><code>tsc</code> clean · ESLint 0 errors · <code>git diff --check</code> clean · production build passes.</li>
+    <li>Vitest: 543 pass, 12 fail. The 12 are older onboarding carousel, ReviewCarousel and StallTimer failures unrelated to this work.</li>
+  </ul>
+
+  <footer>Companion files: <code>BACKEND_PENDING_REQUIREMENTS.md</code> · <code>FRONTEND_INTEGRATION_CHANGELOG.md</code> · <code>docs/ONBOARDING-PERSISTENCE.md</code>.
+  No tokens, passwords or authorization headers appear in these reports.</footer>
+</main>
+</body>
+</html>

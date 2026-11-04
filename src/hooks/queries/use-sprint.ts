@@ -15,9 +15,10 @@ async function fetchSprintData(domain?: string): Promise<SprintData> {
   return { topics, config };
 }
 
-export function useSprintTopics(domain?: string) {
+export function useSprintTopics(domain?: string, enabled = true) {
   return useQuery<SprintData>({
     queryKey: ["sprint", domain],
     queryFn: () => fetchSprintData(domain),
+    enabled,
   });
 }

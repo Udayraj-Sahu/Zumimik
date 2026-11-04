@@ -73,6 +73,47 @@ function messageFromErrorBody(data: unknown, status: number, statusText: string)
   return `API error: ${status} ${statusText}`;
 }
 
+/**
+ * One refresh at a time. The backend rotates refresh tokens and treats re-use of a rotated token as theft (it revokes the
+ * family), so N parallel 401s must share ONE /auth/refresh call. Resolves to the new access token, or:
+ *  - null when the server explicitly rejected the session (the caller signs the user out), or
+ *  - throws NetworkError when the refresh could not be attempted (offline/timeout): the session is NOT ended.
+ */
+let refreshInFlight: Promise<string | null> | null = null;
+
+function refreshAccessToken(): Promise<string | null> {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    const { refreshToken, setToken, setRefreshToken } = useAuthStore.getState();
+    if (!refreshToken) return null;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error("Refresh timed out")), DEFAULT_TIMEOUT_MS);
+    let res: Response;
+    try {
+      res = await fetch(apiUrl("/auth/refresh"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+        signal: controller.signal,
+      });
+    } catch {
+      throw new NetworkError("Could not reach the server to renew your session");
+    } finally {
+      clearTimeout(timer);
+    }
+    if (res.status >= 500) throw new NetworkError("The server could not renew your session");
+    if (!res.ok) return null; // 400/401/403: the refresh token is no longer valid
+    const data = (await safeRead(res)) as { token?: string; refreshToken?: string } | undefined;
+    if (!data?.token) return null;
+    setToken(data.token);
+    if (data.refreshToken) setRefreshToken(data.refreshToken);
+    return data.token;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { headers: extraHeaders, signal, ...restOptions } = options;
   const timeoutController = new AbortController();
@@ -102,6 +143,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     }
   };
 
+  const tokenAtRequest = useAuthStore.getState().token;
   let res: Response;
   try {
     res = await doFetch(extraHeaders as Record<string, string>);
@@ -111,49 +153,29 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (res.status === 401) {
-    const { refreshToken, setToken, setRefreshToken, logout, isAuthenticated } = useAuthStore.getState();
+    const { refreshToken, isAuthenticated, token: currentToken, logout } = useAuthStore.getState();
     if (refreshToken && isAuthenticated) {
-      try {
-        const refreshController = new AbortController();
-        const refreshTimeout = setTimeout(
-          () => refreshController.abort(new Error("Refresh timed out")),
-          DEFAULT_TIMEOUT_MS,
+      // Another request may already have renewed the session while this one was in flight: reuse its token.
+      let newToken: string | null =
+        currentToken && currentToken !== tokenAtRequest ? currentToken : await refreshAccessToken();
+      if (newToken) {
+        const retryRes = await doFetch(
+          {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+            ...(extraHeaders as Record<string, string>),
+          },
+          signal,
         );
-        let refreshRes: Response;
-        try {
-          refreshRes = await fetch(apiUrl("/auth/refresh"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken }),
-            signal: refreshController.signal,
-          });
-        } finally {
-          clearTimeout(refreshTimeout);
+        if (retryRes.ok) return (await safeRead(retryRes)) as T;
+        if (retryRes.status !== 401) {
+          const errorData = await safeRead(retryRes);
+          throw new ApiError(retryRes.status, messageFromErrorBody(errorData, retryRes.status, retryRes.statusText), errorData);
         }
-        if (refreshRes.ok) {
-          const data = await safeRead(refreshRes);
-          const newToken = (data as { token?: string })?.token;
-          const rotatedRefresh = (data as { refreshToken?: string })?.refreshToken;
-          if (!newToken) throw new ApiError(401, "Session expired");
-          setToken(newToken);
-          if (rotatedRefresh) setRefreshToken(rotatedRefresh);
-          const retryRes = await doFetch(
-            {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${newToken}`,
-              ...(extraHeaders as Record<string, string>),
-            },
-            signal,
-          );
-          if (!retryRes.ok) throw new ApiError(retryRes.status, `API error: ${retryRes.status}`);
-          const retried = await safeRead(retryRes);
-          return retried as T;
-        }
-      } catch (err) {
-        if (err instanceof ApiError) throw err;
-        // fall through to logout
+        newToken = null; // a freshly issued token was refused: the session is genuinely invalid
       }
     }
+    // The server rejected the session (or there is none): sign out and clear this user's data.
     logout();
     await resetAppState();
     throw new ApiError(401, "Session expired");
@@ -186,6 +208,14 @@ export async function apiPut<T>(path: string, body?: unknown, options?: RequestI
   return request<T>(path, {
     ...options,
     method: "PUT",
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+}
+
+export async function apiPatch<T>(path: string, body?: unknown, options?: RequestInit): Promise<T> {
+  return request<T>(path, {
+    ...options,
+    method: "PATCH",
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }

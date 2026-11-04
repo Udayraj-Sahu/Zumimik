@@ -55,10 +55,10 @@ describe("backend response adapters", () => {
       }),
     ).toEqual({
       friends: [
-        { id: "u1", name: "Ada Lovelace", initials: "AL" },
+        { id: "u1", friendshipId: "f1", name: "Ada Lovelace", initials: "AL" },
       ],
       requests: [
-        { id: "u2", name: "Grace Hopper", initials: "GH" },
+        { id: "u2", friendshipId: "f2", name: "Grace Hopper", initials: "GH" },
       ],
     });
   });

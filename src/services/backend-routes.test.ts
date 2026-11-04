@@ -54,13 +54,15 @@ describe("frontend routes implemented by Speed-Gym", () => {
   it("uses the backend's unversioned content routes and practice catalog", async () => {
     const { getSubjectTree, getLeafTechniques, getSubjectEdges } = await import("./explorer");
 
-    mockedApiGet.mockResolvedValueOnce({ topics: [] } as never);
+    // The explorer tree combines the two global endpoints; neither is sent an exam.
+    mockedApiGet.mockResolvedValueOnce({ topics: [] } as never).mockResolvedValueOnce({ techniques: [] } as never);
     await getSubjectTree("cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/api/topics");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/topics");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/practice/techniques?limit=500");
 
     mockedApiGet.mockResolvedValueOnce({ techniques: [] } as never);
     await getLeafTechniques("cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/api/practice/techniques");
+    expect(mockedApiGet).toHaveBeenLastCalledWith("/api/practice/techniques?limit=500");
 
     mockedApiGet.mockResolvedValueOnce({ skills: [] } as never);
     await getSubjectEdges();
@@ -72,9 +74,12 @@ describe("frontend routes implemented by Speed-Gym", () => {
     const { getSprintQuestions } = await import("./sprint-session");
     const emptySession = { items: [], summary: { requested: 10, served: 0 } };
 
-    mockedApiGet.mockResolvedValueOnce(emptySession as never);
+    // Practice requests a catalog skill as a slot (POST); GET filters on corpus topic/technique labels.
+    mockedApiPost.mockResolvedValueOnce(emptySession as never);
     await getPracticeSession("nikhilam", 10, "Beginner", "cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/session?topic=nikhilam&size=10");
+    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", {
+      slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }],
+    });
 
     mockedApiGet.mockResolvedValueOnce(emptySession as never);
     await getSprintQuestions("nikhilam", 10, "Beginner", "cat");

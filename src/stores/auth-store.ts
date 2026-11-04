@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { safeLocalStorage } from "@/lib/platform";
 import { IS_MOCK, apiUrl } from "@/lib/platform";
 
-type User = {
+export type User = {
   id: string;
   name: string;
   email: string;
@@ -11,6 +11,18 @@ type User = {
   phone?: string;
   /** Backend users.tier (additive on the /auth/* user shape). */
   tier?: string | null;
+  // Onboarding profile as returned by login and GET /auth/me (camelCase; any may be null/empty on a new account).
+  isOnboarded?: boolean | null;
+  persona?: string | null;
+  goal?: string | null;
+  targetExam?: string | null;
+  firstName?: string | null;
+  triggers?: string[] | null;
+  sex?: string | null;
+  dob?: { day?: number; month?: string; year?: number } | null;
+  temporalWindow?: string | null;
+  activePreps?: string[] | null;
+  behavioral_profile?: Record<string, unknown> | null;
 };
 
 /** Backend user payload: any field may be null/omitted (e.g. display_name is optional). */

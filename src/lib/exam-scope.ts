@@ -34,3 +34,41 @@ export function masteryNotice(examLabel: string | null | undefined): string {
     ? `Your overall mastery across all topics. It is not a ${examLabel} syllabus.`
     : "Your overall mastery across all topics.";
 }
+
+/**
+ * What the Explorer may claim about its data for the current selection. Exam and learning path are independent inputs;
+ * neither changes which topics the backend returns today.
+ */
+export type ExplorerScope = {
+  exam: string | null;
+  activePath: ActivePath | null;
+  /** "global": the catalog is the same for every exam. "exam": the backend scopes it (not available yet). */
+  catalog: "global" | "exam";
+  /** True when an exam is selected but no verified exam-specific catalog exists. */
+  examCatalogUnavailable: boolean;
+};
+
+export function resolveExplorerScope(
+  exam: string | null | undefined,
+  activePath: ActivePath | null | undefined,
+): ExplorerScope {
+  const selected = exam || null;
+  return {
+    exam: selected,
+    activePath: activePath ?? null,
+    catalog: EXAM_TOPIC_CATALOG_SUPPORTED ? "exam" : "global",
+    examCatalogUnavailable: !!selected && !EXAM_TOPIC_CATALOG_SUPPORTED,
+  };
+}
+
+/**
+ * Cache-key part for explorer data. Global data must not be cached separately (or re-fetched) per exam, so the exam
+ * is part of the key only when the backend can scope the data to it, or in mock mode whose fixtures are per exam.
+ */
+export function explorerScopeKey(
+  exam: string | null | undefined,
+  perExamData: boolean,
+  catalogSupported: boolean = EXAM_TOPIC_CATALOG_SUPPORTED,
+): string {
+  return catalogSupported || perExamData ? (exam ?? "") : "global";
+}

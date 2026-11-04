@@ -1,5 +1,5 @@
 import type { SprintSession } from "@/lib/types/sprint-session";
-import { apiGet } from "./api";
+import { apiPost } from "./api";
 import { mapBackendPracticeSession, type BackendPracticeSessionResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
@@ -17,7 +17,12 @@ export async function getPracticeSession(
     await delay(150);
     return generateSprintSession(topic, length, difficulty, domain);
   }
-  const params = new URLSearchParams({ topic, size: String(length) });
-  const response = await apiGet<BackendPracticeSessionResponse>(`/practice/session?${params.toString()}`);
+  // `topic` here is a :Skill name from GET /practice/catalog. GET /practice/session filters on corpus topic/technique
+  // labels, a near-disjoint vocabulary, so a catalog skill is requested as a slot: POST /practice/session
+  // { slots: [{ skill, bucket, n }] } (n: 1-50). The backend has no difficulty parameter; difficulty is only a label.
+  const n = Math.min(50, Math.max(1, Math.floor(length)));
+  const response = await apiPost<BackendPracticeSessionResponse>("/practice/session", {
+    slots: [{ skill: topic, bucket: "primary", n }],
+  });
   return mapBackendPracticeSession(response, { topic, difficulty, domain });
 }

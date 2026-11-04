@@ -7,18 +7,26 @@ import { QRCodeSVG } from "qrcode.react";
 import { Share2, KeyRound, QrCode, Copy, Check, X } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useReferralStore } from "@/stores/referral-store";
+import { useReferralStatus } from "@/hooks/queries/use-referral";
+import { IS_MOCK } from "@/lib/platform";
 
 const REWARD_XP = 50;
 
 export function InviteCard() {
   const firstName = useOnboardingStore((s) => s.firstName);
-  const { code, invitesSent, friendsJoined, ensureCode, markInvited } = useReferralStore();
+  const local = useReferralStore();
+  const { invitesSent, ensureCode, markInvited } = local;
+  // Real mode: the code and the joined count are the SERVER's (GET /referral). A locally generated code was never issued by the
+  // backend and would not redeem. While it loads, or if the feature is off, no code is shown rather than an invented one.
+  const { data: server } = useReferralStatus();
+  const code = IS_MOCK ? local.code : (server?.code ?? null);
+  const friendsJoined = IS_MOCK ? local.friendsJoined : (server?.verifiedReferrals ?? 0);
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [origin, setOrigin] = useState("");
 
   useEffect(() => {
-    ensureCode(firstName);
+    if (IS_MOCK) ensureCode(firstName); // development-only local code
   }, [firstName, ensureCode]);
 
   useEffect(() => {

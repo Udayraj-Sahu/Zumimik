@@ -18,9 +18,10 @@ export function useTechniquesBySubject(subjectId: string) {
   });
 }
 
-export function useAllTechniques() {
+export function useAllTechniques(enabled = true) {
   return useQuery<Technique[]>({
     queryKey: ["techniques", "all"],
     queryFn: getAllTechniques,
+    enabled,
   });
 }

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { SplashScreen } from "@/components/shell/splash-screen";
 import { useAuthStore } from "@/stores/auth-store";
+import { refreshProfileFromServer } from "@/services/onboarding";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { isNativeRuntime } from "@/lib/native/is-native";
 import { isDevAuthBypassEnabled } from "@/lib/platform/dev-auth-bypass";
@@ -32,6 +33,14 @@ export function AppEntry({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     useWelcomeStore.getState().requestOnAppOpen();
   }, []);
+
+  // Session restored from storage: refresh the profile once from /auth/me. Server values only fill what is blank locally.
+  const restoredProfile = useRef(false);
+  useEffect(() => {
+    if (!isAuthenticated || restoredProfile.current) return;
+    restoredProfile.current = true;
+    void refreshProfileFromServer({ authoritative: false }).catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!DEV_AUTH_BYPASS || isAuthenticated || devBypassStarted.current) return;

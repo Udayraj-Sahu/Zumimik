@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { stubLoginFetch } from "@/lib/test-support/stub-login-fetch";
 import Dexie from "dexie";
 
 import { db } from "./db";
@@ -42,6 +43,7 @@ async function bootCleanAppState(): Promise<void> {
 
 beforeEach(async () => {
   vi.restoreAllMocks();
+  stubLoginFetch();
   await bootCleanAppState();
 });
 
