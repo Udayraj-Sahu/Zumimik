@@ -15,6 +15,7 @@ import { DOMAIN_LABELS } from "@/lib/types/template";
 import { getTechniqueIdsForTopic } from "@/lib/mock/topic-node-map";
 import type { TopicNode } from "@/lib/types/technique";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
+import { globalTopicsNotice } from "@/lib/exam-scope";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 
@@ -184,9 +185,12 @@ function ExplorerContent() {
           <span className="text-micro font-semibold tracking-[0.22em] text-primary/80">EXPLORER</span>
         </div>
         <h1 className="text-[24px] font-bold tracking-[-0.02em] text-foreground leading-tight">
-          Explore <span className="text-primary">{label}</span>
+          Explore <span className="text-primary">Topics</span>
         </h1>
         <p className="mt-1.5 text-[12px] text-muted-foreground/45 font-normal">Tap nodes to branch out and explore your study map.</p>
+        <p data-testid="global-topics-notice" className="mt-1.5 text-[11px] text-muted-foreground/50">
+          {globalTopicsNotice(label)}
+        </p>
       </div>
 
       {/* Exam switcher — sliding segmented control */}

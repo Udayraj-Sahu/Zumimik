@@ -1,4 +1,6 @@
 "use client";
+import { IS_MOCK } from "@/lib/platform";
+import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
 import { PageContainer } from "@/components/ui/page-container";
 
 import { useState } from "react";
@@ -25,7 +27,7 @@ function lastActiveLabel(lastActive: string): string {
   return ago ? `Last active ${ago}` : `Last active ${lastActive}`;
 }
 
-export default function LinkedDevicesPage() {
+function LinkedDevicesPageContent() {
   usePageMeta("Linked Devices — Zuzumik");
   const router = useRouter();
   const { data: devices, isLoading, error } = useLinkedDevices();
@@ -158,4 +160,9 @@ export default function LinkedDevicesPage() {
       </div>
     </PageContainer>
   );
+}
+export default function LinkedDevicesPage() {
+  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
+  if (!IS_MOCK) return <FeatureUnavailable title="Linked Devices" description="Linked-device management isn't available yet. You can still sign in on another device with Scan to Login." />;
+  return <LinkedDevicesPageContent />;
 }

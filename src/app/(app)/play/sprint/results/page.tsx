@@ -71,6 +71,8 @@ function SprintResultsContent() {
   useEffect(() => {
     if (recordedRef.current) return;
     if (!lastResult || !lastSession || !lastSession.topic) return;
+    // Backend mock exams are already recorded server-side by /mocks/submit; do not re-sync them as sprints.
+    if (lastSession.mockId) return;
     recordedRef.current = true;
     recordSession.mutate({
       session: lastSession,

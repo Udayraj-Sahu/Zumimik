@@ -5,7 +5,7 @@ import type { RecentActivityItem } from "@/lib/types/analytics";
 import type { TopicEdge, TopicNode } from "@/lib/types/technique";
 import type { HistoryEntry } from "@/lib/types/history";
 import type { SprintTopic } from "@/lib/types/sprint";
-import type { SprintSession, TrustStatus } from "@/lib/types/sprint-session";
+import type { SprintResult, SprintSession, TrustStatus } from "@/lib/types/sprint-session";
 import type { AdaptiveDomainState, AdaptiveTopicState } from "@/lib/types/adaptive";
 import type { ContentFeedbackRequest } from "@/lib/types/content-feedback";
 import type { NotificationItem } from "@/lib/types/notifications";
@@ -426,4 +426,100 @@ export function mapMockBlueprints(
       difficulty: blueprint.scoring === "scaled" ? "Scaled scoring" : "Raw scoring",
       accent: PAPER_ACCENTS[blueprint.key] ?? CYAN,
     }));
+}
+
+// ── Mock exam lifecycle: configure → submit-answer → submit → results ──────
+
+export type BackendMockQuestion = {
+  question_id: string;
+  kind?: string;
+  text: string;
+  options?: Array<{ id: string; text: string }> | null;
+  skill?: string | null;
+  difficulty?: number | string | null;
+  position?: number;
+};
+
+export type BackendMockConfigureResponse = {
+  mock_id: string;
+  exam: string;
+  mode: string;
+  time_limit_seconds: number;
+  timers_suppressed?: boolean;
+  practice_label?: string | null;
+  sections: Array<{ key: string; name: string; minutes: number; questions: BackendMockQuestion[] }>;
+};
+
+export function mapMockConfigure(response: BackendMockConfigureResponse, title?: string): SprintSession {
+  const questions = response.sections.flatMap((section) =>
+    section.questions.map((q) => {
+      const options = q.options ?? [];
+      return {
+        id: q.question_id,
+        text: q.text,
+        options: options.map((o) => o.text),
+        optionIds: options.map((o) => o.id),
+        // No options → free-text (TITA/numeric); the answer is typed and sent as-is.
+        answerType: options.length === 0 ? ("text" as const) : ("choice" as const),
+        correctIndex: -1,
+        serverGraded: true,
+        timeLimit: Math.max(30, Math.round((section.minutes * 60) / Math.max(section.questions.length, 1))),
+        techniqueId: q.skill ?? undefined,
+        difficulty: typeof q.difficulty === "number" ? q.difficulty : undefined,
+      };
+    }),
+  );
+  return {
+    id: response.mock_id,
+    mockId: response.mock_id,
+    domain: response.exam,
+    topic: response.exam,
+    topicLabel: title ?? response.exam.toUpperCase(),
+    difficulty: response.practice_label ?? "Full Test",
+    questions,
+    totalTime: response.time_limit_seconds,
+  };
+}
+
+export type BackendMockSubmitResponse = { mock_id: string; xp_awarded?: number; percentile?: number | null };
+
+export type BackendMockResultsResponse = {
+  mock_id: string;
+  review: Array<{
+    question_id: string;
+    your_answer: string | null;
+    verdict: boolean | null;
+    time_ms: number | null;
+  }>;
+};
+
+/** Build the client SprintResult from the server-graded review. Verdicts are the backend's, never computed locally. */
+export function mapMockResults(
+  results: BackendMockResultsResponse,
+  questions: SprintSession["questions"],
+  xpEarned: number,
+  totalTimeSpent: number,
+): SprintResult {
+  const byId = new Map(results.review.map((r) => [r.question_id, r]));
+  const answers: SprintResult["answers"] = questions.map((q) => {
+    const r = byId.get(q.id);
+    const idx = r?.your_answer != null ? (q.optionIds ?? []).indexOf(r.your_answer) : -1;
+    return {
+      questionId: q.id,
+      selectedIndex: idx,
+      ...(r?.your_answer != null && q.answerType === "text" ? { answerText: r.your_answer } : {}),
+      correct: r?.verdict ?? null,
+      timeSpent: Math.round((r?.time_ms ?? 0) / 1000),
+    };
+  });
+  const score = answers.filter((a) => a.correct === true).length;
+  const graded = answers.filter((a) => a.correct !== null).length;
+  return {
+    answers,
+    score,
+    total: questions.length,
+    accuracy: graded > 0 ? Math.round((score / graded) * 100) : 0,
+    totalTimeSpent,
+    xpEarned,
+  };
 }

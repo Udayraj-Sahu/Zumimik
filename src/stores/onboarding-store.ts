@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { safeLocalStorage } from "@/lib/platform";
+import type { ActivePath } from "@/lib/exam-scope";
 import type { FocusMode, PlanId, VedicUseCaseId, DrillId, ReclaimConfig } from "@/lib/types/onboarding";
 
 export const DEFAULT_RECLAIM_CONFIGS: Record<string, ReclaimConfig> = {
@@ -32,6 +33,8 @@ type OnboardingState = {
   phone: string;
   authMethod: "google" | "phone" | "email" | null;
   targetExam: string;
+  /** Backend users.active_path. Independent of targetExam. */
+  activePath: ActivePath | null;
   level: string;
   isOnboarded: boolean;
   autoSlidePaused: boolean;
@@ -69,6 +72,7 @@ type OnboardingState = {
 
   setAuthData: (data: { name?: string; email?: string; phone?: string; authMethod: "google" | "phone" | "email" }) => void;
   setTargetExam: (exam: string) => void;
+  setActivePath: (path: ActivePath | null) => void;
   setLevel: (level: string) => void;
   nextStep: () => void;
   setCurrentStep: (step: number) => void;
@@ -117,6 +121,7 @@ const initial = {
   phone: "",
   authMethod: null as "google" | "phone" | "email" | null,
   targetExam: "",
+  activePath: null as ActivePath | null,
   level: "",
   isOnboarded: false,
   autoSlidePaused: false,
@@ -168,6 +173,7 @@ export const useOnboardingStore = create<OnboardingState>()(
         })),
 
       setTargetExam: (exam) => set({ targetExam: exam }),
+      setActivePath: (activePath) => set({ activePath }),
       setLevel: (level) => set({ level }),
 
       nextStep: () => set((s) => ({ currentStep: s.currentStep + 1 })),

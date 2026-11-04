@@ -1,4 +1,6 @@
 "use client";
+import { IS_MOCK } from "@/lib/platform";
+import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -12,7 +14,7 @@ import { GLASS_BG } from "@/lib/theme";
 import { FEED_HERO, FEED_CATEGORIES, FEED_STORIES, FEED_VIDEOS } from "@/lib/mock/feed";
 
 
-export default function FeedPage() {
+function FeedPageContent() {
   usePageMeta("Feed — Zuzumik");
   const [activeCategory, setActiveCategory] = useState<string>("Explore");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -161,4 +163,10 @@ export default function FeedPage() {
       </div>
     </PageContainer>
   );
+}
+
+export default function FeedPage() {
+  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
+  if (!IS_MOCK) return <FeatureUnavailable title="Feed" description="The feed isn't available yet. The server doesn't support it, so no posts are shown." />;
+  return <FeedPageContent />;
 }

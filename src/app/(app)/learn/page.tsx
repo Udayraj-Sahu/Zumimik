@@ -29,6 +29,7 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useDashboardData } from "@/hooks/queries/use-dashboard";
 import { useMockPapers } from "@/hooks/queries/use-mock-exam";
 import { DOMAIN_LABELS } from "@/lib/types/template";
+import { masteryNotice } from "@/lib/exam-scope";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { Button } from "@/components/ui/button";
 import { AdaptiveReprompt } from "@/components/adaptive/adaptive-reprompt";
@@ -174,15 +175,18 @@ function LearnPageContent() {
   const { data: mockPapers, isLoading: mockLoading, isError: mockError, refetch: refetchPapers } = useMockPapers(mockExamDomain);
   const topics = data?.topics ?? [];
 
+  // Your Stats: the learner's real /dashboard/stats (not exam-scoped by the backend). "--" until measured.
   const mockStats = useMemo<StatsSummary>(() => {
-    if (prepExams.length === 0) {
-      return { accuracy: "--", questions: "--", percentile: "--", speed: "--" };
-    }
-    if (prepExams.length === 1) {
-      return { accuracy: "87%", questions: "1,247", percentile: "64%ile", speed: "47s" };
-    }
-    return { accuracy: "91%", questions: "2,845", percentile: "78%ile", speed: "42s" };
-  }, [prepExams.length]);
+    const s = data?.stats;
+    if (!s) return { accuracy: "--", questions: "--", percentile: "--", speed: "--" };
+    const measured = s.questions > 0;
+    return {
+      accuracy: measured ? `${s.accuracy}%` : "--",
+      questions: s.questions.toLocaleString(),
+      percentile: measured ? `${s.percentile}%ile` : "--",
+      speed: measured && s.speed > 0 ? `${s.speed}s` : "--",
+    };
+  }, [data?.stats]);
 
   const adaptiveAccent = useAccentHex();
 
@@ -383,7 +387,16 @@ function LearnPageContent() {
                   )}
                 </GlassCard>
 
-                {/* Topic Cards */}
+                {prepExams.length > 0 && (
+                  <p
+                    data-testid="mastery-scope-notice"
+                    className="mt-5 text-center text-[11px] text-muted-foreground/50"
+                  >
+                    {masteryNotice(DOMAIN_LABELS[activeDomain])}
+                  </p>
+                )}
+
+                {/* Topic Cards (mastery, not an exam catalog) */}
                 {prepExams.length > 0 && (
                   <motion.div
                     key={`${activeDomain}-topics`}

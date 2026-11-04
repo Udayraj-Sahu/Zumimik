@@ -11,6 +11,7 @@ import { ZuzumikWordmark } from "@/components/brand/zuzumik-wordmark";
 import { cn } from "@/lib/utils";
 import { MOBILE_NAV } from "@/lib/mock/dashboard";
 import { useAuthStore } from "@/stores/auth-store";
+import { useSubscription } from "@/hooks/queries/use-subscription";
 import { useThemeStore } from "@/stores/theme-store";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { resetAppState } from "@/lib/platform";
@@ -28,6 +29,7 @@ const RatePrompt = dynamic(
 const EXAM_ROUTES = ["/play/sprint", "/learn/mock/run", "/learn/practice"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  useSubscription(); // keep the plan gate in step with the backend entitlement
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);

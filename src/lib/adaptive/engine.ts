@@ -1,4 +1,5 @@
 import { ADAPTIVE_TOPICS_BY_DOMAIN } from "@/lib/mock/adaptive";
+import { IS_MOCK } from "@/lib/platform";
 import { allocateTimeBudget } from "@/lib/adaptive/modes";
 import type {
   AdaptiveDomainState,
@@ -28,15 +29,16 @@ export function lengthFor(mastery: number): number {
 
 export function initialTopics(domain: string): AdaptiveTopicState[] {
   const seeds = ADAPTIVE_TOPICS_BY_DOMAIN[domain] ?? ADAPTIVE_TOPICS_BY_DOMAIN["cat"] ?? [];
+  // Real mode starts every topic at 0 (NEW). The mock seed values are fixtures, not the learner's mastery.
   return seeds.map((t) => ({
     id: t.id,
     name: t.name,
     color: t.color,
-    mastery: t.value,
+    mastery: IS_MOCK ? t.value : 0,
     attempts: 0,
     currentStreak: 0,
     bestStreak: 0,
-    status: t.value === 0 ? "NEW" : t.value >= MASTERED_AT ? "MASTERED" : "ACTIVE",
+    status: !IS_MOCK || t.value === 0 ? "NEW" : t.value >= MASTERED_AT ? "MASTERED" : "ACTIVE",
   }));
 }
 

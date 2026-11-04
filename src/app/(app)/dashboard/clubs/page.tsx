@@ -1,4 +1,6 @@
 "use client";
+import { IS_MOCK } from "@/lib/platform";
+import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -20,7 +22,7 @@ function formatMembers(n: number): string {
   return String(n);
 }
 
-export default function ClubsPage() {
+function ClubsPageContent() {
   usePageMeta("Clubs — Zuzumik");
   const [tab, setTab] = useState<Tab>("find");
   const [activeFilter, setActiveFilter] = useState<ClubFilter>("All");
@@ -157,4 +159,10 @@ function ClubCard({ club }: { club: Club }) {
       </div>
     </GlassCard>
   );
+}
+
+export default function ClubsPage() {
+  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
+  if (!IS_MOCK) return <FeatureUnavailable title="Clubs" description="Clubs aren't available yet. The server doesn't support them, so no club data is shown." />;
+  return <ClubsPageContent />;
 }

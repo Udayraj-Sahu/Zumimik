@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { usePlanStore } from "@/stores/plan-store";
+import { IS_MOCK } from "@/lib/platform";
 import { usePaywallStore } from "@/stores/paywall-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { PLANS, type PlanId } from "@/lib/types/onboarding";
@@ -102,6 +103,7 @@ export function PaywallModal() {
   const [lane, setLane] = useState<string>(planLane || targetExam || "cat");
   const theme = useThemeStore((s) => s.theme);
   const [state, setState] = useState<"idle" | "success">("idle");
+  const [notice, setNotice] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
   const [isNative] = useState(() => isNativeRuntime());
@@ -162,6 +164,11 @@ export function PaywallModal() {
     setPlanLane(lane);
     if (isFree) {
       requestClose();
+      return;
+    }
+    if (!IS_MOCK) {
+      // Checkout is not wired in the app: never grant access from a UI selection. The backend entitlement decides.
+      setNotice("Checkout isn't available in the app yet. Your plan has not changed.");
       return;
     }
     setPro();
@@ -400,6 +407,11 @@ export function PaywallModal() {
 
                 {/* sticky CTA */}
                 <footer className="sticky bottom-0 z-10 -mx-4 border-t border-[var(--lime-20)] bg-[var(--bg-blue-95)] px-4 pb-1 pt-3 backdrop-blur">
+                  {notice && (
+                    <p role="alert" data-testid="paywall-notice" className="mb-2 text-center text-[11px] text-muted-foreground/70">
+                      {notice}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={confirmPlan}

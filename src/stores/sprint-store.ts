@@ -8,7 +8,7 @@ export type AnswerEntry = {
   correct?: boolean | null;
 };
 
-export type SprintSessionMeta = { questions: Question[]; topic: string; topicLabel: string; difficulty: string };
+export type SprintSessionMeta = { questions: Question[]; topic: string; topicLabel: string; difficulty: string; mockId?: string };
 
 export type ResumePoint = {
   currentIndex: number;

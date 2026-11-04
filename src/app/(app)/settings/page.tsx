@@ -31,6 +31,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { useAccountSummary } from "@/hooks/queries/use-account-summary";
+import { useSubscription } from "@/hooks/queries/use-subscription";
+import { usePaywallStore } from "@/stores/paywall-store";
 import { useThemeStore } from "@/stores/theme-store";
 import { resetAppState } from "@/lib/platform";
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -198,14 +202,14 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
   );
 }
 
-function PerformanceOverview({ sessions, streak, rank, xp }: { sessions: string; streak: string; rank: string; xp: string }) {
+function PerformanceOverview({ questions, streak, rank, xp }: { questions: string; streak: string; rank: string; xp: string }) {
   return (
     <div>
       <SectionLabel>PERFORMANCE OVERVIEW</SectionLabel>
       <div className="grid grid-cols-2 gap-3 max-[359px]:gap-2 md:items-stretch">
-        <StatCard icon={<span className="text-lg">🎯</span>} value={sessions} label="Sessions" />
+        <StatCard icon={<span className="text-lg">🎯</span>} value={questions} label="Questions" />
         <StatCard icon={<span className="text-lg">🔥</span>} value={streak} label="Streak" />
-        <StatCard icon={<Trophy className="h-5 w-5" />} value={`#${rank}`} label="Rank" />
+        <StatCard icon={<Trophy className="h-5 w-5" />} value={rank} label="Rank" />
         <StatCard icon={<Zap className="h-5 w-5" />} value={xp} label="XP" />
       </div>
     </div>
@@ -215,7 +219,25 @@ function PerformanceOverview({ sessions, streak, rank, xp }: { sessions: string;
 /* ------------------------------------------------------------------ */
 /*  Subscription card                                                   */
 /* ------------------------------------------------------------------ */
+const PLAN_NAMES: Record<string, string> = {
+  free: "Free Plan",
+  pro: "Pro",
+  bundle_2: "Bundle (2 seats)",
+  bundle_3: "Bundle (3 seats)",
+};
+
+function formatDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+// Plan, status and dates come from GET /billing/subscription; a plan picked in the UI is never shown as owned.
 function SubscriptionCard() {
+  const { data, isLoading, isError, refetch } = useSubscription();
+  const openPaywall = usePaywallStore((st) => st.openPaywall);
+  const periodEnd = formatDate(data?.periodEnd ?? null);
+  const trialEnd = formatDate(data?.trialEndsAt ?? null);
   return (
     <div>
       <SectionLabel>SUBSCRIPTION</SectionLabel>
@@ -226,30 +248,39 @@ function SubscriptionCard() {
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <CreditCard className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <p className="text-[14px] font-bold tracking-[-0.01em] text-foreground">Free Plan</p>
-              <p className="text-[12px] text-muted-foreground/40 mt-0.5">$0 / month</p>
+            <div data-testid="subscription-plan">
+              {isLoading ? (
+                <p className="text-[14px] font-bold text-foreground/60">Loading…</p>
+              ) : isError || !data ? (
+                <p className="text-[14px] font-bold text-destructive">Couldn&apos;t load your plan</p>
+              ) : (
+                <>
+                  <p className="text-[14px] font-bold tracking-[-0.01em] text-foreground">{PLAN_NAMES[data.tier] ?? data.tier}</p>
+                  {data.status && <p className="text-[12px] text-muted-foreground/40 mt-0.5 capitalize">{data.status.replace(/_/g, " ")}</p>}
+                </>
+              )}
             </div>
           </div>
-          <span className="rounded-full bg-white/[0.06] border border-white/[0.06] px-3 py-1 text-micro font-semibold tracking-[0.05em] text-muted-foreground/60">CURRENT</span>
+          {data && (
+            <span className="rounded-full bg-white/[0.06] border border-white/[0.06] px-3 py-1 text-micro font-semibold tracking-[0.05em] text-muted-foreground/60">CURRENT</span>
+          )}
         </div>
-        <ul className="relative mt-4 space-y-2.5 text-[12px] max-[359px]:space-y-2">
-          <li className="flex items-center gap-2.5 text-foreground/80 font-normal">
-            <Check className="h-3.5 w-3.5 text-primary shrink-0" /> 5 sprints per day
-          </li>
-          <li className="flex items-center gap-2.5 text-foreground/80 font-normal">
-            <Check className="h-3.5 w-3.5 text-primary shrink-0" /> Basic analytics
-          </li>
-          <li className="flex items-center gap-2.5 text-muted-foreground/30 line-through">
-            <X className="h-3.5 w-3.5 shrink-0" /> Advanced analytics
-          </li>
-          <li className="flex items-center gap-2.5 text-muted-foreground/30 line-through">
-            <X className="h-3.5 w-3.5 shrink-0" /> Unlimited sprints
-          </li>
-        </ul>
-        <button type="button" className="relative mt-5 w-full rounded-full bg-cta py-3.5 text-[13px] font-semibold tracking-[-0.01em] text-[var(--on-accent)] shadow-[0_0_20px_var(--accent-25)] transition-all hover:shadow-[0_0_30px_var(--accent-40)] active:scale-[0.98] max-[359px]:py-3 whitespace-nowrap">
-          Upgrade to Pro — $9.99/mo
-        </button>
+        {data && (trialEnd || periodEnd) && (
+          <ul className="relative mt-4 space-y-2 text-[12px] text-foreground/80 font-normal">
+            {trialEnd && <li>Trial ends {trialEnd}</li>}
+            {periodEnd && <li>{data.cancelAtPeriodEnd ? "Ends" : "Renews"} {periodEnd}</li>}
+          </ul>
+        )}
+        {isError && (
+          <button type="button" onClick={() => refetch()} className="relative mt-4 w-full rounded-full border border-white/10 py-3 text-[13px] font-semibold text-foreground/80">
+            Retry
+          </button>
+        )}
+        {data && !data.isPaid && (
+          <button type="button" onClick={() => openPaywall("prep")} className="relative mt-5 w-full rounded-full bg-cta py-3.5 text-[13px] font-semibold tracking-[-0.01em] text-[var(--on-accent)] shadow-[0_0_20px_var(--accent-25)] transition-all hover:shadow-[0_0_30px_var(--accent-40)] active:scale-[0.98] max-[359px]:py-3 whitespace-nowrap">
+            Upgrade to Pro
+          </button>
+        )}
       </div>
     </div>
   );
@@ -281,7 +312,11 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
     return list;
   }, [activePreps, targetExam]);
 
-  const name = firstName || "Google User";
+  const accountName = useAuthStore((st) => st.user?.name);
+  const accountTier = useAuthStore((st) => st.user?.tier);
+  const { data: summary } = useAccountSummary();
+  const stat = (v: number | null | undefined, fmt: (n: number) => string = (n) => n.toLocaleString()) => (v == null ? "--" : fmt(v));
+  const name = firstName || accountName || "Google User";
   const initials = name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   const handleLogout = () => {
@@ -298,16 +333,16 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
       <ProfileHeader
         name={name}
         initials={initials || "UA"}
-        badge="CHAMPION"
+        badge={(accountTier || "free").toUpperCase()}
         onEdit={() => router.push("/settings/profile/edit")}
       />
 
       <div className="mt-2 space-y-4 max-[359px]:space-y-3">
         <PerformanceOverview
-          sessions="47"
-          streak="12-Day"
-          rank="47"
-          xp="2,340"
+          questions={stat(summary?.questions)}
+          streak={stat(summary?.streakDays, (n) => `${n}-Day`)}
+          rank={stat(summary?.rank, (n) => `#${n}`)}
+          xp={stat(summary?.xp)}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:items-stretch max-[359px]:gap-3">
           <SubscriptionCard />

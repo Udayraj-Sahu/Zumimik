@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { ArrowLeft, Check, X, Clock, FileText, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMockPaperSession } from "@/hooks/queries/use-mock-exam";
+import { submitMock, submitMockAnswer } from "@/services/mock-exam";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
 import { useFeedback } from "@/hooks/use-feedback";
@@ -47,6 +48,9 @@ function MockRunContent() {
   const activeTopic = isResume ? snapshot.topic : data?.topic;
   const activeTopicLabel = isResume ? snapshot.topicLabel : data?.topicLabel;
   const activeDifficulty = isResume ? snapshot.difficulty : data?.difficulty;
+  const activeMockId = isResume ? snapshot.mockId : data?.mockId;
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -61,6 +65,7 @@ function MockRunContent() {
     return {
       kind: "mock",
       paperId,
+      mockId: activeMockId,
       topic: activeTopic ?? paperId,
       topicLabel: activeTopicLabel ?? "Mock Test",
       difficulty: activeDifficulty ?? "Full Test",
@@ -75,7 +80,7 @@ function MockRunContent() {
       domain,
       savedAt: Date.now(),
     };
-  }, [activeQuestions, activeTopic, activeTopicLabel, activeDifficulty, paperId, domain]);
+  }, [activeQuestions, activeTopic, activeTopicLabel, activeDifficulty, activeMockId, paperId, domain]);
 
   const commitSnapshot = useCallback(() => {
     const snap = buildSnapshot();
@@ -89,19 +94,51 @@ function MockRunContent() {
     router.push(`/play/sprint/results${qs ? `?${qs}` : ""}`);
   }, [router, domain]);
 
-  const finishMock = useCallback(() => {
-    if (activeQuestions.length > 0) {
-      feedback.complete();
-      completeSprint({
-        questions: activeQuestions,
-        topic: activeTopic ?? paperId,
-        topicLabel: activeTopicLabel ?? "Mock Test",
-        difficulty: activeDifficulty ?? "Full Test",
-      });
-      clearSnapshot();
-      goToResults();
+  const finishMock = useCallback(async () => {
+    if (activeQuestions.length === 0 || submittingRef.current) return;
+    const meta = {
+      questions: activeQuestions,
+      topic: activeTopic ?? paperId,
+      topicLabel: activeTopicLabel ?? "Mock Test",
+      difficulty: activeDifficulty ?? "Full Test",
+      mockId: activeMockId,
+    };
+    if (activeMockId) {
+      // Backend mock: the server grades. Never complete or clear the resume snapshot until it acknowledges.
+      submittingRef.current = true;
+      setSubmitError(null);
+      try {
+        const s = useSprintStore.getState();
+        const elapsed = s.sessionStartTime ? (Date.now() - s.sessionStartTime) / 1000 : 0;
+        const result = await submitMock({
+          mockId: activeMockId,
+          questions: activeQuestions,
+          elapsedSeconds: elapsed,
+          answers: activeQuestions.flatMap((q) => {
+            const entry = s.answers[q.id];
+            if (!entry) return [];
+            const answer =
+              entry.answerText !== undefined ? entry.answerText : (q.optionIds?.[entry.selectedIndex] ?? null);
+            return [{ question_id: q.id, answer, time_ms: Math.round(entry.timeSpent * 1000) }];
+          }),
+        });
+        feedback.complete();
+        completeSprint(meta);
+        useSprintStore.setState({ lastResult: result });
+        clearSnapshot();
+        goToResults();
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : "Could not submit your exam.");
+      } finally {
+        submittingRef.current = false;
+      }
+      return;
     }
-  }, [activeQuestions, activeTopic, activeTopicLabel, activeDifficulty, paperId, completeSprint, goToResults, feedback, clearSnapshot]);
+    feedback.complete();
+    completeSprint(meta);
+    clearSnapshot();
+    goToResults();
+  }, [activeQuestions, activeTopic, activeTopicLabel, activeDifficulty, activeMockId, paperId, completeSprint, goToResults, feedback, clearSnapshot]);
 
   useEffect(() => {
     if (isResume && snapshot && status === "idle") {
@@ -188,6 +225,26 @@ function MockRunContent() {
     if (showFeedback || status !== "active") return;
     const q = activeQuestions[currentIndex];
     if (!q) return;
+
+    if (q.serverGraded && activeMockId) {
+      // No verdict is shown: the backend withholds correct answers until submit.
+      setSelectedIndex(optionIndex);
+      answerCurrent(q.id, optionIndex);
+      const timeMs = Math.max(0, Date.now() - (useSprintStore.getState().questionStartTime ?? Date.now()));
+      submitMockAnswer(activeMockId, q.id, q.optionIds?.[optionIndex] ?? null, timeMs).catch(() => {
+        // Submit sends every answer again in bulk, so a lost single answer is recovered there.
+      });
+      autoAdvanceRef.current = setTimeout(() => {
+        const isLast = currentIndex >= activeQuestions.length - 1;
+        if (isLast) {
+          void finishMock();
+        } else {
+          setSelectedIndex(null);
+          nextQuestion();
+        }
+      }, 350);
+      return;
+    }
 
     setSelectedIndex(optionIndex);
     setShowFeedback(true);
@@ -381,6 +438,14 @@ function MockRunContent() {
           ) : undefined
         }
       >
+        {submitError && (
+          <div role="alert" className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-[12px] font-medium text-destructive">
+            <p>Couldn&apos;t submit your exam: {submitError}</p>
+            <Button className="mt-2 min-h-11" onClick={() => void finishMock()}>
+              Retry submit
+            </Button>
+          </div>
+        )}
         {question && (
           <div key={question.id} ref={questionRef}>
             <p className="text-[16px] font-bold leading-snug text-foreground mb-5 max-[359px]:mb-4">
@@ -390,10 +455,13 @@ function MockRunContent() {
             <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
               {question.options.map((option, i) => {
                 const isSelected = selectedIndex === i;
-                const isCorrect = i === question.correctIndex;
+                const isCorrect = !question.serverGraded && i === question.correctIndex;
                 let variantStyles: React.CSSProperties = { backgroundColor: GLASS_BG, borderColor: GLASS_BORDER };
                 let variantClass = "border backdrop-blur-xl text-foreground hover:bg-white/[0.06] active:bg-white/[0.06]" as string;
-                if (showFeedback) {
+                if (question.serverGraded && isSelected) {
+                  variantClass = "border text-primary";
+                  variantStyles = { backgroundColor: CTA_06, borderColor: CTA_30 };
+                } else if (showFeedback) {
                   if (isSelected && isCorrect) {
                     variantClass = "border text-primary";
                     variantStyles = { backgroundColor: CTA_06, borderColor: CTA_30 };

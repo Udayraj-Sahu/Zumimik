@@ -25,6 +25,8 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { useAdaptiveState, useTodayPlan } from "@/hooks/queries/use-adaptive";
+import { useAccountSummary, type AccountSummary } from "@/hooks/queries/use-account-summary";
+import { IS_MOCK } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { resolveJourneyProfile } from "@/lib/adaptive/modes";
@@ -150,6 +152,8 @@ function CircularGauge({
 }
 
 type VariantCtx = {
+  /** Real /dashboard/* numbers. null in explicit mock mode, where the fixture state supplies them. */
+  live: AccountSummary | null;
   domain: string;
   router: ReturnType<typeof useRouter>;
   data: AdaptiveDomainState;
@@ -508,9 +512,11 @@ function GuidedLearningBlock({ ctx }: { ctx: VariantCtx }) {
 }
 
 function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
-  const accuracy = ctx.data?.lastSession?.accuracy ?? 0;
-  const avgSec =
-    ctx.data && (ctx.data.totalTimeSpent ?? 0) > 0 && (ctx.data.sessionCount ?? 0) > 0
+  const accuracy = ctx.live ? (ctx.live.accuracy ?? 0) : (ctx.data?.lastSession?.accuracy ?? 0);
+  // Real mode: measured average seconds/question from /dashboard/stats, or unknown. Never a made-up default.
+  const avgSec: number | null = ctx.live
+    ? ctx.live.speed
+    : ctx.data && (ctx.data.totalTimeSpent ?? 0) > 0 && (ctx.data.sessionCount ?? 0) > 0
       ? Math.max(
           3,
           Math.round(
@@ -520,7 +526,7 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
           ),
         )
       : 8.4;
-  const target = Math.max(4, avgSec - 1.5);
+  const target = avgSec === null ? null : Math.max(4, avgSec - 1.5);
   const weak = ctx.topics[0];
   return (
     <div
@@ -534,8 +540,8 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
             Current Speed
           </p>
           <p className="mt-1.5 text-[22px] font-black tracking-tight text-foreground leading-none">
-            {avgSec}
-            <span className="text-[12px] font-bold text-muted-foreground/50"> sec/q</span>
+            {avgSec ?? "--"}
+            {avgSec !== null && <span className="text-[12px] font-bold text-muted-foreground/50"> sec/q</span>}
           </p>
         </div>
         <div className="rounded-2xl border border-white/[0.06] p-3.5">
@@ -544,7 +550,7 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
           </p>
           <p className="mt-1.5 text-[22px] font-black tracking-tight text-foreground leading-none">
             {accuracy > 0 ? `${accuracy}%` : "--"}
-            <span className="text-[12px] font-bold text-muted-foreground/50"> last</span>
+            <span className="text-[12px] font-bold text-muted-foreground/50"> {ctx.live ? "overall" : "last"}</span>
           </p>
         </div>
       </div>
@@ -555,15 +561,17 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
         >
           <div className="flex items-center justify-between gap-2">
             <p className="text-[13px] font-bold text-foreground">Today&apos;s Challenge</p>
-            <span
-              className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider"
-              style={{ color: ctx.profile.accent }}
-            >
-              Target &lt; {target}s
-            </span>
+            {target !== null && (
+              <span
+                className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider"
+                style={{ color: ctx.profile.accent }}
+              >
+                Target &lt; {target}s
+              </span>
+            )}
           </div>
           <p className="mt-1.5 text-[12px] text-foreground/70">
-            {ctx.practice?.length ?? ctx.weak?.length ?? 20} calculations · focus: {weak.name}
+            {(ctx.practice?.length ?? ctx.weak?.length) ? `${ctx.practice?.length ?? ctx.weak?.length} calculations · ` : ""}focus: {weak.name}
           </p>
         </div>
       )}
@@ -721,7 +729,7 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
             </div>
             <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">Daily Streak</span>
             <span className="ml-auto shrink-0 text-[13px] font-bold" style={{ color: ctx.profile.accent }}>
-              {ctx.bestStreak} days
+              {ctx.live ? (ctx.live.streakDays == null ? "--" : `${ctx.live.streakDays} days`) : `${ctx.bestStreak} days`}
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-2.5">
@@ -733,7 +741,7 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
             </div>
             <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">Time Spent</span>
             <span className="ml-auto shrink-0 text-[13px] font-bold" style={{ color: ctx.profile.accent }}>
-              {ctx.hours}h
+              {ctx.live && !(ctx.data.totalTimeSpent ?? 0) ? "--" : `${ctx.hours}h`}
             </span>
           </div>
         </div>
@@ -910,6 +918,8 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
   const dailyMinutes = useOnboardingStore((s) => s.dailyMinutes);
   const examDates = useOnboardingStore((s) => s.examDates);
   const { data } = useAdaptiveState(domain);
+  const { data: liveSummary } = useAccountSummary();
+  const live: AccountSummary | null = IS_MOCK ? null : (liveSummary ?? { streakDays: null, xp: null, questions: null, rank: null, accuracy: null, speed: null, percentile: null });
   const plan = useTodayPlan(domain).data;
 
   const temporalLabel = temporalWindow ? (TEMPORAL_LABELS[temporalWindow] ?? "") : "";
@@ -960,6 +970,7 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
   const startHref = startRec ? sprintHref(startRec, domain) : "/play/configure-sprint";
 
   const ctx: VariantCtx = {
+    live,
     domain,
     router,
     data,

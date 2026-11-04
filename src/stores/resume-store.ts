@@ -7,6 +7,7 @@ import type { AnswerEntry } from "@/stores/sprint-store";
 export type ResumeSnapshot = {
   kind: "sprint" | "mock";
   paperId?: string;
+  mockId?: string;
   topic: string;
   topicLabel: string;
   difficulty: string;

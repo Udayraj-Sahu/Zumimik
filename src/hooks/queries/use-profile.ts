@@ -9,10 +9,11 @@ type ProfileDataResult = {
 };
 
 async function fetchProfileData(): Promise<ProfileDataResult> {
+  // The identity header must survive a failed stats/achievements call; only getProfile may fail the query.
   const [profile, stats, achievements] = await Promise.all([
     getProfile(),
-    getProfileStats(),
-    getAchievements(),
+    getProfileStats().catch((): ProfileStat[] => []),
+    getAchievements().catch((): Achievement[] => []),
   ]);
   return { profile, stats, achievements };
 }

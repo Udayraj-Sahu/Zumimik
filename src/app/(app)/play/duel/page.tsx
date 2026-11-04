@@ -1,4 +1,6 @@
 "use client";
+import { IS_MOCK } from "@/lib/platform";
+import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
 import { PageContainer } from "@/components/ui/page-container";
 
 import { useState, useRef, useEffect } from "react";
@@ -20,7 +22,7 @@ import { Button } from "@/components/ui/button";
 
 type Phase = "config" | "active" | "done";
 
-export default function DuelPage() {
+function DuelPageContent() {
   usePageMeta("Duel — Zuzumik");
   const router = useRouter();
   const feedback = useFeedback();
@@ -370,4 +372,10 @@ export default function DuelPage() {
       )}
     </PageContainer>
   );
+}
+
+export default function DuelPage() {
+  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
+  if (!IS_MOCK) return <FeatureUnavailable title="Duel" description="Duels aren't available in the app yet. The server's live duel service isn't connected, so no opponents or results are shown." />;
+  return <DuelPageContent />;
 }

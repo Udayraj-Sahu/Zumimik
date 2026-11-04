@@ -46,11 +46,12 @@ export function AuthModal({ onClose }: AuthModalProps) {
       } else {
         await authLogin(data.email, data.password);
       }
-      setAuthData({
-        name: data.displayName ?? data.email.split("@")[0],
-        email: data.email,
-        authMethod: "email",
-      });
+      // Prefer the backend's account name (login has no displayName); never overwrite it with the email prefix.
+      const account = useAuthStore.getState().user;
+      const accountName = account?.name?.trim() || data.displayName || data.email.split("@")[0];
+      setAuthData({ name: accountName, email: account?.email ?? data.email, authMethod: "email" });
+      const onboarding = useOnboardingStore.getState();
+      if (!onboarding.firstName.trim()) onboarding.setFirstName(accountName.split(/\s+/)[0]);
     } else {
       setAuthData(data);
       if (data.idToken) {

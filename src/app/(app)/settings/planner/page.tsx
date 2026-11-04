@@ -1,4 +1,6 @@
 "use client";
+import { IS_MOCK } from "@/lib/platform";
+import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
 import { PageContainer } from "@/components/ui/page-container";
 
 import { useRef, useEffect } from "react";
@@ -10,7 +12,7 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { GLASS_BG } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 
-export default function PlannerPage() {
+function PlannerPageContent() {
   usePageMeta("Study Planner — Zuzumik");
   const { data, isLoading, error } = usePlanner();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -148,4 +150,10 @@ export default function PlannerPage() {
       </div>
     </PageContainer>
   );
+}
+
+export default function PlannerPage() {
+  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
+  if (!IS_MOCK) return <FeatureUnavailable title="Class Calendar" description="The planner isn't available yet. The server doesn't support it, so no schedule is shown." />;
+  return <PlannerPageContent />;
 }

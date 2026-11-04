@@ -9,7 +9,28 @@ type User = {
   email: string;
   role: string;
   phone?: string;
+  /** Backend users.tier (additive on the /auth/* user shape). */
+  tier?: string | null;
 };
+
+/** Backend user payload: any field may be null/omitted (e.g. display_name is optional). */
+export type IncomingUser = { id: string } & { [K in keyof Omit<User, "id">]?: User[K] | null };
+
+/**
+ * Combine an incoming (backend) user with the stored one. For the SAME account the stored fields
+ * survive anything the incoming payload omits or sends as null/undefined (e.g. a locally edited phone).
+ * With `preferStored` (background /auth/me refresh) stored values also win over incoming ones;
+ * a different account replaces the stored user entirely so nothing leaks between accounts.
+ */
+export function mergeUser(prev: User | null, next: IncomingUser, preferStored = false): User {
+  if (!prev || prev.id !== next.id) {
+    return { ...next, name: next.name ?? "", email: next.email ?? "", role: next.role ?? "user" } as User;
+  }
+  const defined = Object.fromEntries(Object.entries(next).filter(([, v]) => v !== undefined && v !== null));
+  const stored = Object.fromEntries(Object.entries(prev).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+  // preferStored: a background refresh only fills gaps, so local edits (no server update route exists) survive.
+  return (preferStored ? { ...prev, ...defined, ...stored } : { ...prev, ...defined }) as User;
+}
 
 type AuthState = {
   user: User | null;
@@ -25,6 +46,8 @@ type AuthState = {
   setToken: (token: string | null) => void;
   setRefreshToken: (token: string | null) => void;
   setUser: (user: User) => void;
+  /** Refresh the stored user from GET /auth/me. No-op when signed out (a late response must not re-authenticate). */
+  syncServerUser: (user: IncomingUser) => void;
   completeOnboarding: () => void;
   updateUser: (patch: Partial<Pick<User, "name" | "email" | "phone">>) => void;
 };
@@ -51,7 +74,7 @@ async function authFailureMessage(response: Response, fallback: string): Promise
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       refreshToken: null,
@@ -75,7 +98,7 @@ export const useAuthStore = create<AuthState>()(
           if (!res.ok) throw new Error(await authFailureMessage(res, "Login failed"));
           const data = await res.json();
           set({
-            user: data.user,
+            user: mergeUser(get().user, data.user),
             token: data.token,
             refreshToken: data.refreshToken,
             isAuthenticated: true,
@@ -107,7 +130,7 @@ export const useAuthStore = create<AuthState>()(
         if (!res.ok) throw new Error(await authFailureMessage(res, "Registration failed"));
         const data = await res.json();
         set({
-          user: data.user,
+          user: mergeUser(get().user, data.user),
           token: data.token,
           refreshToken: data.refreshToken,
           isAuthenticated: true,
@@ -149,12 +172,22 @@ export const useAuthStore = create<AuthState>()(
           });
           if (!res.ok) throw new Error(await authFailureMessage(res, "Firebase auth failed"));
           const data = await res.json();
-          set({ user: data.user, token: data.token, refreshToken: data.refreshToken, isAuthenticated: true });
+          set({ user: mergeUser(get().user, data.user), token: data.token, refreshToken: data.refreshToken, isAuthenticated: true });
         }
       },
 
       logout: () => {
+        const { refreshToken } = get();
         set({ user: null, token: null, refreshToken: null, isAuthenticated: false });
+        // Best-effort server-side revocation (POST /auth/logout {refreshToken}). Local sign-out never waits on it.
+        if (!IS_MOCK && refreshToken) {
+          fetch(apiUrl("/auth/logout"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+            keepalive: true,
+          }).catch(() => {});
+        }
       },
 
       setToken: (token) => {
@@ -166,7 +199,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => {
-        set({ user, isAuthenticated: true });
+        set({ user: mergeUser(get().user, user), isAuthenticated: true });
+      },
+
+      syncServerUser: (user) => {
+        if (!get().isAuthenticated) return;
+        set({ user: mergeUser(get().user, user, true) });
       },
 
       completeOnboarding: () => {

@@ -1,5 +1,6 @@
 import type { ProfileData, ProfileStat, Achievement } from "@/lib/types/profile";
 import { apiGet } from "./api";
+import { useAuthStore } from "@/stores/auth-store";
 import { mapBackendAchievements, type BackendAchievementsResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
@@ -12,11 +13,24 @@ export async function getProfile(): Promise<ProfileData> {
     await delay(200);
     return PROFILE_DATA;
   }
-  const [user, streak] = await Promise.all([
-    apiGet<{ name: string; tier?: string }>("/auth/me"),
+  // Backend contract: GET /auth/me → { user: { id, name, email, role, tier } }.
+  // Streak is optional decoration: its failure must not blank the profile header.
+  const [meResult, streakResult] = await Promise.allSettled([
+    apiGet<{ user: { id: string; name?: string | null; email?: string; role?: string; tier?: string | null } }>("/auth/me"),
     apiGet<{ current: number; xp: number }>("/dashboard/streak"),
   ]);
-  const name = user.name || "Learner";
+  const auth = useAuthStore.getState();
+  let user: { name?: string | null; email?: string | null; tier?: string | null } | null | undefined = auth.user;
+  if (meResult.status === "fulfilled" && meResult.value?.user) {
+    // Keep the stored session user fresh without clobbering fields the server omitted.
+    auth.syncServerUser(meResult.value.user);
+    user = useAuthStore.getState().user ?? meResult.value.user;
+  } else if (!user) {
+    // Nothing stored and /auth/me failed: surface the real error rather than inventing a profile.
+    throw meResult.status === "rejected" ? meResult.reason : new Error("Profile unavailable");
+  }
+  const streak = streakResult.status === "fulfilled" ? streakResult.value : { current: 0, xp: 0 };
+  const name = user?.name?.trim() || user?.email?.split("@")[0] || "Learner";
   const initials = name
     .trim()
     .split(/\s+/)
@@ -27,7 +41,7 @@ export async function getProfile(): Promise<ProfileData> {
   return {
     initials,
     name,
-    badge: user.tier ?? "free",
+    badge: user?.tier ?? "free",
     level: `Level ${Math.floor(streak.xp / 500) + 1}`,
     streak: `${streak.current} day${streak.current === 1 ? "" : "s"}`,
   };
