@@ -11,10 +11,10 @@ export function useMockPapers(domain?: string) {
   });
 }
 
-export function useMockPaperSession(paperId?: string, domain?: string) {
+export function useMockPaperSession(paperId?: string, domain?: string, practice = false) {
   return useQuery<SprintSession>({
-    queryKey: ["mock-session", paperId, domain],
-    queryFn: () => getMockPaperSession(paperId!, domain),
+    queryKey: ["mock-session", paperId, domain, practice],
+    queryFn: () => getMockPaperSession(paperId!, domain, practice),
     enabled: !!paperId,
   });
 }

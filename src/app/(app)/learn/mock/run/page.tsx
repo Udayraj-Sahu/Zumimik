@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useMockPaperSession } from "@/hooks/queries/use-mock-exam";
 import { submitMock, submitMockAnswer } from "@/services/mock-exam";
 import { gatedFeatureMessage } from "@/services/flags";
+import { unfillablePaperReason } from "@/services/mock-exam";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
 import { useFeedback } from "@/hooks/use-feedback";
@@ -30,9 +31,11 @@ function MockRunContent() {
   const paperId = searchParams.get("paper") ?? "";
   const domain = searchParams.get("domain") ?? undefined;
   const resumeParam = searchParams.get("resume") === "1";
+  // ?practice=1: the learner chose to take a paper the question bank cannot make exactly as labelled practice (see unfillablePaperReason).
+  const practiceParam = searchParams.get("practice") === "1";
 
   const feedback = useFeedback();
-  const { data, isLoading, error } = useMockPaperSession(paperId, domain);
+  const { data, isLoading, error } = useMockPaperSession(paperId, domain, practiceParam);
   const snapshot = useResumeStore((s) => s.snapshot);
   const saveSnapshot = useResumeStore((s) => s.saveSnapshot);
   const clearSnapshot = useResumeStore((s) => s.clearSnapshot);
@@ -333,6 +336,38 @@ function MockRunContent() {
     );
   }
 
+  const unfillable = error ? unfillablePaperReason(error) : null;
+  if (error && unfillable) {
+    const practiceUrl = (() => {
+      const q = new URLSearchParams(searchParams.toString());
+      q.set("practice", "1");
+      return `/learn/mock/run?${q.toString()}`;
+    })();
+    return (
+      <PageContainer className="text-center">
+        <div role="alert" data-testid="mock-unfillable" className="mx-auto max-w-md">
+          <p className="text-[14px] font-semibold text-foreground">This paper can&apos;t be set up as a real exam right now.</p>
+          <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground/70">
+            The question bank doesn&apos;t have enough of the right questions for one of its sections.
+          </p>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/50" data-testid="mock-unfillable-reason">{unfillable}</p>
+          <p className="mt-4 text-[12px] leading-relaxed text-muted-foreground/70">
+            You can still take it as practice. Any section that can&apos;t be built exactly is filled with the closest questions we have and clearly
+            labelled, and a practice attempt does not count toward your percentile.
+          </p>
+        </div>
+        <div className="mt-6 flex justify-center gap-3 max-[359px]:gap-1.5">
+          <Button variant="glass" onClick={() => router.push("/learn?mode=mock")} className="max-[359px]:px-4">
+            Back
+          </Button>
+          <Button onClick={() => router.replace(practiceUrl)} className="max-[359px]:px-4">
+            Take it as practice
+          </Button>
+        </div>
+      </PageContainer>
+    );
+  }
+
   if (error) {
     return (
       <PageContainer className="text-center">
@@ -405,6 +440,11 @@ function MockRunContent() {
               />
             </div>
 
+            {data?.practiceLabel && (
+              <p role="status" data-testid="mock-practice-notice" className="mb-4 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[11px] leading-relaxed text-muted-foreground/70">
+                <strong className="text-foreground/80">Practice attempt.</strong> {data.practiceLabel}. It does not count toward your percentile.
+              </p>
+            )}
             <div className="flex items-center justify-between mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 max-[359px]:px-2.5 text-micro font-bold uppercase tracking-wider text-primary max-w-[60%] truncate whitespace-nowrap">
                 <FileText size={10} />

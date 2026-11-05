@@ -1,7 +1,7 @@
 import type { MockPaper } from "@/lib/types/mock-exam";
 import type { SprintSession } from "@/lib/types/sprint-session";
 import type { Question, SprintResult } from "@/lib/types/sprint-session";
-import { apiGet, apiPost } from "./api";
+import { ApiError, apiGet, apiPost } from "./api";
 import {
   mapMockBlueprints,
   mapMockConfigure,
@@ -26,7 +26,17 @@ export async function getMockPapers(domain?: string): Promise<MockPaper[]> {
   return mapMockBlueprints(response, domain);
 }
 
-export async function getMockPaperSession(paperId: string, domain?: string): Promise<SprintSession> {
+/**
+ * POST /mocks/configure answers 503 "<exam>.<section>: ... the pool has N" when the question bank cannot make a faithful section
+ * (for example CAT VARC needs 8 verbal-ability questions and the bank has none). The same request with `practice: true` is the
+ * server's labelled way to run it anyway. This returns the server's reason for that refusal, or null for any other error.
+ */
+export function unfillablePaperReason(err: unknown): string | null {
+  if (!(err instanceof ApiError) || err.status !== 503) return null;
+  return /the pool has|cannot run as a scored mock|no combination of whole question sets/i.test(err.message) ? err.message : null;
+}
+
+export async function getMockPaperSession(paperId: string, domain?: string, practice = false): Promise<SprintSession> {
   if (IS_MOCK) {
     const { getMockPapersByDomain, getMockPaperById } = await import("@/lib/mock/mock-exam");
     const { buildPaperSession } = await import("@/lib/mock/sprint-session");
@@ -47,7 +57,7 @@ export async function getMockPaperSession(paperId: string, domain?: string): Pro
   const response = await apiPost<BackendMockConfigureResponse>("/mocks/configure", {
     exam: paperId,
     mode: "full",
-    practice: false,
+    practice,
   });
   return mapMockConfigure(response, paperId.toUpperCase());
 }
