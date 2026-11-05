@@ -90,6 +90,7 @@ export function buildGlobalExplorerTree(
       children: topics.topics.map(({ topic, problems, subtopics }) => ({
         id: `bank:${topic}`,
         type: "topic" as const,
+        bankTopic: topic,
         title: titleOf(topic),
         slug: slugOf(`bank-${topic}`),
         description: `${problems} problems · ${subtopics} subtopics`,

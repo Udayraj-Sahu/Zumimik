@@ -88,6 +88,15 @@ describe("frontend routes implemented by Speed-Gym", () => {
     expect(mockedApiGet).not.toHaveBeenCalledWith(expect.stringContaining("/practice/session"));
   });
 
+  it("requests a problem-bank topic through GET /practice/session?topic= (corpus label), never as a skill slot", async () => {
+    const { getPracticeSession, BANK_TOPIC_PREFIX } = await import("./practice");
+    mockedApiGet.mockResolvedValueOnce({ items: [], summary: { requested: 10, served: 0 } } as never);
+    const session = await getPracticeSession(`${BANK_TOPIC_PREFIX}Number Theory`, 10, "Beginner", "cat");
+    expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/session?topic=Number%20Theory&size=10");
+    expect(mockedApiPost).not.toHaveBeenCalled();
+    expect(session.topic).toBe("Number Theory");
+  });
+
   it("uses the server-scored mock history and blueprint routes", async () => {
     const { getHistory, getTopicFilterOptions } = await import("./history");
 

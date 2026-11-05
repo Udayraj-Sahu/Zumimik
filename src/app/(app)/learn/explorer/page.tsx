@@ -402,6 +402,7 @@ function ExplorerContent() {
               focusNodeId={focusNodeId ?? undefined}
               availableTechniqueIds={availableTechniqueIds}
               techniqueHref={IS_MOCK ? undefined : (id) => `/learn/practice?skill=${encodeURIComponent(id)}`}
+              bankTopicHref={IS_MOCK ? undefined : (topic) => `/learn/practice?bankTopic=${encodeURIComponent(topic)}`}
             />
           </motion.div>
         </AnimatePresence>

@@ -18,6 +18,8 @@ export type TopicNode = {
   icon?: string;
   children?: TopicNode[];
   techniqueId?: string;
+  /** Problem-bank topic label (GET /api/topics). Practised through GET /practice/session?topic=, not a :Skill slot. */
+  bankTopic?: string;
   masteryLevel?: number;
 };
 

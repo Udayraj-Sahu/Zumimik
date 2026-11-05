@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePracticeSession } from "@/hooks/queries/use-practice";
+import { BANK_TOPIC_PREFIX } from "@/services/practice";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { templatesKeys } from "@/hooks/queries/use-templates";
 import { useQueryClient } from "@tanstack/react-query";
@@ -56,6 +57,7 @@ export default function PracticePage() {
   const templateIdParam = searchParams.get("templateId");
   const returnTo = searchParams.get("returnTo") || "/dashboard";
   const skillParam = searchParams.get("skill");
+  const bankTopicParam = searchParams.get("bankTopic");
 
   const [practiceType, setPracticeType] = useState<PracticeType>(templateIdParam ? "templates" : "mcq");
   const [topic, setTopic] = useState("");
@@ -116,6 +118,16 @@ export default function PracticePage() {
     if (!skillParam || topic) return;
     if (sprintData?.topics.some((t) => t.id === skillParam)) setTopic(skillParam);
   }, [skillParam, sprintData, topic]);
+
+  // Deep link from an Explorer problem-bank topic: /learn/practice?bankTopic=<label>. Starts a GET /practice/session
+  // for that corpus label straight away (it is not in the skill picker, so there is nothing to choose).
+  const bankStartedRef = useRef(false);
+  useEffect(() => {
+    if (!bankTopicParam || bankStartedRef.current || topic || practiceType !== "mcq") return;
+    bankStartedRef.current = true;
+    setTopic(`${BANK_TOPIC_PREFIX}${bankTopicParam}`);
+    setPhase("active");
+  }, [bankTopicParam, topic, practiceType]);
 
   const sessionQuestionIds = (session?.questions ?? []).map((q) => q.id).join("|");
 

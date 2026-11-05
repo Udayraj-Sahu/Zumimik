@@ -338,4 +338,25 @@ describe("Practice deep link from the Explorer", () => {
     await screen.findByRole("button", { name: "Select Fractions and Decimals" });
     expect(screen.getByRole("button", { name: /Start Practice/ })).toBeDisabled();
   });
+
+  it("starts a GET /practice/session for a problem-bank topic label", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    params = new URLSearchParams({ bankTopic: "Number Theory" });
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/practice/catalog") return CATALOG;
+      if (path.startsWith("/practice/session")) return { items: [], summary: { requested: 10, served: 0 } };
+      throw new Error(`unexpected GET ${path}`);
+    });
+    const { default: Practice } = await import("@/app/(app)/learn/practice/page");
+    const { useOnboardingStore } = await import("@/stores/onboarding-store");
+    useOnboardingStore.setState({ targetExam: "cat", isOnboarded: true });
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <Practice />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/practice/session?topic=Number%20Theory&size=10"));
+    expect(apiPost).not.toHaveBeenCalledWith("/practice/session", expect.anything());
+  });
 });
