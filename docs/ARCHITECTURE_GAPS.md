@@ -22,7 +22,7 @@ Earlier in this work (also tested): stale-snapshot race (event-sourced reconcile
 
 | Pri | Gap | Why it is open |
 |---|---|---|
-| P1 | **Blocked:** IRT theta is not recovered on a new device | The API neither stores nor returns theta. Proposed backend change in `FRONTEND_BACKEND_INTEGRATION.md` 5.1 |
+| P1 | **Blocked:** IRT theta is not recovered on a new device | The API neither stores nor returns theta. Proposal: `docs/proposals/IRT_THETA_PERSISTENCE.md` |
 | P1 | **Blocked:** Quant and Data Insights are not separated | Practice items carry no subject; all items are `quant` (5.2) |
 | P1 | **Blocked:** bank sub-topics cannot show techniques or mastery | No sub-topic to skill mapping (5.3) |
 | P1 | Dashboard, Analytics, Reports and History do not read the learner model | They show server-computed `/dashboard/*` and `/mocks/*` data. This is by design for behaviour and results, but mastery there (`/dashboard/topics`, `mapBackendMastery`) is a second mapping of the same snapshot, not the engine's states |

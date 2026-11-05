@@ -40,7 +40,7 @@ All of these need a bearer token except the public content and reference reads.
 
 ## 5. Contracts that cannot support a requirement (backend work needed)
 
-1. **Theta (IRT) persistence and recovery.** Verified against the backend source. **Proposal only: not applied and not run** (the backend copy has no database to run it against).
+1. **Theta (IRT) persistence and recovery.** The full proposal is `docs/proposals/IRT_THETA_PERSISTENCE.md`. Summary, verified against the backend source. **Proposal only: not applied and not run** (the backend copy has no database to run it against).
 
    What the schema and code actually say:
    - `user_cognitive_profiles` has a flat `theta` and `theta_se` (`10_create_core.sql:371`, `270_engine_tranche.sql:90`) and a `subject_profiles` JSONB whose defaults are `quant: {theta, topic_theta, se}` and `di: {overall_theta, chart_type_theta, se, recent_sets}`. No API code writes any of them.
