@@ -86,7 +86,7 @@ export async function buildSessionSyncEvents(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord } = {},
+  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }> } = {},
 ): Promise<SyncEvent[]> {
   const events = buildSprintSyncEvents(session, result, domain, sessionType);
   if (IS_MOCK) return events;
@@ -94,6 +94,16 @@ export async function buildSessionSyncEvents(
   const userKey = useAuthStore.getState().user?.id ?? "";
   const age = ageFromDob(useOnboardingStore.getState().dob, now);
   const end = events[events.length - 1] as { event_id: string; session_id: string; metadata: Record<string, unknown> };
+  // Psychometric events from the session (fatigue checkpoints, cognitive-load interventions), logged with it.
+  for (const extra of opts.extraEvents ?? []) {
+    events.splice(events.length - 1, 0, {
+      event_id: crypto.randomUUID(),
+      event_type: extra.event_type,
+      client_timestamp: now,
+      session_id: end.session_id,
+      metadata: extra.metadata,
+    });
+  }
   if (opts.calibration) {
     // calibration_completed {priors, ans_baseline_ms}: the warm-up's result, logged with the session that produced it.
     events.splice(events.length - 1, 0, {
@@ -140,7 +150,7 @@ export async function queueSessionSync(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord } = {},
+  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }> } = {},
 ): Promise<SyncEvent[]> {
   if (IS_MOCK) return buildSprintSyncEvents(session, result, domain, sessionType);
   return withLearnerLock(async () => {

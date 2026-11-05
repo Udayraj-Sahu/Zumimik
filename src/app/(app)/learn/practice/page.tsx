@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ExamShell } from "@/components/exam/exam-shell";
 import { QuestionNavigator } from "@/components/exam/question-navigator";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import {
@@ -36,6 +36,10 @@ import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
 import { queueSessionSync, sendSyncBatch, type SyncEvent } from "@/services/telemetry";
+import { useWellbeing } from "@/hooks/use-wellbeing";
+import { useSocialPolicy } from "@/hooks/queries/use-social-policy";
+import { BreakOverlay } from "@/components/learn/break-overlay";
+import type { SprintAnswer } from "@/lib/types/sprint-session";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
 import type { Question, SprintResult } from "@/lib/types/sprint-session";
@@ -78,11 +82,19 @@ export default function PracticePage() {
   const [, setRendererTotal] = useState(0);
 
   const {
-    data: session,
+    data: baseSession,
     isLoading,
     error: sessionError,
     refetch: refetchSession,
   } = usePracticeSession(topic, 10, difficulty, targetExam, { enabled: phase === "active" && practiceType === "mcq", level: levelParam });
+  // The learning engine watches the session for tiring and may pause it, switch hints on, or reorder what is left.
+  const wellbeing = useWellbeing(phase === "active" && practiceType === "mcq");
+  const socialPolicy = useSocialPolicy().data;
+  const sessionStartRef = useRef<number | null>(null);
+  const session = useMemo(
+    () => (baseSession && wellbeing.override ? { ...baseSession, questions: wellbeing.override } : baseSession),
+    [baseSession, wellbeing.override],
+  );
   const [syncState, setSyncState] = useState<"idle" | "saving" | "saved" | "queued" | "failed">("idle");
   const pendingSyncRef = useRef<SyncEvent[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -142,10 +154,13 @@ export default function PracticePage() {
     setPhase("active");
   }, [bankTopicParam, topic, practiceType]);
 
-  const sessionQuestionIds = (session?.questions ?? []).map((q) => q.id).join("|");
+  // Keyed to the questions as SERVED: the engine reordering what is left must not reset the learner's progress.
+  const sessionQuestionIds = (baseSession?.questions ?? []).map((q) => q.id).join("|");
 
   useEffect(() => {
-    if (!session || phase !== "active") return;
+    if (!baseSession || phase !== "active") return;
+    wellbeing.reset();
+    sessionStartRef.current = Date.now();
     setCurrentIndex(0);
     setAnswers({});
     setAnswerCorrectness({});
@@ -163,6 +178,7 @@ export default function PracticePage() {
     queryClient.removeQueries({ queryKey: ["practice"] });
     setSyncState("idle");
     pendingSyncRef.current = null;
+    wellbeing.reset();
     setPhase("active");
     setCurrentIndex(0);
     setAnswers({});
@@ -176,6 +192,36 @@ export default function PracticePage() {
     setCompleted(null);
   };
 
+  /** Tell the learning engine about a scored answer, with everything answered so far (the current answer included). */
+  const reportScored = (q: Question, answer: number | string, correct: boolean | null) => {
+    if (!session) return;
+    const now = Date.now();
+    const timeSpentMs = Math.max(0, now - questionStartedAtRef.current);
+    const answersSoFar: SprintAnswer[] = session.questions.flatMap((qq) => {
+      const isCurrent = qq.id === q.id;
+      const given = isCurrent ? answer : answers[qq.id];
+      if (given === undefined) return [];
+      return [{
+        questionId: qq.id,
+        selectedIndex: typeof given === "number" ? given : -1,
+        ...(typeof given === "string" ? { answerText: given } : {}),
+        correct: isCurrent ? correct : (answerCorrectness[qq.id] ?? (typeof given === "number" ? given === qq.correctIndex : null)),
+        timeSpent: isCurrent ? timeSpentMs / 1000 : (answerTimes[qq.id] ?? 0),
+        ...(isCurrent ? { answeredAt: now } : answeredAtById[qq.id] !== undefined ? { answeredAt: answeredAtById[qq.id] } : {}),
+      }];
+    });
+    wellbeing.onScored({
+      question: q,
+      questions: session.questions,
+      servedCount: currentIndex + 1,
+      correct,
+      timeSpentMs,
+      answersSoFar,
+      sessionStartedAt: sessionStartRef.current ?? now,
+      sessionCapMin: socialPolicy?.kidsMode ? socialPolicy.sessionCapMinutes : null,
+    });
+  };
+
   const handleSelect = (optionIndex: number) => {
     if (revealed || !session) return;
     const question = session.questions[currentIndex];
@@ -187,6 +233,7 @@ export default function PracticePage() {
     }));
     setRevealed(true);
     const q = question;
+    reportScored(q, optionIndex, optionIndex === q.correctIndex);
     if (optionIndex === q.correctIndex) {
       feedback.correct();
       setAnswerCorrectness((previous) => ({ ...previous, [q.id]: true }));
@@ -212,6 +259,7 @@ export default function PracticePage() {
     }));
     setAnswerCorrectness((previous) => ({ ...previous, [q.id]: verdict === "deferred" ? null : verdict === "correct" }));
     setRevealed(true);
+    reportScored(q, textAnswer, verdict === "deferred" ? null : verdict === "correct");
     if (verdict === "correct") feedback.correct();
     if (verdict === "incorrect") feedback.wrong();
   };
@@ -273,7 +321,7 @@ export default function PracticePage() {
         xpEarned: 0,
       };
       // Built once: a retry re-sends the SAME event ids, which the backend treats idempotently.
-      pendingSyncRef.current = await queueSessionSync(session, telemetryResult, targetExam ?? undefined, "practice");
+      pendingSyncRef.current = await queueSessionSync(session, telemetryResult, targetExam ?? undefined, "practice", { extraEvents: wellbeing.events() });
       void sendPendingSync();
     } else {
       setCurrentIndex((i) => i + 1);
@@ -368,6 +416,16 @@ export default function PracticePage() {
   };
 
   const question: Question | null = session?.questions[currentIndex] ?? null;
+
+  // New material is counted against the engine's cap as it is shown; while the engine keeps the learner in guided mode, hints start open.
+  useEffect(() => {
+    if (question) wellbeing.onServed(question);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, question?.id]);
+  useEffect(() => {
+    if (wellbeing.guided && question?.hint) setHintOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wellbeing.guided, currentIndex]);
 
   /* ================================================================ */
   /*  CONFIG PHASE                                                     */
@@ -923,6 +981,7 @@ export default function PracticePage() {
 
   return (
     <PageContainer>
+      {wellbeing.breakInfo && <BreakOverlay kind={wellbeing.breakInfo.kind} seconds={wellbeing.breakInfo.seconds} onDone={wellbeing.dismissBreak} />}
       <ExamShell
         header={
           <>
