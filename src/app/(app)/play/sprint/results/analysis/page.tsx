@@ -10,6 +10,7 @@ import type { SprintResult } from "@/lib/types/sprint-session";
 import { GLASS_BG, RED_04, RED_06, RED_30 } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
+import { SessionBreakdownCard } from "@/components/learn/session-breakdown-card";
 
 export default function AnalysisPage() {
   usePageMeta("Analysis — Zuzumik");
@@ -92,6 +93,8 @@ export default function AnalysisPage() {
           {wrongAnswers.length > 1 ? "s" : ""}
         </p>
       </div>
+
+      <SessionBreakdownCard questions={session.questions} answers={result.answers} />
 
       {/* Wrong answers list */}
       <div className="grid gap-5 max-[359px]:gap-4 md:grid-cols-2 md:items-start">

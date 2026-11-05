@@ -6,9 +6,11 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { applySession, ageFromDob, buildSessionLog, resolveAttemptTimes } from "@/lib/learning/learner-state";
 import { applyAbility } from "@/lib/learning/ability";
 import type { CalibrationRecord } from "@/lib/learning/calibration";
+import { summariseChange, type SessionChange } from "@/lib/learning/session-change";
 import { applySessionToSinking } from "@/lib/learning/review";
 import { commitAbility, commitSinkingBook, invalidateLearnerCache, loadAbility, loadSinkingBook, reconcileLearnerStates, withLearnerLock } from "./learner";
-import { flushQueuedBefore, enqueueEventBatch, isPermanentRejection, parkEventBatch, removeEventBatch } from "./offline/sync";
+import { syncDeviceId } from "./offline/device-id";
+import { flushQueuedBefore, settleAcknowledged, enqueueEventBatch, isPermanentRejection, parkEventBatch, removeEventBatch } from "./offline/sync";
 
 export type SyncEvent = Record<string, unknown>;
 
@@ -86,7 +88,7 @@ export async function buildSessionSyncEvents(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }> } = {},
+  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }>; onChange?: (change: SessionChange) => void } = {},
 ): Promise<SyncEvent[]> {
   const events = buildSprintSyncEvents(session, result, domain, sessionType);
   if (IS_MOCK) return events;
@@ -132,6 +134,9 @@ export async function buildSessionSyncEvents(
   const base = await reconcileLearnerStates(userKey, now);
   const priors = opts.calibration ? new Map(Object.entries(opts.calibration.priors)) : undefined;
   const next = applySession(base, log, now, priors);
+  // What this session did to each technique, from the same states that are about to be persisted.
+  const change = summariseChange(log, base, next);
+  if (change) opts.onChange?.(change);
   // Review book: wrong answers add or raise entries; a technique the engine now calls fluid is recovered and leaves.
   commitSinkingBook(userKey, applySessionToSinking(loadSinkingBook(userKey), log, next));
   if (!next) return events;
@@ -150,7 +155,7 @@ export async function queueSessionSync(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }> } = {},
+  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }>; onChange?: (change: SessionChange) => void } = {},
 ): Promise<SyncEvent[]> {
   if (IS_MOCK) return buildSprintSyncEvents(session, result, domain, sessionType);
   return withLearnerLock(async () => {
@@ -163,7 +168,7 @@ export async function queueSessionSync(
 /** POST /api/v1/sync. Resolves only when the backend acknowledged the batch. */
 export async function postSyncEvents(events: SyncEvent[]): Promise<void> {
   if (IS_MOCK) return;
-  await apiPost("/sync", { events });
+  await apiPost("/sync", { events, device_id: syncDeviceId() });
 }
 
 /**
@@ -177,8 +182,10 @@ export async function sendSyncBatch(events: SyncEvent[]): Promise<"synced" | "qu
   const id = await enqueueEventBatch(events);
   try {
     await flushQueuedBefore(id); // earlier sessions first, so the server sees them in order
-    await apiPost("/sync", { events });
-    await removeEventBatch(id);
+    const response = await apiPost("/sync", { events, device_id: syncDeviceId() });
+    // Acknowledged. Events the server rejected one by one are parked with their reason, never silently dropped.
+    if (id) await settleAcknowledged({ id, events }, response);
+    else await removeEventBatch(id);
     invalidateLearnerCache(); // the server's mastery just changed
     return "synced";
   } catch (err) {
@@ -196,8 +203,10 @@ export async function syncSprintResult(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-): Promise<void> {
-  if (IS_MOCK) return;
+): Promise<SessionChange | null> {
+  if (IS_MOCK) return null;
+  let change: SessionChange | null = null;
   // Durable: a failed send is kept on the device and retried, not dropped.
-  await sendSyncBatch(await queueSessionSync(session, result, domain, sessionType));
+  await sendSyncBatch(await queueSessionSync(session, result, domain, sessionType, { onChange: (c) => { change = c; } }));
+  return change;
 }

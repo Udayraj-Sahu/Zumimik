@@ -39,6 +39,8 @@ import { queueSessionSync, sendSyncBatch, type SyncEvent } from "@/services/tele
 import { useWellbeing } from "@/hooks/use-wellbeing";
 import { useSocialPolicy } from "@/hooks/queries/use-social-policy";
 import { BreakOverlay } from "@/components/learn/break-overlay";
+import { SessionChangeCard } from "@/components/adaptive/session-change-card";
+import type { SessionChange } from "@/lib/learning/session-change";
 import type { SprintAnswer } from "@/lib/types/sprint-session";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
@@ -91,6 +93,7 @@ export default function PracticePage() {
   const wellbeing = useWellbeing(phase === "active" && practiceType === "mcq");
   const socialPolicy = useSocialPolicy().data;
   const sessionStartRef = useRef<number | null>(null);
+  const [sessionChange, setSessionChange] = useState<SessionChange | null>(null);
   const session = useMemo(
     () => (baseSession && wellbeing.override ? { ...baseSession, questions: wellbeing.override } : baseSession),
     [baseSession, wellbeing.override],
@@ -160,6 +163,7 @@ export default function PracticePage() {
   useEffect(() => {
     if (!baseSession || phase !== "active") return;
     wellbeing.reset();
+    setSessionChange(null);
     sessionStartRef.current = Date.now();
     setCurrentIndex(0);
     setAnswers({});
@@ -321,7 +325,7 @@ export default function PracticePage() {
         xpEarned: 0,
       };
       // Built once: a retry re-sends the SAME event ids, which the backend treats idempotently.
-      pendingSyncRef.current = await queueSessionSync(session, telemetryResult, targetExam ?? undefined, "practice", { extraEvents: wellbeing.events() });
+      pendingSyncRef.current = await queueSessionSync(session, telemetryResult, targetExam ?? undefined, "practice", { extraEvents: wellbeing.events(), onChange: setSessionChange });
       void sendPendingSync();
     } else {
       setCurrentIndex((i) => i + 1);
@@ -725,7 +729,9 @@ export default function PracticePage() {
           </GlassCard>
         </div>
 
-        <div className="flex flex-col gap-3 max-[359px]:gap-2">
+        <SessionChangeCard change={sessionChange} />
+
+        <div className="mt-4 flex flex-col gap-3 max-[359px]:gap-2">
           <Button
             fullWidth
             size="lg"

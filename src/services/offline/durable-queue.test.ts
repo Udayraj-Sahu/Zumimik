@@ -76,7 +76,7 @@ describe("durable attempt queue", () => {
     useNetworkStore.getState().clearQueue();
     apiPost.mockResolvedValue({ accepted: 2 });
     await syncAll();
-    expect(apiPost).toHaveBeenCalledWith("/sync", { events: EVENTS });
+    expect(apiPost).toHaveBeenCalledWith("/sync", { events: EVENTS, device_id: expect.any(String) });
     expect(await db.eventQueue.count()).toBe(0);
   });
 

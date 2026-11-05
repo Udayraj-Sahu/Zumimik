@@ -4,6 +4,7 @@ import { attemptsFromEvents } from "@/lib/learning/event-replay";
 import { flushEventQueue, pendingEvents } from "./offline/sync";
 import { PRACTICE_SUBJECT, restoreTheta } from "@/lib/learning/ability";
 import type { SinkingBook } from "@/lib/learning/review";
+import { learnerKeys } from "@/lib/learning/storage-keys";
 import { IS_MOCK, safeLocalStorage } from "@/lib/platform";
 import { apiGet } from "./api";
 import { ageFromDob, hydrateLearner, type LearnerStates } from "@/lib/learning/learner-state";
@@ -42,7 +43,7 @@ export function loadMasterySnapshot(userKey = ""): Promise<MasterySnapshot> {
   return promise;
 }
 
-const SNAPSHOT_KEY = (userKey: string) => `zuzumik:mastery-snapshot:${userKey}`;
+const SNAPSHOT_KEY = learnerKeys.snapshot;
 
 function rememberSnapshot(userKey: string, snapshot: MasterySnapshot): void {
   try {
@@ -129,7 +130,7 @@ export function loadCatalogSkills(): Promise<CatalogSkill[]> {
 // The server does not return θ from GET /practice/mastery (its `theta` column is written by a worker that has not landed), so
 // the device keeps the learner's own estimate. It is rebuilt from the stored responses on every read (restoreTheta), and each
 // finished session also sends it on `session_end.metadata.theta`, where the server logs it.
-const THETA_KEY = (userKey: string) => `zuzumik:ability:${userKey}`;
+const THETA_KEY = learnerKeys.ability;
 
 export function loadAbility(userKey: string): ThetaState {
   if (!userKey) return freshThetaState(PRACTICE_SUBJECT);
@@ -153,7 +154,7 @@ export function commitAbility(userKey: string, state: ThetaState): void {
 // ── review book (spaced repetition) ─────────────────────────────────────────
 // The server's sinking_skills table has no writer and no read route yet, so the learner's review entries live on this device,
 // updated with every finished session (under the same lock as the mastery snapshot) and by mock-exam results.
-const SINKING_KEY = (userKey: string) => `zuzumik:review-book:${userKey}`;
+const SINKING_KEY = learnerKeys.reviewBook;
 
 export function loadSinkingBook(userKey: string): SinkingBook {
   if (!userKey) return {};

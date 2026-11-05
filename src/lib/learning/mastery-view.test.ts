@@ -62,3 +62,21 @@ describe("what to practise next", () => {
     expect(recommendNext(all, catalog, {}, NOW)).toBeNull();
   });
 });
+
+describe("the ordered list of next steps", () => {
+  it("lists review, then techniques in progress, then new ones, each technique once, and the first is the single next step", async () => {
+    const { recommendSteps } = await import("./mastery-view");
+    const states = {
+      Basics: practised("Basics", Array(30).fill(true)),
+      Fractions: practised("Fractions", [false, false, true, false]),
+    };
+    const open = [...catalog, { skill: "Geometry", parents: [] as string[], servable: 5 }]; // a second root technique with no prerequisite
+    const steps = recommendSteps(states, open, { Fractions: createSinking("Fractions", "session_wrong") }, NOW);
+    expect(steps.map((s) => s.kind)).toEqual(["review", "new"]);
+    expect(steps[0].skill).toBe("Fractions");
+    expect(new Set(steps.map((s) => s.skill)).size).toBe(steps.length);
+    expect(recommendNext(states, open, { Fractions: createSinking("Fractions", "session_wrong") }, NOW)).toEqual(steps[0]);
+    expect(steps[1].skill).toBe("Geometry"); // Decimals stays locked until Fractions is mastered
+    expect(recommendSteps({}, catalog, {}, NOW, undefined, 3).map((s) => s.skill)).toEqual(["Basics"]); // the rest is locked behind the prerequisite
+  });
+});

@@ -16,6 +16,7 @@ import { usePaywallStore } from "@/stores/paywall-store";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { queryClient } from "@/providers/query-provider";
 import { clearImpressionQueue } from "@/services/ads";
+import { allLearnerKeys } from "@/lib/learning/storage-keys";
 
 const STORAGE_KEYS = [
   "zuzumik-auth",
@@ -73,11 +74,32 @@ export async function resetAppState(): Promise<void> {
   queryClient.clear();
 }
 
+/**
+ * Account deletion: everything this device holds for the signed-in learner goes. Logout and an expired session (resetAppState)
+ * deliberately keep the queued, unsynced events and the learner's psychometric data, tagged by user, so work done offline is never
+ * lost and the same learner can sign back in; deleting the account is the one case where that data must not outlive it.
+ * The user id is read BEFORE the sign-out clears it.
+ */
 export async function purgeUserData(): Promise<void> {
+  const userId = useAuthStore.getState().user?.id ?? null;
   await resetAppState();
-  // Logout keeps queued (unsynced) work, tagged by user. An explicit purge removes it.
+  if (userId) {
+    for (const key of allLearnerKeys(userId)) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        /* ignore storage access errors */
+      }
+    }
+    try {
+      await db.eventQueue.where("userId").equals(userId).delete();
+    } catch {
+      /* ignore dexie failures */
+    }
+  }
+  // Anything left without an owner (a batch queued before sign-in existed) is cleared too.
   try {
-    await db.eventQueue.clear();
+    await db.eventQueue.filter((b) => !b.userId).delete();
   } catch {
     /* ignore dexie failures */
   }

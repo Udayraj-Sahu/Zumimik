@@ -46,20 +46,17 @@ async function open(masteryReadable: boolean) {
 }
 
 describe("Explorer with the learner's real history", () => {
-  it("labels the technique, shows the engine-based recommendation, and links practice to that technique", async () => {
+  it("labels each technique with the learner state; the recommendation itself lives in the Adaptive Learning tab", async () => {
     localStorage.clear();
     await open(true);
-    const next = await screen.findByTestId("next-step");
-    expect(next).toHaveTextContent("Ready for something new: Fractions"); // Arithmetic is mastered, which opens Fractions
-    expect(screen.getByRole("link", { name: "Practise Fractions" })).toHaveAttribute("href", "/learn/practice?skill=Fractions");
     await waitFor(() => expect(screen.getAllByTestId("mastery-state").some((c) => c.textContent === "Fluid")).toBe(true));
+    expect(screen.queryByTestId("next-step")).not.toBeInTheDocument(); // recommendations are in the Adaptive Learning tab, not here
   });
 
-  it("when the history cannot be read there are no labels and no recommendation, and the Explorer still works", async () => {
+  it("when the history cannot be read there are no labels, and the Explorer still works", async () => {
     localStorage.clear();
     await open(false);
     await screen.findByTestId("mastery-panel");
-    expect(screen.queryByTestId("next-step")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mastery-state")).not.toBeInTheDocument();
   });
 });

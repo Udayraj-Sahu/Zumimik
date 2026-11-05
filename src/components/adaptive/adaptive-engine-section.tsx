@@ -6,7 +6,8 @@ import { IS_MOCK } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
-import { WarmupCard } from "@/components/learn/warmup-card";
+import { WarmupCard } from "@/components/adaptive/warmup-card";
+import { LearnerProgressCard } from "@/components/adaptive/learner-progress-card";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore } from "@/stores/resume-store";
 import { ADAPTIVE_MIX_TOPIC } from "@/services/practice";
@@ -49,6 +50,7 @@ export function AdaptiveEngineSection() {
   return (
     <div className="mt-5 space-y-3" data-testid="adaptive-engine-section">
       <WarmupCard />
+      <LearnerProgressCard />
       {review.length > 0 && (
         <GlassCard className="p-4" data-testid="review-reminders">
           <p className="text-[14px] font-semibold text-foreground">Time to revisit</p>

@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { syncDeviceId } from "./device-id";
 import { useNetworkStore, type QueuedMutation } from "@/stores/network-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { apiUrl } from "@/lib/platform";
@@ -178,6 +179,52 @@ export async function removeEventBatch(id: string | null): Promise<void> {
   }
 }
 
+/** One event the server will never store, as POST /sync reports it (HTTP 200 with the rest of the batch accepted). */
+export type SyncRejection = { event_id: string | null; index?: number; reason?: string };
+
+/** The per-event rejections in a POST /sync response; none when the response carries none (or is not an object). */
+export function rejectionsOf(response: unknown): SyncRejection[] {
+  const list = (response as { rejected?: unknown } | null | undefined)?.rejected;
+  if (!Array.isArray(list)) return [];
+  return list.filter((r): r is SyncRejection => !!r && typeof r === "object");
+}
+
+/**
+ * The server ANSWERED the batch. HTTP 200 does not mean every event was stored: it lists the ones it never will (`rejected`, each with
+ * its event_id, index and reason) and says that resending gets the same answer. Those events are not retried and not thrown away:
+ * they move, in the same transaction that removes the acknowledged batch, to a parked row that keeps them and the reason, and they
+ * never reach the learner's replayed state. Returns how many were parked.
+ */
+export async function settleAcknowledged(batch: { id: string | null; userId?: string; events: Array<Record<string, unknown>> }, response: unknown): Promise<number> {
+  if (!batch.id) return 0;
+  const rejected = rejectionsOf(response);
+  const ids = new Set(rejected.map((r) => r.event_id).filter((x): x is string => typeof x === "string"));
+  const positions = new Set(rejected.map((r) => r.index).filter((x): x is number => typeof x === "number"));
+  const refused = batch.events.filter((e, i) => (typeof e.event_id === "string" && ids.has(e.event_id)) || positions.has(i));
+  const userId = batch.userId ?? useAuthStore.getState().user?.id ?? "";
+  const reasons = [...new Set(rejected.map((r) => r.reason).filter((x): x is string => typeof x === "string"))].join("; ");
+  const batchId = batch.id;
+  try {
+    await db.transaction("rw", db.eventQueue, async () => {
+      if (refused.length > 0) {
+        await db.eventQueue.put({
+          id: `rejected:${batchId}`,
+          userId,
+          events: refused,
+          createdAt: Date.now(),
+          attempts: 0,
+          status: "parked",
+          lastError: (reasons || "rejected by the server").slice(0, 200),
+        });
+      }
+      await db.eventQueue.delete(batchId);
+    });
+  } catch {
+    return 0; // the batch stays queued and is sent again; the server deduplicates by event id
+  }
+  return refused.length;
+}
+
 /** Server rejected the batch (4xx): stop retrying but keep it, with the reason. */
 export async function parkEventBatch(id: string | null, reason: string): Promise<void> {
   if (!id) return;
@@ -215,8 +262,8 @@ export async function flushEventQueue(): Promise<number> {
   for (const batch of batches) {
     try {
       const { apiPost } = await import("@/services/api");
-      await apiPost("/sync", { events: batch.events });
-      await db.eventQueue.delete(batch.id);
+      const response = await apiPost("/sync", { events: batch.events, device_id: syncDeviceId() });
+      await settleAcknowledged(batch, response);
       sent += 1;
     } catch (err) {
       if (isPermanentRejection(err)) {
@@ -265,8 +312,8 @@ export async function flushQueuedBefore(batchId: string | null): Promise<number>
   for (const batch of batches) {
     try {
       const { apiPost } = await import("@/services/api");
-      await apiPost("/sync", { events: batch.events });
-      await db.eventQueue.delete(batch.id);
+      const response = await apiPost("/sync", { events: batch.events, device_id: syncDeviceId() });
+      await settleAcknowledged(batch, response);
       sent += 1;
     } catch (err) {
       if (isPermanentRejection(err)) {

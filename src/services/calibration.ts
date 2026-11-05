@@ -1,6 +1,7 @@
 import { IS_MOCK, safeLocalStorage } from "@/lib/platform";
 import type { CalibrationRecord, WarmupDraft } from "@/lib/learning/calibration";
 import { loadLearnerStates } from "./learner";
+import { learnerKeys } from "@/lib/learning/storage-keys";
 import { needsCalibration } from "@/lib/learning/calibration";
 
 /**
@@ -8,8 +9,8 @@ import { needsCalibration } from "@/lib/learning/calibration";
  * The server has no place for either yet (users.active_path and the priors have no write route), so this is the learner's record;
  * the result is also sent once as a calibration_completed event with the warm-up session.
  */
-const RECORD_KEY = (userKey: string) => `zuzumik:calibration:${userKey}`;
-const DRAFT_KEY = (userKey: string) => `zuzumik:warmup-draft:${userKey}`;
+const RECORD_KEY = learnerKeys.calibration;
+const DRAFT_KEY = learnerKeys.warmupDraft;
 
 function read<T>(key: string): T | null {
   try {

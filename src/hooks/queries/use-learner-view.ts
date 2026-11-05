@@ -4,10 +4,16 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { loadCatalogSkills, loadLearnerStates, loadSinkingBook } from "@/services/learner";
 import { daysToExam } from "@/services/practice";
-import { recommendNext, type NextStep } from "@/lib/learning/mastery-view";
+import { recommendSteps, type NextStep } from "@/lib/learning/mastery-view";
 import type { LearnerStates } from "@/lib/learning/learner-state";
 
-export type LearnerView = { states: LearnerStates | null; next: NextStep | null };
+export type LearnerView = {
+  states: LearnerStates | null;
+  /** The best next step (the first of steps). */
+  next: NextStep | null;
+  /** The few best next steps, most useful first, each a different technique. */
+  steps: NextStep[];
+};
 
 /** The learner's hydrated engine states (for mastery labels) and what to practise next. Real backend only. */
 export function useLearnerView() {
@@ -17,15 +23,15 @@ export function useLearnerView() {
     queryFn: async () => {
       const now = Date.now();
       const states = await loadLearnerStates(userId, now);
-      if (!states) return { states: null, next: null };
+      if (!states) return { states: null, next: null, steps: [] };
       const onboarding = useOnboardingStore.getState();
-      let next: NextStep | null = null;
+      let steps: NextStep[] = [];
       try {
-        next = recommendNext(states, await loadCatalogSkills(), loadSinkingBook(userId), now, daysToExam(onboarding.examDates[onboarding.targetExam], now));
+        steps = recommendSteps(states, await loadCatalogSkills(), loadSinkingBook(userId), now, daysToExam(onboarding.examDates[onboarding.targetExam], now));
       } catch {
-        next = null; // the catalog could not be read: labels still show, no recommendation
+        steps = []; // the catalog could not be read: labels still show, no recommendation
       }
-      return { states, next };
+      return { states, next: steps[0] ?? null, steps };
     },
     enabled: !IS_MOCK && !!userId,
     staleTime: 60_000,

@@ -51,7 +51,7 @@ describe("mastery on the technique tree", () => {
   });
 
   it("the next-step card names what to practise and links to that technique only", async () => {
-    const { NextStepCard } = await import("./next-step-card");
+    const { NextStepCard } = await import("@/components/adaptive/next-step-card");
     render(<NextStepCard next={{ skill: "LongDivision", kind: "review" }} />);
     expect(screen.getByTestId("next-step")).toHaveTextContent("Time to revisit: Long Division");
     expect(screen.getByRole("link", { name: "Practise Long Division" })).toHaveAttribute("href", "/learn/practice?skill=LongDivision");

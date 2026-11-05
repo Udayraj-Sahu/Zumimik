@@ -20,6 +20,10 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { formatTime } from "@/lib/text";
 import { GhostPanel } from "@/components/ghosts/ghost-panel";
+import { SessionChangeCard } from "@/components/adaptive/session-change-card";
+import { NextStepCard } from "@/components/adaptive/next-step-card";
+import { useLearnerView } from "@/hooks/queries/use-learner-view";
+import { IS_MOCK } from "@/lib/platform";
 
 export default function SprintResultsPage() {
   return (
@@ -44,6 +48,7 @@ function SprintResultsContent() {
   const lastResult = useSprintStore((s) => s.lastResult);
   const lastSession = useSprintStore((s) => s.lastSession);
   const incrementSprint = useRateStore((s) => s.increment);
+  const learnerView = useLearnerView();
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const queryClient = useQueryClient();
 
@@ -61,6 +66,8 @@ function SprintResultsContent() {
       if (input.sessionType === "adaptive" && input.domain) {
         queryClient.invalidateQueries({ queryKey: ["adaptive-state", input.domain] });
       }
+      // The learner model just changed: everything derived from it is read again.
+      for (const key of ["learner-view", "review-items", "adaptive-state"]) void queryClient.invalidateQueries({ queryKey: [key] });
     },
   });
 
@@ -189,6 +196,9 @@ function SprintResultsContent() {
           {result.score} of {result.total} correct &middot; {session.topicLabel}
         </p>
       </div>
+
+      {!lastSession?.mockId && <SessionChangeCard change={recordSession.data} />}
+      {!lastSession?.mockId && !IS_MOCK && <NextStepCard next={learnerView.data?.next} />}
 
       {!lastSession?.mockId && (
         <GhostPanel ghostId={searchParams.get("ghost")} skill={session.topic} domain={targetExam} questions={session.questions} result={result} />

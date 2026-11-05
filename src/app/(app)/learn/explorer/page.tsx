@@ -9,7 +9,6 @@ import { useSubjectTree, useExplorerMastery, useReferencePages } from "@/hooks/q
 import { linkReferencePages } from "@/services/explorer-tree";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { MasteryPanel } from "@/components/explorer/mastery-panel";
-import { NextStepCard } from "@/components/explorer/next-step-card";
 import { useLearnerView } from "@/hooks/queries/use-learner-view";
 import { stateOf } from "@/lib/learning/mastery-view";
 import { IS_MOCK } from "@/lib/platform";
@@ -396,8 +395,6 @@ function ExplorerContent() {
       )}
 
       {/* Mind map */}
-      {!IS_MOCK && <NextStepCard next={learnerView?.next} />}
-
       <div ref={animateSection} data-section-index={3} className="relative mt-6">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div

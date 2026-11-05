@@ -6,6 +6,7 @@ vi.setConfig({ testTimeout: 30000 });
 
 const apiDelete = vi.fn();
 const resetAppState = vi.fn();
+const purgeUserData = vi.fn();
 const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -25,6 +26,7 @@ async function renderSettings() {
     ...(await orig<object>()),
     IS_MOCK: false,
     resetAppState: (...a: unknown[]) => resetAppState(...a),
+    purgeUserData: (...a: unknown[]) => purgeUserData(...a),
   }));
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "a@x.com", role: "user", tier: "free" }, isAuthenticated: true });
@@ -43,6 +45,7 @@ describe("Settings > Delete account (DELETE /auth/me)", () => {
   beforeEach(() => {
     apiDelete.mockReset();
     resetAppState.mockReset().mockResolvedValue(undefined);
+    purgeUserData.mockReset().mockResolvedValue(undefined);
     replace.mockReset();
     localStorage.clear();
   });
@@ -63,9 +66,10 @@ describe("Settings > Delete account (DELETE /auth/me)", () => {
     fireEvent.change(screen.getByLabelText(/Type DELETE to confirm/), { target: { value: "delete" } });
     fireEvent.click(screen.getByRole("button", { name: "Delete forever" }));
     await waitFor(() => expect(apiDelete).toHaveBeenCalledWith("/auth/me"));
-    await waitFor(() => expect(resetAppState).toHaveBeenCalled());
+    // Deleting the account wipes everything on the device for that learner, queued events and learner data included.
+    await waitFor(() => expect(purgeUserData).toHaveBeenCalled());
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
-    expect(apiDelete.mock.invocationCallOrder[0]).toBeLessThan(resetAppState.mock.invocationCallOrder[0]);
+    expect(apiDelete.mock.invocationCallOrder[0]).toBeLessThan(purgeUserData.mock.invocationCallOrder[0]);
   });
 
   it("a failed delete shows the error and keeps the user signed in", async () => {
@@ -75,6 +79,7 @@ describe("Settings > Delete account (DELETE /auth/me)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete forever" }));
     expect(await screen.findByTestId("delete-account-error")).toHaveTextContent("Network request failed");
     expect(resetAppState).not.toHaveBeenCalled();
+    expect(purgeUserData).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Delete forever" })).toBeEnabled();
   });

@@ -36,7 +36,7 @@ import { useAccountSummary } from "@/hooks/queries/use-account-summary";
 import { useSubscription } from "@/hooks/queries/use-subscription";
 import { usePaywallStore } from "@/stores/paywall-store";
 import { useThemeStore } from "@/stores/theme-store";
-import { resetAppState } from "@/lib/platform";
+import { resetAppState, purgeUserData } from "@/lib/platform";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { Dialog } from "@/components/ui/dialog";
@@ -348,7 +348,7 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
       setDeleting(false);
       return;
     }
-    await resetAppState();
+    await purgeUserData();
     router.replace("/");
   };
 
