@@ -14,9 +14,9 @@ describe("AuthPanel with the live backend", () => {
     const onAuthSuccess = vi.fn().mockResolvedValue(undefined);
     render(<AuthPanel onAuthSuccess={onAuthSuccess} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("Use email and password");
-    expect(screen.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Continue with Phone Number" })).toBeDisabled();
+    // Google and phone sign-in are hidden (501 on staging); only email is offered.
+    expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue with Phone Number" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Continue with email" }));
     fireEvent.change(screen.getByLabelText("Email address"), {

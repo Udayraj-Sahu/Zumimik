@@ -3,8 +3,9 @@ import { PageContainer } from "@/components/ui/page-container";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, Puzzle, Brain, Zap, Clock, Flame, Gamepad2, type LucideIcon } from "lucide-react";
+import { Trophy, Puzzle, Brain, Zap, Clock, Flame, Gamepad2, CalendarCheck, Ghost, type LucideIcon } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { useSocialPolicy } from "@/hooks/queries/use-social-policy";
 import { AMBER, BLUE, CTA_LIME, GLASS_BG, GLASS_BORDER, PURPLE, SLATE_SOFT, hueText } from "@/lib/theme";
 
 const TABS = [
@@ -46,6 +47,24 @@ const MATH_MODES: ModeCard[] = [
     icon: Flame,
     badge: "2P",
     href: "/play/duel",
+  },
+  {
+    id: "daily",
+    category: "MATH",
+    title: "DAILY CHALLENGE",
+    desc: "The same 10 problems for everyone, once a day.",
+    color: BLUE,
+    icon: CalendarCheck,
+    href: "/play/daily",
+  },
+  {
+    id: "ghosts",
+    category: "MATH",
+    title: "GHOST RACES",
+    desc: "Race a saved run from you, a friend or the public.",
+    color: PURPLE,
+    icon: Ghost,
+    href: "/play/ghosts",
   },
 ];
 
@@ -119,6 +138,7 @@ export default function PlayPage() {
   const [activeTab, setActiveTab] = useState<TabId>("math");
   const modes = MODES_BY_TAB[activeTab];
   const comingSoon = COMING_SOON[activeTab];
+  const { data: policy } = useSocialPolicy();
 
   return (
     <PageContainer>
@@ -136,6 +156,13 @@ export default function PlayPage() {
           Compete, learn, and climb the leaderboard
         </p>
       </header>
+
+      {policy?.sessionCapEnforced && policy.sessionCapMinutes != null && (
+        <p role="status" data-testid="session-cap" className="mb-4 rounded-2xl border px-4 py-3 text-[12px] text-muted-foreground/70" style={{ borderColor: GLASS_BORDER, background: GLASS_BG }}>
+          Daily play limit: {policy.sessionCapMinutes} min
+          {policy.sessionRemainingMinutes != null ? ` · ${Math.max(0, Math.round(policy.sessionRemainingMinutes))} min left today` : ""}.
+        </p>
+      )}
 
       {/* Tabs */}
       <nav aria-label="Play modes" className="grid grid-cols-4 gap-2.5 mb-5 max-[359px]:gap-1.5">

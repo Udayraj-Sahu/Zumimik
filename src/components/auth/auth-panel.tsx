@@ -273,11 +273,8 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
 
       {mode === "select" && (
         <>
-          {!IS_MOCK && !firebaseAvailable && (
-            <p role="status" className="text-center text-fluid-xs text-muted-foreground/70">
-              Google and phone sign-in are not configured for this backend. Use email and password.
-            </p>
-          )}
+          {/* Google and phone sign-in return 501 on the staging backend: hidden outside mock mode until they are configured. */}
+          {IS_MOCK && (<>
           <button
             data-step-el
             type="button"
@@ -312,6 +309,7 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
             <Smartphone size={20} className="text-muted-foreground" aria-hidden="true" />
             Continue with Phone Number
           </button>
+          </>)}
           <button
             data-step-el
             type="button"

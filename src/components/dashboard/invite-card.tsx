@@ -81,8 +81,8 @@ export function InviteCard() {
     setOrigin(window.location.origin);
   }, []);
 
-  const shareText = `Join me on Zuzumik — use my invite code ${code} to get started.`;
-  const inviteLink = code ? `${origin || ""}/?ref=${code}` : "";
+  const inviteLink = code ? `${origin || window.location.origin}/auth?ref=${code}` : "";
+  const shareText = `Join me on Zuzumik — use my invite code ${code} to get started: ${inviteLink}`;
   const earnedXp = friendsJoined * REWARD_XP;
 
   const handleCopy = async () => {
@@ -104,10 +104,10 @@ export function InviteCard() {
       const { Capacitor } = await import("@capacitor/core");
       if (Capacitor.isNativePlatform()) {
         const { Share } = await import("@capacitor/share");
-        await Share.share({ title: "Zuzumik invite", text: shareText, dialogTitle: "Invite friends" });
+        await Share.share({ title: "Zuzumik invite", text: shareText, url: inviteLink, dialogTitle: "Invite friends" });
         shared = true;
       } else if (navigator.share) {
-        await navigator.share({ title: "Zuzumik invite", text: shareText });
+        await navigator.share({ title: "Zuzumik invite", text: shareText, url: inviteLink });
         shared = true;
       }
     } catch {

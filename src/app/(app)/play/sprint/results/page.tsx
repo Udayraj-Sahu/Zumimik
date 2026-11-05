@@ -19,6 +19,7 @@ import { GLASS_BG } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { formatTime } from "@/lib/text";
+import { GhostPanel } from "@/components/ghosts/ghost-panel";
 
 export default function SprintResultsPage() {
   return (
@@ -188,6 +189,10 @@ function SprintResultsContent() {
           {result.score} of {result.total} correct &middot; {session.topicLabel}
         </p>
       </div>
+
+      {!lastSession?.mockId && (
+        <GhostPanel ghostId={searchParams.get("ghost")} skill={session.topic} domain={targetExam} questions={session.questions} result={result} />
+      )}
 
       {/* CTA buttons */}
       <div className="mt-6 flex flex-col sm:flex-row gap-3 max-[359px]:gap-2">
