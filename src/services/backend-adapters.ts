@@ -269,6 +269,7 @@ export type BackendPracticeSessionResponse = {
     sub_topic: string | null;
     trust: string;
     feeds_mastery: boolean;
+    irt?: { a?: number; b?: number; source?: string } | null;
     answer_check: "client_extract" | "server_sympy";
     expected_answer: number | null;
     answer_key_display?: string | null;
@@ -310,6 +311,10 @@ export function mapBackendPracticeSession(
         difficulty: item.difficulty,
         hint,
         techniqueId: item.skill ?? item.technique ?? undefined,
+        ...(item.skill ? { skillId: item.skill } : {}),
+        ...(typeof item.irt?.a === "number" && Number.isFinite(item.irt.a) && item.irt.a > 0 && typeof item.irt.b === "number" && Number.isFinite(item.irt.b)
+          ? { irt: { a: item.irt.a, b: item.irt.b, source: item.irt.source ?? "seed" } }
+          : {}),
         trustStatus: trustStatus(item.trust),
         sourceId: item.template_id,
       };
@@ -488,7 +493,7 @@ export function mapMockConfigure(response: BackendMockConfigureResponse, title?:
   };
 }
 
-export type BackendMockSubmitResponse = { mock_id: string; xp_awarded?: number; percentile?: number | null };
+export type BackendMockSubmitResponse = { mock_id: string; xp_awarded?: number; percentile?: number | null; deferred_sinking_skills?: string[] };
 
 export type BackendMockResultsResponse = {
   mock_id: string;

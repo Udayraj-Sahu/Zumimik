@@ -33,10 +33,18 @@ function SprintContent() {
   const isAdaptive = searchParams.get("adaptive") === "1";
   const adaptiveDomain = searchParams.get("domain");
   const resumeParam = searchParams.get("resume") === "1";
+  const ghostId = searchParams.get("ghost");
 
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const feedback = useFeedback();
-  const { data, isLoading, error, refetch } = useSprintSession(topic, length, difficulty, targetExam);
+  const { data, isLoading, error, refetch } = useSprintSession(
+    topic,
+    length,
+    difficulty,
+    targetExam,
+    // Beginner/Advanced steer question difficulty via theta targeting; Adaptive sends no level.
+    difficulty === "beginner" ? 2 : difficulty === "advanced" ? 4 : undefined,
+  );
   const snapshot = useResumeStore((s) => s.snapshot);
   const saveSnapshot = useResumeStore((s) => s.saveSnapshot);
   const clearSnapshot = useResumeStore((s) => s.clearSnapshot);
@@ -94,9 +102,10 @@ function SprintContent() {
       params.set("adaptive", "1");
       if (adaptiveDomain) params.set("domain", adaptiveDomain);
     }
+    if (ghostId) params.set("ghost", ghostId);
     const qs = params.toString();
     router.push(`/play/sprint/results${qs ? `?${qs}` : ""}`);
-  }, [router, isAdaptive, adaptiveDomain]);
+  }, [router, isAdaptive, adaptiveDomain, ghostId]);
 
   const finishSprint = useCallback(() => {
     if (activeQuestions.length > 0) {

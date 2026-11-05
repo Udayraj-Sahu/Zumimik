@@ -34,6 +34,7 @@ import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { Button } from "@/components/ui/button";
 import { AdaptiveReprompt } from "@/components/adaptive/adaptive-reprompt";
 import { AdaptiveDashboard } from "@/components/adaptive/adaptive-dashboard";
+import { AdaptiveEngineSection } from "@/components/adaptive/adaptive-engine-section";
 import { ResumeProtocolCard } from "@/components/adaptive/resume-protocol-card";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 import { usePlanStore } from "@/stores/plan-store";
@@ -664,6 +665,8 @@ function LearnPageContent() {
                 kind="sprint"
                 className="mt-5 px-0"
               />
+
+              {goal && <AdaptiveEngineSection />}
 
               {justExploring && prepExams.length === 0 ? (
                 <AdaptiveDashboard domain={primaryExam} />

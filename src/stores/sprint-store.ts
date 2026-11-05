@@ -6,6 +6,8 @@ export type AnswerEntry = {
   timeSpent: number;
   answerText?: string;
   correct?: boolean | null;
+  /** Epoch ms of the submission. */
+  answeredAt?: number;
 };
 
 export type SprintSessionMeta = { questions: Question[]; topic: string; topicLabel: string; difficulty: string; mockId?: string };
@@ -79,7 +81,7 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       const now = Date.now();
       const timeSpent = state.questionStartTime ? (now - state.questionStartTime) / 1000 : 0;
       return {
-        answers: { ...state.answers, [questionId]: { selectedIndex: optionIndex, timeSpent } },
+        answers: { ...state.answers, [questionId]: { selectedIndex: optionIndex, timeSpent, answeredAt: now } },
         questionStartTime: now,
       };
     }),
@@ -91,7 +93,7 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       return {
         answers: {
           ...state.answers,
-          [questionId]: { selectedIndex: -1, answerText, correct, timeSpent },
+          [questionId]: { selectedIndex: -1, answerText, correct, timeSpent, answeredAt: now },
         },
         questionStartTime: now,
       };
@@ -137,6 +139,7 @@ export const useSprintStore = create<SprintState>((set, get) => ({
         ...(a?.answerText !== undefined ? { answerText: a.answerText } : {}),
         correct: a?.correct ?? (q.answerType === "text" ? null : a?.selectedIndex === q.correctIndex),
         timeSpent: a?.timeSpent ?? 0,
+        ...(a?.answeredAt !== undefined ? { answeredAt: a.answeredAt } : {}),
       };
     });
     const score = answerList.filter((a) => a.correct).length;

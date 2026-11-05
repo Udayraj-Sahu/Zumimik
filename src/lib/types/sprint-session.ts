@@ -14,6 +14,10 @@ export type Question = {
   hint?: string;
   explanation?: string;
   techniqueId?: string;
+  /** The canonical :Skill id (GET /practice/catalog vocabulary). Mastery and ability are keyed on this only; `techniqueId` may be a corpus label. */
+  skillId?: string;
+  /** IRT item parameters the server attached (calibrated, or the seed a=1, b=difficulty-3). Absent: the client seeds from `difficulty`. */
+  irt?: { a: number; b: number; source: string };
   trustStatus?: TrustStatus;
   sourceId?: string;
   variantGroupId?: string;
@@ -43,6 +47,8 @@ export type SprintAnswer = {
   answerText?: string;
   correct: boolean | null;
   timeSpent: number;
+  /** Epoch ms at which the learner submitted this answer (the device clock at that moment). Absent on answers from before it was recorded. */
+  answeredAt?: number;
 };
 
 export type SprintResult = {

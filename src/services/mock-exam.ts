@@ -13,6 +13,9 @@ import {
 } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
+import { useAuthStore } from "@/stores/auth-store";
+import { addMockSinking } from "@/lib/learning/review";
+import { commitSinkingBook, loadSinkingBook } from "./learner";
 
 export async function getMockPapers(domain?: string): Promise<MockPaper[]> {
   if (IS_MOCK) {
@@ -87,6 +90,15 @@ export async function submitMock(input: MockSubmitInput): Promise<SprintResult> 
     answers: input.answers,
     elapsed_seconds: Math.round(input.elapsedSeconds),
   });
+  // The weak skills the server deferred become review entries (trigger mock_wrong_answer); a failure here never blocks the results.
+  try {
+    if (Array.isArray(submitted.deferred_sinking_skills) && submitted.deferred_sinking_skills.length > 0) {
+      const userKey = useAuthStore.getState().user?.id ?? "";
+      commitSinkingBook(userKey, addMockSinking(loadSinkingBook(userKey), submitted.deferred_sinking_skills));
+    }
+  } catch {
+    /* review entries are best effort */
+  }
   const results = await apiGet<BackendMockResultsResponse>(`/mocks/results/${encodeURIComponent(input.mockId)}`);
   return mapMockResults(results, input.questions, submitted.xp_awarded ?? 0, input.elapsedSeconds);
 }

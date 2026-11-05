@@ -157,8 +157,11 @@ async function flushFeedbackFromDisk(skipIds: Set<string>): Promise<void> {
 export async function enqueueEventBatch(events: Array<Record<string, unknown>>): Promise<string | null> {
   const userId = useAuthStore.getState().user?.id;
   if (!userId) return null;
-  const id = crypto.randomUUID();
+  // The id is the batch's first event id, so storing the same batch twice (a retry, or the pre-queue + the send) is one row, not two.
+  const id = typeof events[0]?.event_id === "string" ? (events[0].event_id as string) : crypto.randomUUID();
   try {
+    const existing = await db.eventQueue.get(id);
+    if (existing) return id;
     await db.eventQueue.put({ id, userId, events, createdAt: Date.now(), attempts: 0, status: "pending" });
     return id;
   } catch {
@@ -206,6 +209,8 @@ export async function flushEventQueue(): Promise<number> {
   } catch {
     return 0;
   }
+  // Oldest first: snapshots reach the server in the order they were made (the primary key is a random id, not a time).
+  batches.sort((a, b) => a.createdAt - b.createdAt);
   let sent = 0;
   for (const batch of batches) {
     try {
@@ -237,6 +242,54 @@ export async function flushEventQueue(): Promise<number> {
     }
   }
   return sent;
+}
+
+/**
+ * Deliver the batches queued BEFORE `batchId` (oldest first), best effort. A new session's batch is sent after the ones it
+ * follows, so the server receives them in the order they happened. Stops at the first network/server failure, keeps what it
+ * could not deliver, and parks a rejected batch (never deletes it).
+ */
+export async function flushQueuedBefore(batchId: string | null): Promise<number> {
+  const userId = useAuthStore.getState().user?.id;
+  if (!batchId || !userId || !useAuthStore.getState().token) return 0;
+  let batches: QueuedEventBatch[];
+  try {
+    const own = await db.eventQueue.get(batchId);
+    if (!own) return 0;
+    batches = await db.eventQueue.where("userId").equals(userId).filter((b) => b.status === "pending" && b.id !== batchId && b.createdAt <= own.createdAt).toArray();
+  } catch {
+    return 0;
+  }
+  batches.sort((a, b) => a.createdAt - b.createdAt);
+  let sent = 0;
+  for (const batch of batches) {
+    try {
+      const { apiPost } = await import("@/services/api");
+      await apiPost("/sync", { events: batch.events });
+      await db.eventQueue.delete(batch.id);
+      sent += 1;
+    } catch (err) {
+      if (isPermanentRejection(err)) {
+        await parkEventBatch(batch.id, err instanceof Error ? err.message : "rejected");
+        continue;
+      }
+      break;
+    }
+  }
+  return sent;
+}
+
+/** Events the server has NOT acknowledged yet (queued, not parked), oldest batch first. Parked batches were rejected and are excluded. */
+export async function pendingEvents(): Promise<Array<Record<string, unknown>>> {
+  const userId = useAuthStore.getState().user?.id;
+  if (!userId) return [];
+  try {
+    const batches = await db.eventQueue.where("userId").equals(userId).filter((b) => b.status === "pending").toArray();
+    batches.sort((a, b) => a.createdAt - b.createdAt);
+    return batches.flatMap((b) => b.events);
+  } catch {
+    return [];
+  }
 }
 
 export async function pendingEventBatchCount(): Promise<number> {

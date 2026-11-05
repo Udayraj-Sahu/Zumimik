@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiGet, apiPost } from "./api";
 
 vi.mock("./api", () => ({ apiGet: vi.fn(), apiPost: vi.fn() }));
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false }));
+vi.mock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
+// Mastery is unreadable here, so session building takes the plain single-skill request (the planner has its own tests).
+vi.mock("./learner", () => ({ loadLearnerStates: vi.fn().mockResolvedValue(null), loadCatalogSkills: vi.fn().mockResolvedValue([]), loadAbility: vi.fn(() => ({ subject: "quant", theta: 0, se: 1, n: 0, responses: [] })), commitAbility: vi.fn(), invalidateLearnerCache: vi.fn(), reconcileLearnerStates: vi.fn().mockResolvedValue(null), withLearnerLock: <T,>(fn: () => Promise<T>) => fn() }));
 
 const mockedApiGet = vi.mocked(apiGet);
 const mockedApiPost = vi.mocked(apiPost);
@@ -89,9 +91,14 @@ describe("frontend routes implemented by Speed-Gym", () => {
 
     // Sprint uses the same slot request: GET ?topic= returned no questions for most catalog skills (verified on staging).
     mockedApiPost.mockResolvedValueOnce(emptySession as never);
-    await getSprintQuestions("nikhilam", 10, "Beginner", "cat");
-    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", { slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }] });
-    expect(mockedApiGet).not.toHaveBeenCalledWith(expect.stringContaining("/practice/session"));
+    mockedApiGet.mockResolvedValueOnce({ items: [], summary: { requested: 10, served: 0 } } as never);
+    await getSprintQuestions("nikhilam", 10, "Beginner", "cat", 2);
+    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", {
+      slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }],
+      theta: expect.any(Number),
+    });
+    // Never the ?topic= filter; only the short-session top-up (size = missing items).
+    expect(mockedApiGet).not.toHaveBeenCalledWith(expect.stringContaining("/practice/session?topic="));
   });
 
   it("requests a problem-bank topic through GET /practice/session?topic= (corpus label), never as a skill slot", async () => {

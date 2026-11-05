@@ -35,7 +35,7 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
-import { buildSprintSyncEvents, sendSyncBatch, type SyncEvent } from "@/services/telemetry";
+import { queueSessionSync, sendSyncBatch, type SyncEvent } from "@/services/telemetry";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
 import type { Question, SprintResult } from "@/lib/types/sprint-session";
@@ -89,6 +89,8 @@ export default function PracticePage() {
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [answerCorrectness, setAnswerCorrectness] = useState<Record<string, boolean | null>>({});
   const [answerTimes, setAnswerTimes] = useState<Record<string, number>>({});
+  // The device time at which each answer was submitted (kept for the attempt's real timestamp).
+  const [answeredAtById, setAnsweredAtById] = useState<Record<string, number>>({});
   const [textAnswer, setTextAnswer] = useState("");
   const [textVerdict, setTextVerdict] = useState<AnswerCheckOutcome | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -148,6 +150,7 @@ export default function PracticePage() {
     setAnswers({});
     setAnswerCorrectness({});
     setAnswerTimes({});
+    setAnsweredAtById({});
     setTextAnswer("");
     setTextVerdict(null);
     setRevealed(false);
@@ -165,6 +168,7 @@ export default function PracticePage() {
     setAnswers({});
     setAnswerCorrectness({});
     setAnswerTimes({});
+    setAnsweredAtById({});
     setTextAnswer("");
     setTextVerdict(null);
     setRevealed(false);
@@ -176,6 +180,7 @@ export default function PracticePage() {
     if (revealed || !session) return;
     const question = session.questions[currentIndex];
     setAnswers((prev) => ({ ...prev, [question.id]: optionIndex }));
+    setAnsweredAtById((prev) => ({ ...prev, [question.id]: Date.now() }));
     setAnswerTimes((prev) => ({
       ...prev,
       [question.id]: Math.max(0, (Date.now() - questionStartedAtRef.current) / 1000),
@@ -200,6 +205,7 @@ export default function PracticePage() {
     if (verdict === "unparsable") return;
 
     setAnswers((previous) => ({ ...previous, [q.id]: textAnswer }));
+    setAnsweredAtById((previous) => ({ ...previous, [q.id]: Date.now() }));
     setAnswerTimes((previous) => ({
       ...previous,
       [q.id]: Math.max(0, (Date.now() - questionStartedAtRef.current) / 1000),
@@ -254,6 +260,7 @@ export default function PracticePage() {
           ...(typeof answer === "string" ? { answerText: answer } : {}),
           correct: correctness,
           timeSpent: answerTimes[question.id] ?? 0,
+          ...(answeredAtById[question.id] !== undefined ? { answeredAt: answeredAtById[question.id] } : {}),
         }];
       });
       const totalTimeSpent = telemetryAnswers.reduce((sum, answer) => sum + answer.timeSpent, 0);
@@ -266,7 +273,7 @@ export default function PracticePage() {
         xpEarned: 0,
       };
       // Built once: a retry re-sends the SAME event ids, which the backend treats idempotently.
-      pendingSyncRef.current = buildSprintSyncEvents(session, telemetryResult, targetExam ?? undefined, "practice");
+      pendingSyncRef.current = await queueSessionSync(session, telemetryResult, targetExam ?? undefined, "practice");
       void sendPendingSync();
     } else {
       setCurrentIndex((i) => i + 1);

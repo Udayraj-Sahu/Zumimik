@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { levelToTheta } from "@/services/practice";
 
 vi.setConfig({ testTimeout: 30000 });
 
@@ -50,8 +51,13 @@ describe("/play/sprint requests sessions with the verified slot contract", () =>
     apiPost.mockResolvedValue({ items: [ITEM], summary: { requested: 5, served: 1 } });
     await renderSprint();
     expect(await screen.findByText("12 x 12 = ?")).toBeInTheDocument();
-    expect(apiPost).toHaveBeenCalledWith("/practice/session", { slots: [{ skill: "Fractions and Decimals", bucket: "primary", n: 5 }] });
-    expect(apiGet.mock.calls.some(([p]) => String(p).includes("/practice/session"))).toBe(false);
+    expect(apiPost).toHaveBeenCalledWith("/practice/session", {
+      slots: [{ skill: "Fractions and Decimals", bucket: "primary", n: 5 }],
+      theta: levelToTheta(2), // Beginner targets level 2
+    });
+    // The backend served 1 of 5, so the safety net tops up from the general session endpoint (size = the 4 missing); never ?topic=.
+    expect(apiGet.mock.calls.some(([p]) => String(p).includes("/practice/session?topic="))).toBe(false);
+    expect(apiGet).toHaveBeenCalledWith("/practice/session?size=4");
   });
 
   it("an empty session shows an explanation instead of a blank exam", async () => {
