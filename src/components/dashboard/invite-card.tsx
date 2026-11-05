@@ -7,7 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Share2, KeyRound, QrCode, Copy, Check, X } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useReferralStore } from "@/stores/referral-store";
-import { useReferralStatus } from "@/hooks/queries/use-referral";
+import { useClaimReferralReward, useReferralStatus } from "@/hooks/queries/use-referral";
 import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
 import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
 import { useGenerateFriendQr } from "@/hooks/queries/use-friends";
@@ -27,6 +27,8 @@ export function InviteCard() {
   const referralOff = !IS_MOCK && isFeatureOff(flags, "referral_ladder");
   // Wait for the flag list to settle (loaded or failed) so a feature that is off never gets a pointless request.
   const { data: server } = useReferralStatus({ enabled: !flagsLoading && !referralOff });
+  const claim = useClaimReferralReward();
+  const [claimedName, setClaimedName] = useState<string | null>(null);
   const code = IS_MOCK ? local.code : (server?.code ?? null);
   const friendsJoined = IS_MOCK ? local.friendsJoined : (server?.verifiedReferrals ?? 0);
   const [copied, setCopied] = useState(false);
@@ -189,6 +191,52 @@ export function InviteCard() {
         <Stat label="Joined" value={`${friendsJoined}`} valueClass="text-[var(--primary)]" />
         <Stat label="Earned" value={`${earnedXp} XP`} valueClass="text-primary" />
       </div>
+
+      {/* Reward ladder (GET /referral rungs; claim = POST /referral/claim) */}
+      {!IS_MOCK && !referralOff && server && server.rungs.length > 0 && (
+        <div data-testid="referral-ladder" className="mt-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-02)] p-4">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Reward ladder</p>
+          <p data-testid="referral-next" className="mt-1.5 text-[11px] text-muted-foreground/70">
+            {server.nextRung
+              ? `Next: ${server.nextRung.name}, ${server.nextRung.remaining} more verified ${server.nextRung.remaining === 1 ? "friend" : "friends"}.`
+              : "You have reached every reward."}
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {server.rungs.map((r) => (
+              <li key={r.threshold} className="flex items-center gap-2 text-[12px]">
+                <span className="w-7 shrink-0 text-right font-mono font-bold text-muted-foreground">{r.threshold}</span>
+                <span className="min-w-0 flex-1 truncate text-foreground">{r.name}</span>
+                <span className={r.granted ? "text-[var(--primary)]" : r.reached ? "text-chart-4" : "text-muted-foreground/40"}>
+                  {r.granted ? "Claimed" : r.reached ? "Ready" : "Locked"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {server.claimable && (
+            <button
+              type="button"
+              onClick={() => {
+                setClaimedName(null);
+                claim.mutate(undefined, { onSuccess: (c) => setClaimedName(c.name) });
+              }}
+              disabled={claim.isPending}
+              className="mt-3 flex h-11 w-full items-center justify-center rounded-full bg-primary font-mono text-[12px] font-bold uppercase tracking-wide text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50"
+            >
+              {claim.isPending ? "Claiming…" : `Claim ${server.claimable.name}`}
+            </button>
+          )}
+          {claimedName && (
+            <p role="status" data-testid="referral-claimed" className="mt-2 text-center text-[12px] text-[var(--primary)]">
+              Claimed: {claimedName}.
+            </p>
+          )}
+          {claim.error && (
+            <p role="alert" data-testid="referral-claim-error" className="mt-2 text-center text-[12px] text-destructive">
+              {claim.error instanceof Error ? claim.error.message : "Couldn't claim the reward."}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* CTA */}
       <button

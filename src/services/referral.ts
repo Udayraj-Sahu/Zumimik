@@ -5,21 +5,68 @@ import { IS_MOCK } from "@/lib/platform";
  * GET /api/v1/referral (feature flag `referral_ladder`) — the learner's server-issued referral code and ladder.
  * Only the fields the app uses are typed here.
  */
+export type BackendReferralRung = {
+  threshold: number;
+  name: string;
+  capability?: string;
+  tier?: string | null;
+  reached?: boolean;
+  granted?: boolean;
+  active?: boolean;
+  expires_at?: string | null;
+};
+
 export type BackendReferralStatus = {
   code: string;
   verified_referrals: number;
   by_status?: Record<string, number>;
+  rungs?: BackendReferralRung[];
   next_rung?: { threshold: number; name: string; remaining: number } | null;
   claimable?: { threshold: number; name: string } | null;
+  cooldown_clear?: boolean;
+  last_reward_at?: string | null;
 };
 
-export type ReferralStatus = { code: string; verifiedReferrals: number };
+export type ReferralRung = { threshold: number; name: string; reached: boolean; granted: boolean; expiresAt: string | null };
+
+export type ReferralStatus = {
+  code: string;
+  verifiedReferrals: number;
+  /** The reward ladder, lowest rung first (15 / 30 / 45 / 60 verified referrals on staging). */
+  rungs: ReferralRung[];
+  nextRung: { threshold: number; name: string; remaining: number } | null;
+  /** The rung the server says can be claimed right now, else null. */
+  claimable: { threshold: number; name: string } | null;
+};
 
 export async function getReferralStatus(): Promise<ReferralStatus | null> {
   // Mock mode has no server; the local development code in the referral store is used instead.
   if (IS_MOCK) return null;
   const res = await apiGet<BackendReferralStatus>("/referral");
-  return { code: res.code, verifiedReferrals: res.verified_referrals ?? 0 };
+  return {
+    code: res.code,
+    verifiedReferrals: res.verified_referrals ?? 0,
+    rungs: (res.rungs ?? [])
+      .filter((r) => typeof r?.threshold === "number" && typeof r?.name === "string")
+      .map((r) => ({ threshold: r.threshold, name: r.name, reached: r.reached === true, granted: r.granted === true, expiresAt: r.expires_at ?? null }))
+      .sort((a, b) => a.threshold - b.threshold),
+    nextRung: res.next_rung ?? null,
+    claimable: res.claimable ?? null,
+  };
+}
+
+export type ClaimedReward = { name: string; threshold: number; capability: string | null; expiresAt: string | null };
+
+/**
+ * POST /api/v1/referral/claim (no body) -> { claimed: { threshold, name, capability, tier, expires_at }, ...the new status }.
+ * Claims the rung the server says is due. 409 "no rung is due" / "that rung is already granted"; 429 when a reward was claimed
+ * within the cooldown window (the message says when the next is available). The server's message is surfaced as is.
+ */
+export async function claimReferralReward(): Promise<ClaimedReward> {
+  const res = await apiPost<{ claimed?: { name?: string; threshold?: number; capability?: string | null; expires_at?: string | null } }>("/referral/claim");
+  const c = res?.claimed;
+  if (!c || typeof c.name !== "string" || typeof c.threshold !== "number") throw new Error("The server did not confirm the reward.");
+  return { name: c.name, threshold: c.threshold, capability: c.capability ?? null, expiresAt: c.expires_at ?? null };
 }
 
 // ── Invite link: https://<app>/?ref=<CODE> ──────────────────────────────────────────────────────────────────────

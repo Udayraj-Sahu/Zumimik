@@ -23,7 +23,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { usePracticeSession } from "@/hooks/queries/use-practice";
-import { BANK_TOPIC_PREFIX } from "@/services/practice";
+import { BANK_TOPIC_PREFIX, parseLevel } from "@/services/practice";
+import { AdInterstitial } from "@/components/ads/ad-interstitial";
+import { ServerHintPanel } from "@/components/practice/server-hint";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { templatesKeys } from "@/hooks/queries/use-templates";
 import { useQueryClient } from "@tanstack/react-query";
@@ -58,6 +60,10 @@ export default function PracticePage() {
   const returnTo = searchParams.get("returnTo") || "/dashboard";
   const skillParam = searchParams.get("skill");
   const bankTopicParam = searchParams.get("bankTopic");
+  // From the technique page: a difficulty level (1-5) and/or start=1 begin the session without the picker.
+  const levelParam = parseLevel(searchParams.get("level"));
+  const autoStart = searchParams.get("start") === "1" || levelParam !== undefined;
+  const autoStartedRef = useRef(false);
 
   const [practiceType, setPracticeType] = useState<PracticeType>(templateIdParam ? "templates" : "mcq");
   const [topic, setTopic] = useState("");
@@ -76,7 +82,7 @@ export default function PracticePage() {
     isLoading,
     error: sessionError,
     refetch: refetchSession,
-  } = usePracticeSession(topic, 10, difficulty, targetExam, { enabled: phase === "active" && practiceType === "mcq" });
+  } = usePracticeSession(topic, 10, difficulty, targetExam, { enabled: phase === "active" && practiceType === "mcq", level: levelParam });
   const [syncState, setSyncState] = useState<"idle" | "saving" | "saved" | "queued" | "failed">("idle");
   const pendingSyncRef = useRef<SyncEvent[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -116,8 +122,13 @@ export default function PracticePage() {
   // selected; anything else is ignored rather than requested.
   useEffect(() => {
     if (!skillParam || topic) return;
-    if (sprintData?.topics.some((t) => t.id === skillParam)) setTopic(skillParam);
-  }, [skillParam, sprintData, topic]);
+    if (!sprintData?.topics.some((t) => t.id === skillParam)) return;
+    setTopic(skillParam);
+    if (autoStart && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      startPractice();
+    }
+  }, [skillParam, sprintData, topic]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Deep link from an Explorer problem-bank topic: /learn/practice?bankTopic=<label>. Starts a GET /practice/session
   // for that corpus label straight away (it is not in the skill picker, so there is nothing to choose).
@@ -607,6 +618,7 @@ export default function PracticePage() {
     const accuracy = completed.total > 0 ? Math.round((completed.correct / completed.total) * 100) : 0;
     return (
       <PageContainer ref={contentRef} size="sm" className="pt-8">
+        <AdInterstitial />
         <div className="text-center mb-6 max-[359px]:mb-4">
           <div className={cn(
             "mx-auto mb-4 grid size-20 place-items-center rounded-full text-[28px] font-bold backdrop-blur-xl",
@@ -964,6 +976,7 @@ export default function PracticePage() {
         {question && (
           <div key={question.id} ref={questionRef}>
             <p className="text-[16px] font-bold leading-snug text-foreground mb-5 tracking-[-0.01em]">{question.text}</p>
+            {!question.hint && <ServerHintPanel key={question.id} templateId={question.id} disabled={revealed} />}
             {!revealed && question.hint && (
               <div className="mb-5">
                 {!hintOpen ? (

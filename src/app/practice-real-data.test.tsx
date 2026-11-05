@@ -48,11 +48,16 @@ class FakeApiError extends Error {
   }
 }
 
-async function setup(mock = false) {
+async function setup(mock = false, signedIn = false) {
   vi.resetModules();
   vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { default: PracticePage } = await import("@/app/(app)/learn/practice/page");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
+  if (signedIn) {
+    // Only the hint helper needs a signed-in learner (its policy is asked per user); the sync tests keep the signed-out path.
+    const { useAuthStore } = await import("@/stores/auth-store");
+    useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "a@x.com", role: "user" }, isAuthenticated: true });
+  }
   const { ApiError } = await import("@/services/api");
   useOnboardingStore.setState({ targetExam: "cat", isOnboarded: true });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -67,6 +72,7 @@ async function setup(mock = false) {
 
 function routeApi(opts: { catalog?: unknown; session?: unknown; sync?: unknown } = {}) {
   apiGet.mockImplementation(async (path: string) => {
+    if (path === "/chat/policy") return { hints_only: true, rag: false, llm_enabled: false, model: null, daily_token_budget: 20000, budget_remaining: 20000, usage_today: {} };
     if (path === "/practice/catalog") {
       if (opts.catalog instanceof Error) throw opts.catalog;
       return opts.catalog ?? CATALOG;
@@ -143,6 +149,22 @@ describe("/learn/practice against the backend (real mode)", () => {
       });
       // The backend serves free-text items (no choices): an answer input, no fabricated options.
       expect(screen.getByLabelText("Your answer")).toBeInTheDocument();
+    });
+
+    it("a question without its own hint offers a server hint for that problem (POST /chat/query)", async () => {
+      routeApi();
+      const sessionAndHint = apiPost.getMockImplementation()!;
+      apiPost.mockImplementation(async (path: string, body: unknown) =>
+        path === "/chat/query"
+          ? { template_id: "t1", mode: "hint_ladder", answer_withheld: true, level: 1, max_level: 1, hint: "Think about which method fits.", budget_remaining: 20000 }
+          : sessionAndHint(path, body),
+      );
+      await setup(false, true);
+      await startSession();
+      expect(await screen.findByText("7 x 8 = ?")).toBeInTheDocument();
+      fireEvent.click(await screen.findByRole("button", { name: "Need a hint?" }));
+      await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/chat/query", { template_id: "t1", level: 1 }));
+      expect(await screen.findByText("Think about which method fits.")).toBeInTheDocument();
     });
 
     it("renders no invented choices: the backend serves free-text items", async () => {

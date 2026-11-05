@@ -149,3 +149,67 @@ describe("InviteCard friend QR (POST /social/friends/qr/generate)", () => {
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });
+
+describe("InviteCard reward ladder (GET /referral rungs, POST /referral/claim)", () => {
+  const RUNG = (threshold: number, name: string, over: Record<string, unknown> = {}) => ({
+    threshold, name, capability: "x", tier: null, reached: false, granted: false, active: false, grant_months: null, expires_at: null, ...over,
+  });
+  const STATUS = (over: Record<string, unknown> = {}) => ({
+    code: "ABCD1234",
+    verified_referrals: 16,
+    by_status: {},
+    rungs: [RUNG(15, "+1 exam lane", { reached: true }), RUNG(30, "Offline queue")],
+    next_rung: { threshold: 30, name: "Offline queue", remaining: 14 },
+    claimable: null,
+    cooldown_clear: true,
+    ...over,
+  });
+
+  beforeEach(() => {
+    apiGet.mockReset();
+    apiPost.mockReset();
+    localStorage.clear();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("shows the ladder and the next reward; no claim button when nothing is due", async () => {
+    apiGet.mockImplementation(async (path: string) => (path === "/api/config" ? { flags: {} } : STATUS()));
+    await renderCard(false);
+    const ladder = await screen.findByTestId("referral-ladder");
+    expect(ladder).toHaveTextContent("+1 exam lane");
+    expect(ladder).toHaveTextContent("Offline queue");
+    expect(screen.getByTestId("referral-next")).toHaveTextContent("Next: Offline queue, 14 more verified friends.");
+    expect(screen.queryByRole("button", { name: /^Claim / })).not.toBeInTheDocument();
+  });
+
+  it("a due reward gets a Claim button that POSTs /referral/claim and says what was claimed", async () => {
+    apiGet.mockImplementation(async (path: string) =>
+      path === "/api/config" ? { flags: {} } : STATUS({ claimable: { threshold: 15, name: "+1 exam lane" } }),
+    );
+    apiPost.mockResolvedValue({ claimed: { threshold: 15, name: "+1 exam lane", capability: "extra_lane", tier: null, expires_at: null } });
+    await renderCard(false);
+    fireEvent.click(await screen.findByRole("button", { name: "Claim +1 exam lane" }));
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/referral/claim"));
+    expect(await screen.findByTestId("referral-claimed")).toHaveTextContent("Claimed: +1 exam lane.");
+  });
+
+  it("the server's refusal (e.g. the cooldown) is shown as returned", async () => {
+    apiGet.mockImplementation(async (path: string) =>
+      path === "/api/config" ? { flags: {} } : STATUS({ claimable: { threshold: 15, name: "+1 exam lane" } }),
+    );
+    const { ApiError } = await import("@/services/api");
+    apiPost.mockRejectedValue(new ApiError(429, "a reward was claimed recently; the next is available 30 days after the last"));
+    await renderCard(false);
+    fireEvent.click(await screen.findByRole("button", { name: "Claim +1 exam lane" }));
+    expect(await screen.findByTestId("referral-claim-error")).toHaveTextContent("claimed recently");
+  });
+
+  it("with every rung earned it says so; with the flag off there is no ladder", async () => {
+    apiGet.mockImplementation(async (path: string) =>
+      path === "/api/config" ? { flags: {} } : STATUS({ next_rung: null, rungs: [RUNG(15, "+1 exam lane", { reached: true, granted: true })] }),
+    );
+    await renderCard(false);
+    expect(await screen.findByTestId("referral-next")).toHaveTextContent("You have reached every reward.");
+    expect(screen.getByTestId("referral-ladder")).toHaveTextContent("Claimed");
+  });
+});
