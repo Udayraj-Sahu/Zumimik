@@ -234,6 +234,18 @@ describe("/learn/practice against the backend (real mode)", () => {
       expect(refreshed).toEqual(expect.arrayContaining(["adaptive-state", "dashboard", "account-summary", "sprint"]));
     });
 
+    it("signed in and offline: the batch is stored on the device and the UI says so, never \"Progress saved\"", async () => {
+      localStorage.setItem("zuzumik-auth", JSON.stringify({ state: { user: { id: "u1", name: "A", email: "a@x.com", role: "user" }, token: "t", refreshToken: "r", isAuthenticated: true, isOnboarded: false }, version: 0 }));
+      routeApi({ sync: new TypeError("Failed to fetch") });
+      const { invalidate } = await setup();
+      await answerCorrectly();
+      await waitFor(() => expect(screen.getByTestId("sync-status")).toHaveTextContent("Saved on this device"));
+      expect(screen.getByTestId("sync-status")).not.toHaveTextContent("Progress saved");
+      expect(invalidate).not.toHaveBeenCalled();
+      const { db } = await import("@/services/offline/db");
+      expect(await db.eventQueue.count()).toBe(1);
+    });
+
     it("does not claim saved when /sync fails; Retry re-sends the SAME event ids and then refreshes", async () => {
       routeApi({ sync: new FakeApiError(503, "down") });
       const { invalidate } = await setup();

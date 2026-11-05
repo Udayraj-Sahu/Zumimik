@@ -20,7 +20,8 @@ import { usePlanStore } from "@/stores/plan-store";
 import { IS_MOCK } from "@/lib/platform";
 import { usePaywallStore } from "@/stores/paywall-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import { PLANS, type PlanId } from "@/lib/types/onboarding";
+import { type PlanId } from "@/lib/types/onboarding";
+import { usePricedPlans } from "@/hooks/queries/use-plans";
 import { formatINR } from "@/lib/text";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
@@ -100,6 +101,7 @@ export function PaywallModal() {
 
   const [planOptionId, setPlanOptionId] = useState<string>("dual-lane");
   const [billing, setBilling] = useState<"annual" | "monthly">("annual");
+  const { plans, cycle } = usePricedPlans();
   const [lane, setLane] = useState<string>(planLane || targetExam || "cat");
   const theme = useThemeStore((s) => s.theme);
   const [state, setState] = useState<"idle" | "success">("idle");
@@ -183,7 +185,7 @@ export function PaywallModal() {
   if (!open || !action) return null;
 
   const selectedPlan = PREP_OPTIONS.find((o) => o.id === planOptionId)!;
-  const selectedPlanDetails = PLANS.find((plan) => plan.id === planOptionId)!;
+  const selectedPlanDetails = plans.find((plan) => plan.id === planOptionId)!;
   const throttle = planOptionId === "dual-lane" ? 100 : planOptionId === "single-lane" ? 72 : 19;
 
   return createPortal(
@@ -425,7 +427,7 @@ export function PaywallModal() {
                     <Zap size={14} />
                     {selectedPlan.cta}
                     {selectedPlanDetails.id !== "initiate" &&
-                      ` — ${formatINR(selectedPlanDetails.billing[billing])}/${billing === "annual" ? "YEAR" : "MONTH"}`}
+                      ` — ${formatINR(selectedPlanDetails.billing[cycle(billing)])}/${cycle(billing) === "annual" ? "YEAR" : "MONTH"}`}
                   </button>
                   <p className="mt-2 text-center text-[9px] font-medium text-muted-foreground/35">
                     You can change this anytime in Settings.

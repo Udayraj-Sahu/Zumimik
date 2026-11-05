@@ -91,13 +91,19 @@ describe("API failure / retry / refresh (src/services/offline/sync.ts)", () => {
     expect(useNetworkStore.getState().syncQueue).toHaveLength(1);
   });
 
-  it("7. 4xx feedback at the retry cap is dropped entirely (queue + DB)", async () => {
+  it("7. 4xx feedback at the retry cap is PARKED (kept on disk, no more automatic retries), never deleted", async () => {
     enqueue("m1", "content/feedback");
     await seedFeedback("m1", 2);
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 404 }));
     await syncAll();
-    expect(await db.feedbackQueue.count()).toBe(0);
+    const kept = await db.feedbackQueue.get("m1");
+    expect(kept).toMatchObject({ parked: true, retryCount: 3 });
     expect(useNetworkStore.getState().syncQueue).toHaveLength(0);
+    // a later sync does not retry a parked item
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetchMock);
+    await syncAll();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("8. 4xx on a NON-feedback key is never dropped (kept for manual/human retry)", async () => {

@@ -1,6 +1,5 @@
 import type { SprintSession } from "@/lib/types/sprint-session";
-import { apiGet } from "./api";
-import { mapBackendPracticeSession, type BackendPracticeSessionResponse } from "./backend-adapters";
+import { getPracticeSession } from "./practice";
 
 import { IS_MOCK } from "@/lib/platform";
 
@@ -17,7 +16,7 @@ export async function getSprintQuestions(
     await delay(300);
     return generateSprintSession(topic, length, difficulty, domain);
   }
-  const params = new URLSearchParams({ topic, size: String(length) });
-  const response = await apiGet<BackendPracticeSessionResponse>(`/practice/session?${params}`);
-  return mapBackendPracticeSession(response, { topic, difficulty, domain });
+  // A sprint topic is a catalog :Skill. GET /practice/session?topic= filters corpus topic labels (a different vocabulary) and
+  // returned no questions for most skills, so Sprint uses the same POST slot request as Practice.
+  return getPracticeSession(topic, length, difficulty, domain);
 }

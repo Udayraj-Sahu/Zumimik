@@ -35,12 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Help & About", href: "/settings/help", icon: HelpCircle, section: "Support" },
 ];
 
-export const MOBILE_NAV: NavItem[] = [
-  { label: "Home", href: "/dashboard", icon: Home },
-  { label: "Learn", href: "/learn", icon: BookOpen },
-  { label: "Play", href: "/play", icon: Zap },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
+export { MOBILE_NAV } from "@/lib/config/nav";
 
 const RADAR_AXES: RadarAxis[] = [
   { label: "Speed", value: 0.9 },

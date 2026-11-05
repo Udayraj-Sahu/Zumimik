@@ -1,6 +1,7 @@
 import type { SprintResult, SprintSession } from "@/lib/types/sprint-session";
 import { IS_MOCK } from "@/lib/platform";
 import { apiPost } from "./api";
+import { enqueueEventBatch, isPermanentRejection, parkEventBatch, removeEventBatch } from "./offline/sync";
 
 export type SyncEvent = Record<string, unknown>;
 
@@ -66,6 +67,29 @@ export async function postSyncEvents(events: SyncEvent[]): Promise<void> {
   await apiPost("/sync", { events });
 }
 
+/**
+ * Durable send. The batch is written to Dexie first, then posted:
+ *  - "synced": the backend acknowledged it (the stored copy is removed).
+ *  - "queued": it could not be delivered (offline/server trouble); it stays on the device and is retried automatically.
+ * A permanent rejection (e.g. 422) is parked and thrown, so the caller never claims it was saved.
+ */
+export async function sendSyncBatch(events: SyncEvent[]): Promise<"synced" | "queued"> {
+  if (IS_MOCK) return "synced";
+  const id = await enqueueEventBatch(events);
+  try {
+    await apiPost("/sync", { events });
+    await removeEventBatch(id);
+    return "synced";
+  } catch (err) {
+    if (isPermanentRejection(err)) {
+      await parkEventBatch(id, err instanceof Error ? err.message : "rejected");
+      throw err;
+    }
+    if (!id) throw err; // nothing durable to fall back on
+    return "queued";
+  }
+}
+
 export async function syncSprintResult(
   session: Pick<SprintSession, "questions" | "topic"> & Partial<Pick<SprintSession, "domain">>,
   result: SprintResult,
@@ -73,5 +97,6 @@ export async function syncSprintResult(
   sessionType = "sprint",
 ): Promise<void> {
   if (IS_MOCK) return;
-  await postSyncEvents(buildSprintSyncEvents(session, result, domain, sessionType));
+  // Durable: a failed send is kept on the device and retried, not dropped.
+  await sendSyncBatch(buildSprintSyncEvents(session, result, domain, sessionType));
 }

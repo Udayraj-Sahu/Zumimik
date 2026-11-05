@@ -3,7 +3,8 @@
 import { useId, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { PLANS, type PlanId } from "@/lib/types/onboarding";
+import { type PlanId } from "@/lib/types/onboarding";
+import { usePricedPlans } from "@/hooks/queries/use-plans";
 import { formatINR } from "@/lib/text";
 import { cn } from "@/lib/utils";
 import {
@@ -62,17 +63,18 @@ export function ClearanceTiers({
   billing?: BillingCycle;
   onBillingChange?: (billing: BillingCycle) => void;
 }) {
+  const { plans, annualAvailable, cycle } = usePricedPlans();
   const [localBilling, setLocalBilling] = useState<BillingCycle>("annual");
   const [selectionAnimation, setSelectionAnimation] = useState(1);
   const reduceMotion = useReducedMotion();
   const idPrefix = useId();
-  const currentBilling = billing ?? localBilling;
+  const currentBilling = cycle(billing ?? localBilling);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const selectedPlan = PLANS.find((plan) => plan.id === value);
+  const selectedPlan = plans.find((plan) => plan.id === value);
   const discountPlan =
     selectedPlan?.id === "initiate"
-      ? PLANS.find((plan) => plan.id === "single-lane")!
-      : (selectedPlan ?? PLANS.find((plan) => plan.id === "single-lane")!);
+      ? plans.find((plan) => plan.id === "single-lane")!
+      : (selectedPlan ?? plans.find((plan) => plan.id === "single-lane")!);
   const annualSavings = getAnnualSavingsPercent(
     discountPlan.billing.annual,
     discountPlan.billing.monthly,
@@ -121,6 +123,7 @@ export function ClearanceTiers({
           billing={currentBilling}
           onChange={changeBilling}
           annualSavings={annualSavings}
+          hidden={!annualAvailable}
           variant="compact"
           className="ml-auto"
         />
@@ -150,7 +153,7 @@ export function ClearanceTiers({
       <div role="radiogroup" aria-label="Clearance tiers" className="mt-3 space-y-2">
         {PREP_OPTIONS.map((option, index) => {
           const active = option.id === value;
-          const plan = PLANS.find((candidate) => candidate.id === option.id)!;
+          const plan = plans.find((candidate) => candidate.id === option.id)!;
           const amount = plan.billing[currentBilling];
           const descriptionId = `${idPrefix}-clearance-description-${option.id}`;
 

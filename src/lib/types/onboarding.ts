@@ -49,6 +49,8 @@ export const PLANS: {
   cadence: string;
   billing: Record<"annual" | "monthly", number>;
   badge?: string;
+  /** Free-trial length from the backend (GET /billing/plans). Absent for bundled/mock pricing. */
+  trialDays?: number;
   tracks?: string[];
   extra?: string;
   features: string[];

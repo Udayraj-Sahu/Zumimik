@@ -5,6 +5,12 @@ import type { PlanId } from "@/lib/types/onboarding";
 import { ClearanceTiers } from "@/components/paywall/clearance-tiers";
 import { BillingCycleToggle } from "@/components/onboarding/intros/plan-intro";
 
+
+// These suites render the plan screens without a QueryClientProvider (the app always has one at the root): use the bundled pricing.
+vi.mock("@/hooks/queries/use-plans", async () => {
+  const { STATIC_PRICING } = await import("@/lib/pricing");
+  return { usePricedPlans: () => ({ ...STATIC_PRICING, cycle: (requested: "annual" | "monthly") => requested }) };
+});
 function ControlledClearanceTiers({ onChange = vi.fn() }: { onChange?: (id: string) => void }) {
   const [value, setValue] = useState<PlanId>("dual-lane");
 

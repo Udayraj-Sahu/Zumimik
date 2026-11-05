@@ -1,26 +1,29 @@
 # Remaining frontend tasks
 
-Generated: 2026-11-04T16:54:04.567Z
+Updated after the frontend pass that followed the post-integration audit. Status: DONE (implemented and unit-tested), PARTIAL, BLOCKED (depends on the backend or a decision), OPEN.
+"Unit-tested" means automated tests with a mocked API; nothing below was exercised on a real device, and no staging write was run.
 
-Frontend work still required after the integration pass. Several depend on the backend items (BE-x) listed in EXAM_ARENA_REMAINING_BACKEND_REQUIREMENTS.md.
-
-| ID | Priority | Task | Detail | Acceptance |
+| ID | Priority | Status | Task | What was done / what remains |
 |---|---|---|---|---|
-| FE-1 | P0 | Verify onboarding persistence end to end | Run save -> logout -> login on a disposable staging account; confirm every field round-trips; adjust vocabulary mapping per BE-1. | - |
-| FE-2 | P1 | Fix Sprint session request | Replace GET /practice/session?topic=<skill> with the POST slot contract used by Practice (returns 0 items for most skills today). | - |
-| FE-3 | P1 | Durable offline queues | Persist practice/sprint/mock/profile writes in Dexie; do not delete queued items after max retries; show sync status. | - |
-| FE-4 | P1 | Secure token storage on native | Move access/refresh tokens out of localStorage on Android; review allowBackup=true. | - |
-| FE-5 | P1 | Mock exam completeness | Typed-answer input, passage/stimulus rendering, sectional mode, server score breakdown on results. | - |
-| FE-6 | P1 | Client BKT or mastery plan | Practice never updates mastery; ship the psychometrics package or depend on BE-2. | - |
-| FE-7 | P1 | Checkout flow | Wire GET /billing/plans, POST /billing/checkout and verify once BE-3 is done. | - |
-| FE-8 | P2 | History filters from real data | Remove getTopicFilters (fixture) from the history page in real mode; use blueprint sections. | - |
-| FE-9 | P2 | Read /api/config feature flags | Gate UI by flags and show a clear 'not enabled' state instead of generic errors. | - |
-| FE-10 | P2 | Profile edit to PATCH | Send name changes through PATCH /auth/me; keep edits from being local-only. | - |
-| FE-11 | P2 | Friends actions | Add friend by email/QR and remove-friend using the existing social routes. | - |
-| FE-12 | P2 | Socket.IO client for duels | Add socket.io-client; implement after BE-5; remove nonexistent /duel REST calls. | - |
-| FE-13 | P2 | Replace fabricated testimonials | src/lib/mock/reviews.ts content is shown to real users. | - |
-| FE-14 | P2 | Move non-mock constants out of lib/mock | SPRINT_CONFIG, MOBILE_NAV, help content are imported from lib/mock in real mode. | - |
-| FE-15 | P2 | Repair stale tests | Update responsive spec sidebar expectation (84 vs 250); fix 12 failing component tests. | - |
-| FE-16 | P3 | Remove dead exports | 17 service functions are never referenced (e.g. recordAdaptiveSession, getReportSummary, duel result submit). | - |
-| FE-17 | P3 | Hardcoded app info | Help page shows version 1.0.0 / build 2026.06.20 literals. | - |
-| FE-18 | P1 | Android runtime verification | Install the debug APK on a device/emulator and run the manual plan in the report (login, restore, offline, onboarding, practice). | - |
+| FE-1 | P0 | OPEN | Verify onboarding persistence end to end | Needs a real save -> logout -> login on a disposable staging account (a staging write was not run). Code path exists and is unit-tested. |
+| FE-2 | P1 | DONE | Fix Sprint session request | Sprint now uses the same `POST /practice/session` slot request as Practice (GET `?topic=` returned 0 items for 3 of 4 real skills). Retry now refetches (was a no-op `router.refresh()`), empty sessions show an explanation, the served session no longer refetches mid-sprint. Tests: `sprint-real-data.test.tsx`, `backend-routes.test.ts`. |
+| FE-3 | P1 | DONE | Durable offline queues | Dexie v3 adds `eventQueue`; practice/sprint attempt batches are written to disk before sending, retried with the same event ids, owned per user, parked (never deleted) on a permanent rejection. Queued feedback is now replayed from disk after a reload (it never was) and parked, not deleted, after 3 failed retries. UI says "Saved on this device. It will sync automatically..." and never "Progress saved" until the server acknowledges. Not covered: mock-exam submissions and profile saves are not queued. Tests: `durable-queue.test.ts`, `sync-retry.test.ts`, `practice-real-data.test.tsx`. |
+| FE-4 | P1 | PARTIAL | Secure token storage on native | `android:allowBackup` set to `false` (tokens in localStorage are no longer copied into device backups). Tokens are still in WebView localStorage: moving them to a secure-storage plugin adds a native dependency and needs a device test. Decision needed. |
+| FE-5 | P1 | PARTIAL | Mock exam completeness | Typed (TITA/numeric) answers now have an input; the text is sent as typed and graded by the server (`mock-run-typed.test.tsx`). Still open: passage/stimulus rendering (needs backend BE-4), sectional mode, server score breakdown on the results screen. |
+| FE-6 | P1 | BLOCKED | Client BKT or mastery plan | Depends on BE-2 (server-side mastery) or shipping the psychometrics package. Practice records attempts but mastery does not change. |
+| FE-7 | P1 | BLOCKED | Checkout flow | Staging reports no payment provider (`providers_available: []`); needs BE-3 first. |
+| FE-8 | P2 | DONE | History filters from real data | Topic filter options now come from `GET /mocks/blueprints` (`useHistoryTopicFilters`); only "All Topics" is shown until they load. Test: `history-filters.test.tsx`. |
+| FE-9 | P2 | DONE | Read /api/config feature flags | New `services/flags.ts` + `useFeatureFlags`. The referral card shows "Not enabled" (and does not request `/referral`) when the flag is off; mock-exam 404s explain that the feature isn't enabled. A flag that cannot be read hides nothing. Other gated screens (hubs, ads, tournaments) have no UI yet. Tests: `flags.test.ts`, `invite-card.test.tsx`. |
+| FE-10 | P2 | DONE | Profile edit to PATCH | A changed name is saved with `PATCH /auth/me` (`name` and `display_name`) before the local user changes; a rejection shows the error and keeps the old name. Email and phone have no backend field and stay on the device. Test: `profile-name-save.test.tsx`. |
+| FE-11 | P2 | DONE | Friends actions | The dead "Add" button now opens an email form (`POST /social/friends/request {email}`; backend refusals such as "no such learner" and "already exists" are shown as returned, and a sent request is never described as seen). Friend rows have a two-step Remove (`POST /social/friends/remove {friendship_id}`). QR friend add (`/friends/qr/*`) is still not built. Tests: `friends-requests.test.tsx`. |
+| FE-12 | P2 | BLOCKED | Socket.IO client for duels | Needs BE-5 (client protocol) and the `socket.io-client` dependency. |
+| FE-13 | P2 | OPEN | Replace fabricated testimonials | `src/lib/mock/reviews.ts` is shown to real users. Needs a business/legal decision on content. |
+| FE-14 | P2 | DONE | Move non-mock constants out of `lib/mock` | `SPRINT_CONFIG` -> `lib/config/sprint-config.ts`, `MOBILE_NAV` -> `lib/config/nav.ts`, FAQ -> `lib/content/faq.ts`. The mock modules re-export them, so mock mode is unchanged. Still in `lib/mock` and used in real mode: technique lessons and solve-along templates (bundled content; needs a product decision). |
+| FE-15 | P2 | OPEN | Repair stale tests | The 12 failing unit tests (intro carousels, ReviewCarousel, StallTimer) assert specific marketing copy and slide counts that have drifted (e.g. 5 slides vs 6, button text "With zuzumik", 24s vs 28s). Needs a design decision about which is intended; editing assertions to match would hide that. The responsive e2e still expects a 250px sidebar margin vs the 84px collapsed rail. |
+| FE-16 | P3 | OPEN | Remove dead exports | 17 service functions are never referenced (see the audit). Not removed in this pass. |
+| FE-17 | P3 | DONE | Hardcoded app info | Help page reads the real version/build: native via Capacitor `App.getInfo()`, web via the package version injected at build (`NEXT_PUBLIC_APP_VERSION`). Test: `help.test.ts`. |
+| FE-18 | P1 | OPEN | Android runtime verification | Needs a device or emulator. The APK was not rebuilt after these changes. |
+| FE-19 | P1 | DONE | Paywall prices from the backend | The paywall and plan screens hardcoded Pro at ₹399/month (₹3,990/year) and Dual at ₹649, and a 14-day trial for Dual. `GET /billing/plans` (public) says Pro ₹504, Dual ₹806.40, Triple ₹1,058.40, a 7-day trial for every paid plan, and has **no annual price**. Prices now come from the backend (matched by lane count); the annual option is hidden and billing is monthly; until prices load, or if they fail, paid prices show an em dash, never the old numbers. Mock mode keeps the bundled prices. Tests: `pricing.test.ts`, `paywall-pricing.test.tsx`. Not done: checkout (no payment provider on staging), the Triple plan (no UI), onboarding marketing feature lists. |
+
+## Verification (this pass)
+`npm run typecheck` clean · ESLint 0 errors (4 old warnings) · Vitest 575 pass / 12 fail (the same 12 old failures) · `npm run build` passes · `git diff --check` clean.

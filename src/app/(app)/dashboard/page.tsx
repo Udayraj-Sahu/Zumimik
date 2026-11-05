@@ -73,7 +73,7 @@ const QUICK_ACCESS_ITEMS = [
   { label: "Clubs", icon: Users, color: AMBER_LIGHT, bg: AMBER_LIGHT_12, href: "/dashboard/clubs" },
   { label: "Store", icon: ShoppingBag, color: ROSE_PINK, bg: ROSE_PINK_12, href: "/dashboard" },
   { label: "Feed", icon: Rss, color: GREEN_SOFT, bg: GREEN_SOFT_12, href: "/dashboard/feed" },
-  { label: "Family", icon: Home, color: ROSE_PINK, bg: ROSE_PINK_12, href: "/dashboard" },
+  { label: "Family", icon: Home, color: ROSE_PINK, bg: ROSE_PINK_12, href: "/dashboard/family" },
 ];
 
 /* ------------------------------------------------------------------ */

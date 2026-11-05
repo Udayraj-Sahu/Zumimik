@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getFriendsSummary, getFriendActivity, respondToFriendRequest, type FriendRequestAction } from "@/services/friends";
+import { getFriendsSummary, getFriendActivity, respondToFriendRequest, sendFriendRequest, removeFriend, type FriendRequestAction } from "@/services/friends";
 import type { Friend, FriendActivity } from "@/lib/types/friends";
 
 type FriendsData = {
@@ -26,6 +26,22 @@ export function useRespondToFriendRequest() {
   return useMutation({
     mutationFn: ({ friendshipId, action }: { friendshipId: string; action: FriendRequestAction }) =>
       respondToFriendRequest(friendshipId, action),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
+  });
+}
+
+export function useSendFriendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (email: string) => sendFriendRequest(email),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
+  });
+}
+
+export function useRemoveFriend() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendshipId: string) => removeFriend(friendshipId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
   });
 }

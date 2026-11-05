@@ -44,3 +44,19 @@ export async function respondToFriendRequest(friendshipId: string, action: Frien
   if (IS_MOCK) return;
   await apiPost("/social/friends/respond", { friendship_id: friendshipId, action });
 }
+
+/**
+ * POST /api/v1/social/friends/request { email } -> { friendship_id, status: "pending" }.
+ * 404 "no such learner" (unknown email, or your own), 409 "a request or friendship already exists". A request to a child is held
+ * for their parent and answers identically, so the UI must not claim the person has seen it. Mock mode has no server (no-op).
+ */
+export async function sendFriendRequest(email: string): Promise<void> {
+  if (IS_MOCK) return;
+  await apiPost("/social/friends/request", { email: email.trim() });
+}
+
+/** POST /api/v1/social/friends/remove { friendship_id } -> { friendship_id, status: "removed" } (404 if there is no such friendship). */
+export async function removeFriend(friendshipId: string): Promise<void> {
+  if (IS_MOCK) return;
+  await apiPost("/social/friends/remove", { friendship_id: friendshipId });
+}

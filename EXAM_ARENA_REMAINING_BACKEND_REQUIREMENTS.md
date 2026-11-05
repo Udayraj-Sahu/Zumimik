@@ -19,3 +19,10 @@ Work the backend team must still do. Items describing new contracts are proposal
 | BE-11 | P3 | Notification feed and push registration | Only /dashboard/events exists. | Feed, read-state and push token endpoints. |
 | BE-12 | P3 | Enable flags for testing | referral_ladder, virtual_hubs, ad_engine, tournament, location_gamification are off on staging. | Flags on in staging so integrations can be verified. |
 | BE-13 | P3 | Sync repository copy with staging | Downloads/Speed-Gym-main lacks PATCH /auth/me present on staging. | Repo contains the deployed code. |
+
+## Added after the pricing check
+
+| ID | Priority | Task | Detail | Acceptance |
+|---|---|---|---|---|
+| BE-14 | P1 | Decide annual billing | `GET /billing/plans` has monthly prices only (no annual amount or cycle), while the product UI was designed around annual (about 10x monthly). Either add annual pricing and a billing-cycle field to `POST /billing/checkout`, or confirm monthly-only. The frontend now shows monthly only. | Plans response states the supported cycles. |
+| BE-15 | P2 | Plan marketing facts | Feature lists (for example "1:1 mentor check-ins", "Priority drill matching") and plan names are bundled copy with no backend source. | A plan response that includes what each tier grants, or confirmation the copy is marketing-only. |

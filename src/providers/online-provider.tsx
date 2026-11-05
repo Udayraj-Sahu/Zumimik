@@ -16,6 +16,8 @@ export function OnlineProvider({ children }: { children: React.ReactNode }) {
 
     setOnline(isOnline());
     clearExpiredCache().catch(() => {});
+    // Pending work from a previous session (queued attempts/feedback) is sent as soon as the app starts online.
+    if (isOnline()) void syncAll().catch(() => {});
 
     const goOnline = () => {
       setOnline(true);

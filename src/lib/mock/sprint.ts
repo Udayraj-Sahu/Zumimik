@@ -36,10 +36,7 @@ const SPRINT_TOPICS_BY_DOMAIN: Record<string, SprintTopic[]> = {
   ],
 };
 
-export const SPRINT_CONFIG: SprintConfig = {
-  lengths: [5, 10, 15],
-  difficulties: ["Adaptive", "Beginner", "Advanced"],
-};
+export { SPRINT_CONFIG } from "@/lib/config/sprint-config";
 
 export function getTopicsByDomain(domain: string): SprintTopic[] {
   return SPRINT_TOPICS_BY_DOMAIN[domain] ?? SPRINT_TOPICS_BY_DOMAIN["cat"] ?? [];

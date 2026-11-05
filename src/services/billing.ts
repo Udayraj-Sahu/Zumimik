@@ -45,6 +45,18 @@ export function mapSubscription(response: BackendSubscriptionResponse): Subscrip
   };
 }
 
+/** GET /api/v1/billing/plans (public): the real tier prices. Only the fields pricing needs are typed. */
+export type BackendPlansResponse = {
+  plans: Array<{ tier: string; lanes: number; usd_cents: number; inr_paise: number; trial_days: number; ad_free: boolean }>;
+  trial_days: number;
+  default_currency: string;
+  providers_available: string[];
+};
+
+export async function getPlans(): Promise<BackendPlansResponse> {
+  return apiGet<BackendPlansResponse>("/billing/plans");
+}
+
 export async function getSubscription(): Promise<Subscription> {
   if (IS_MOCK) {
     return { tier: "free", isPaid: false, status: null, periodEnd: null, trialEndsAt: null, cancelAtPeriodEnd: false };

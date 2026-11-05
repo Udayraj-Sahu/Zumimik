@@ -81,9 +81,11 @@ describe("frontend routes implemented by Speed-Gym", () => {
       slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }],
     });
 
-    mockedApiGet.mockResolvedValueOnce(emptySession as never);
+    // Sprint uses the same slot request: GET ?topic= returned no questions for most catalog skills (verified on staging).
+    mockedApiPost.mockResolvedValueOnce(emptySession as never);
     await getSprintQuestions("nikhilam", 10, "Beginner", "cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/session?topic=nikhilam&size=10");
+    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", { slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }] });
+    expect(mockedApiGet).not.toHaveBeenCalledWith(expect.stringContaining("/practice/session"));
   });
 
   it("uses the server-scored mock history and blueprint routes", async () => {

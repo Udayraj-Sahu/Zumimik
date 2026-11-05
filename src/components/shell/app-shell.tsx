@@ -9,7 +9,7 @@ import { LogOut, Zap } from "lucide-react";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { ZuzumikWordmark } from "@/components/brand/zuzumik-wordmark";
 import { cn } from "@/lib/utils";
-import { MOBILE_NAV } from "@/lib/mock/dashboard";
+import { MOBILE_NAV } from "@/lib/config/nav";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSubscription } from "@/hooks/queries/use-subscription";
 import { useThemeStore } from "@/stores/theme-store";

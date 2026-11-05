@@ -1,6 +1,12 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 
+
+// These suites render the plan screens without a QueryClientProvider (the app always has one at the root): use the bundled pricing.
+vi.mock("@/hooks/queries/use-plans", async () => {
+  const { STATIC_PRICING } = await import("@/lib/pricing");
+  return { usePricedPlans: () => ({ ...STATIC_PRICING, cycle: (requested: "annual" | "monthly") => requested }) };
+});
 // The carousel reads live dashboard data for the "up next" slide; a non-empty
 // list keeps every Arena slide in the flow (Arena 7, Pitch 6: sponsor + 5 Pitch-only).
 vi.mock("@/hooks/queries/use-dashboard", () => ({

@@ -8,6 +8,7 @@ import { ArrowLeft, Check, X, Clock, FileText, ChevronRight } from "lucide-react
 import { cn } from "@/lib/utils";
 import { useMockPaperSession } from "@/hooks/queries/use-mock-exam";
 import { submitMock, submitMockAnswer } from "@/services/mock-exam";
+import { gatedFeatureMessage } from "@/services/flags";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
 import { useFeedback } from "@/hooks/use-feedback";
@@ -37,7 +38,7 @@ function MockRunContent() {
   const clearSnapshot = useResumeStore((s) => s.clearSnapshot);
   const {
     status, currentIndex, timeLeft, answers,
-    initSprint, resumeSprint, answerCurrent, nextQuestion, tick, jumpTo, completeSprint, reset,
+    initSprint, resumeSprint, answerCurrent, answerTextCurrent, nextQuestion, tick, jumpTo, completeSprint, reset,
   } = useSprintStore();
 
   const isResume = resumeParam && !!snapshot && snapshot.kind === "mock" && snapshot.paperId === paperId;
@@ -53,6 +54,12 @@ function MockRunContent() {
   const submittingRef = useRef(false);
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [typedAnswer, setTypedAnswer] = useState("");
+  // Each question starts with its own saved answer (or empty), so jumping around never leaks text between questions.
+  useEffect(() => {
+    const q = activeQuestions[currentIndex];
+    setTypedAnswer(q ? (useSprintStore.getState().answers[q.id]?.answerText ?? "") : "");
+  }, [currentIndex, activeQuestions]);
   const [showFeedback, setShowFeedback] = useState(false);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout>>();
   const feedbackRef = useRef<HTMLDivElement>(null);
@@ -268,6 +275,22 @@ function MockRunContent() {
     }, 1200);
   };
 
+  // Typed (TITA / numeric) questions have no options. The answer is sent exactly as typed; the server grades it.
+  const handleTextSubmit = () => {
+    if (status !== "active") return;
+    const q = activeQuestions[currentIndex];
+    const text = typedAnswer.trim();
+    if (!q || !q.serverGraded || !activeMockId || !text) return;
+    answerTextCurrent(q.id, text, null);
+    const timeMs = Math.max(0, Date.now() - (useSprintStore.getState().questionStartTime ?? Date.now()));
+    submitMockAnswer(activeMockId, q.id, text, timeMs).catch(() => {
+      // Submit sends every answer again in bulk, so a lost single answer is recovered there.
+    });
+    setTypedAnswer("");
+    if (currentIndex >= activeQuestions.length - 1) void finishMock();
+    else nextQuestion();
+  };
+
   const handleNext = () => {
     if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
     const isLast = currentIndex >= (activeQuestions.length ?? 1) - 1;
@@ -314,7 +337,7 @@ function MockRunContent() {
     return (
       <PageContainer className="text-center">
         <p className="text-[13px] font-semibold text-destructive">Failed to load mock paper.</p>
-        <p className="mt-2 text-[12px] text-muted-foreground/60">{error instanceof Error ? error.message : "Something went wrong"}</p>
+        <p className="mt-2 text-[12px] text-muted-foreground/60">{gatedFeatureMessage(error, "Mock exams") ?? (error instanceof Error ? error.message : "Something went wrong")}</p>
         <div className="mt-6 flex justify-center gap-3 max-[359px]:gap-1.5">
           <Button
             variant="glass"
@@ -452,6 +475,31 @@ function MockRunContent() {
               {question.text}
             </p>
 
+            {question.answerType === "text" && question.serverGraded && (
+              <form
+                className="flex flex-col gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleTextSubmit();
+                }}
+              >
+                <label className="text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+                  Your answer
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    value={typedAnswer}
+                    onChange={(e) => setTypedAnswer(e.target.value)}
+                    placeholder="Type your answer"
+                    className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[15px] font-semibold text-foreground outline-none focus:border-primary/40"
+                  />
+                </label>
+                <Button type="submit" disabled={!typedAnswer.trim()} className="min-h-11">
+                  {currentIndex >= activeQuestions.length - 1 ? "Submit answer and finish" : "Submit answer"}
+                </Button>
+              </form>
+            )}
             <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
               {question.options.map((option, i) => {
                 const isSelected = selectedIndex === i;

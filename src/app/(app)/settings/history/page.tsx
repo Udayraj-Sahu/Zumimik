@@ -6,8 +6,8 @@ import gsap from "gsap";
 import { Clock, Award, ChevronRight, Filter, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
-import { useHistory } from "@/hooks/queries/use-history";
-import { getTopicFilters, DIFFICULTY_FILTER } from "@/lib/mock/history";
+import { useHistory, useHistoryTopicFilters } from "@/hooks/queries/use-history";
+import { DIFFICULTY_FILTER } from "@/lib/mock/history";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import type { HistoryEntry } from "@/lib/types/history";
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -86,7 +86,9 @@ export default function HistoryPage() {
   usePageMeta("History — Zuzumik");
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const domain = targetExam;
-  const TOPICS_FILTER_HISTORY = getTopicFilters(domain);
+  const { data: topicFilters } = useHistoryTopicFilters(domain);
+  // Until the blueprints load (or if they fail) only "All" is offered; no invented topics.
+  const TOPICS_FILTER_HISTORY = topicFilters ?? [{ id: "all", label: "All Topics" }];
   const { data: entries, isLoading, error } = useHistory(targetExam);
   const [topicFilter, setTopicFilter] = useState("all");
   const [diffFilter, setDiffFilter] = useState("all");

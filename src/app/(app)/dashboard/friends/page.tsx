@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Users, UserPlus, Swords, Zap, Award, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
-import { useFriends, useRespondToFriendRequest } from "@/hooks/queries/use-friends";
+import { useFriends, useRespondToFriendRequest, useSendFriendRequest, useRemoveFriend } from "@/hooks/queries/use-friends";
 import { toast } from "@/stores/toast-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
@@ -16,6 +16,39 @@ export default function FriendsPage() {
   usePageMeta("Friends — Zuzumik");
   const { data, isLoading, error } = useFriends();
   const respond = useRespondToFriendRequest();
+  const sendRequest = useSendFriendRequest();
+  const remove = useRemoveFriend();
+  const [addOpen, setAddOpen] = useState(false);
+  const [addEmail, setAddEmail] = useState("");
+  const [addMessage, setAddMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const submitAdd = () => {
+    const email = addEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAddMessage({ kind: "error", text: "Enter a valid email address." });
+      return;
+    }
+    setAddMessage(null);
+    sendRequest.mutate(email, {
+      // The backend answers identically whoever the account is, so this only says the request was sent, not that it was seen.
+      onSuccess: () => {
+        setAddMessage({ kind: "ok", text: "Friend request sent." });
+        setAddEmail("");
+      },
+      onError: (err) => setAddMessage({ kind: "error", text: err instanceof Error ? err.message : "Couldn't send the request." }),
+    });
+  };
+  const confirmAndRemove = (friendshipId: string | undefined) => {
+    if (!friendshipId) return;
+    if (confirmRemove !== friendshipId) {
+      setConfirmRemove(friendshipId);
+      return;
+    }
+    remove.mutate(friendshipId, {
+      onSettled: () => setConfirmRemove(null),
+      onError: (err) => toast.error("Couldn't remove this friend", err instanceof Error ? err.message : undefined),
+    });
+  };
   const answer = (friendshipId: string | undefined, name: string, action: "accept" | "decline") => {
     if (!friendshipId) return;
     respond.mutate(
@@ -49,11 +82,47 @@ export default function FriendsPage() {
         <div className="mt-3 flex justify-center">
           <Button
             size="sm"
+            onClick={() => {
+              setAddOpen((open) => !open);
+              setAddMessage(null);
+            }}
+            aria-expanded={addOpen}
             className="rounded-xl px-3 py-2.5 min-h-[44px] hover:scale-[1.05] active:scale-[0.95] max-[359px]:px-2.5 max-[359px]:py-2"
           >
             <UserPlus size={14} /> Add
           </Button>
         </div>
+        {addOpen && (
+          <form
+            data-testid="add-friend-form"
+            noValidate
+            className="mx-auto mt-3 flex w-full max-w-sm flex-col gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitAdd();
+            }}
+          >
+            <label className="text-left text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+              Friend&apos;s email
+              <input
+                type="email"
+                autoComplete="off"
+                value={addEmail}
+                onChange={(e) => setAddEmail(e.target.value)}
+                placeholder="friend@example.com"
+                className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[14px] font-semibold text-foreground outline-none focus:border-primary/40"
+              />
+            </label>
+            <Button type="submit" size="sm" disabled={sendRequest.isPending || !addEmail.trim()} className="min-h-[44px]">
+              {sendRequest.isPending ? "Sending…" : "Send request"}
+            </Button>
+            {addMessage && (
+              <p role={addMessage.kind === "error" ? "alert" : "status"} data-testid="add-friend-message" className={cn("text-[12px]", addMessage.kind === "error" ? "text-destructive" : "text-primary")}>
+                {addMessage.text}
+              </p>
+            )}
+          </form>
+        )}
       </div>
 
       <div ref={animateSection} data-section-index="0" className="mt-5 flex gap-2 overflow-x-auto max-[359px]:gap-1.5">
@@ -157,6 +226,18 @@ export default function FriendsPage() {
               >
                 <Swords size={12} /> Duel
               </button>
+              {f.friendshipId && (
+                <button
+                  type="button"
+                  onClick={() => confirmAndRemove(f.friendshipId)}
+                  disabled={remove.isPending}
+                  aria-label={confirmRemove === f.friendshipId ? `Confirm remove ${f.name}` : `Remove ${f.name}`}
+                  className="flex min-h-11 items-center rounded-xl px-3 py-2 text-micro font-bold text-muted-foreground outline-none transition-colors hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring whitespace-nowrap"
+                  style={{ background: GLASS_BG }}
+                >
+                  {confirmRemove === f.friendshipId ? "Confirm" : "Remove"}
+                </button>
+              )}
             </GlassCard>
           ))}
 

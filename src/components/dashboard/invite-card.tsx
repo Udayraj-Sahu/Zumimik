@@ -8,6 +8,8 @@ import { Share2, KeyRound, QrCode, Copy, Check, X } from "lucide-react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useReferralStore } from "@/stores/referral-store";
 import { useReferralStatus } from "@/hooks/queries/use-referral";
+import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
+import { isFeatureOff } from "@/services/flags";
 import { IS_MOCK } from "@/lib/platform";
 
 const REWARD_XP = 50;
@@ -18,7 +20,11 @@ export function InviteCard() {
   const { invitesSent, ensureCode, markInvited } = local;
   // Real mode: the code and the joined count are the SERVER's (GET /referral). A locally generated code was never issued by the
   // backend and would not redeem. While it loads, or if the feature is off, no code is shown rather than an invented one.
-  const { data: server } = useReferralStatus();
+  const { data: flags, isLoading: flagsLoading } = useFeatureFlags();
+  // GET /api/config says whether the referral ladder is on. When it is definitely off, say so (a bare 404 is indistinguishable from a bug).
+  const referralOff = !IS_MOCK && isFeatureOff(flags, "referral_ladder");
+  // Wait for the flag list to settle (loaded or failed) so a feature that is off never gets a pointless request.
+  const { data: server } = useReferralStatus({ enabled: !flagsLoading && !referralOff });
   const code = IS_MOCK ? local.code : (server?.code ?? null);
   const friendsJoined = IS_MOCK ? local.friendsJoined : (server?.verifiedReferrals ?? 0);
   const [copied, setCopied] = useState(false);
@@ -102,9 +108,14 @@ export function InviteCard() {
             </span>
           </div>
           <span className="rounded-md bg-[var(--accent-10)] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--primary)]">
-            Active
+            {referralOff ? "Not enabled" : "Active"}
           </span>
         </div>
+        {referralOff && (
+          <p data-testid="referral-off" role="status" className="mt-2 text-[11px] text-muted-foreground/60">
+            Referrals aren&apos;t enabled for your account yet.
+          </p>
+        )}
 
         <div className="mt-3 flex items-center gap-3">
           <div className="flex h-12 min-w-0 flex-1 items-center justify-between rounded-full border border-[var(--glass-border)] bg-[var(--glass-05)] px-4">

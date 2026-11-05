@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SPRINT_CONFIG } from "@/lib/mock/sprint";
+import { SPRINT_CONFIG } from "@/lib/config/sprint-config";
 
 const PAGE_SIZE = SPRINT_CONFIG.lengths[SPRINT_CONFIG.lengths.length - 1];
 

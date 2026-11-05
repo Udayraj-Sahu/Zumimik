@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Check, CreditCard, QrCode, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/lib/text";
-import { PLANS } from "@/lib/types/onboarding";
+import { usePricedPlans } from "@/hooks/queries/use-plans";
 import type { PlanId } from "@/lib/types/onboarding";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { useOnboardingStore } from "@/stores/onboarding-store";
@@ -46,18 +46,23 @@ export function BillingCycleToggle({
   annualSavings = 0,
   variant = "full",
   className,
+  hidden = false,
 }: {
   billing: BillingCycle;
   onChange: (billing: BillingCycle) => void;
   annualSavings?: number;
   variant?: "full" | "compact";
   className?: string;
+  /** No choice to make (the backend bills monthly only). */
+  hidden?: boolean;
 }) {
   const cycles: BillingCycle[] = ["annual", "monthly"];
   const reduceMotion = useReducedMotion();
   const layoutTransition = reduceMotion
     ? { duration: 0 }
     : { type: "spring" as const, stiffness: 460, damping: 36, mass: 0.7 };
+
+  if (hidden) return null;
 
   if (variant === "compact") {
     return (
@@ -242,6 +247,7 @@ export function PlanSelector({
 }) {
   const theme = useThemeStore((s) => s.theme);
   const store = useOnboardingStore();
+  const { plans, cycle } = usePricedPlans();
   const second = (store.activePreps.find((p) => p !== lane) ??
     (lane && lane !== "gmat" ? "gmat" : "cat")) as string;
 
@@ -260,18 +266,24 @@ export function PlanSelector({
         layout === "row" ? "grid grid-cols-1 gap-3 md:grid-cols-3" : "flex flex-col gap-3",
       )}
     >
-      {PLANS.map((p, idx) => {
+      {plans.map((p, idx) => {
         const selected = p.id === value;
-        const unit = billing === "monthly" ? "mo" : "yr";
-        const shown = p.billing[billing ?? "annual"];
+        const cycleNow = cycle(billing ?? "annual");
+        const unit = cycleNow === "monthly" ? "mo" : "yr";
+        const shown = p.billing[cycleNow];
         const tracks = p.id === "dual-lane" && dualTracks ? dualTracks : p.tracks;
         const isFree = shown === 0;
+        // Real trial length from the backend; the bundled labels (7 and 14 days) only apply to mock pricing.
         const trialLabel =
-          p.id === "single-lane"
-            ? "7-DAY FREE TRIAL"
-            : p.id === "dual-lane"
-              ? "14-DAY FREE TRIAL"
-              : null;
+          typeof p.trialDays === "number"
+            ? p.trialDays > 0
+              ? `${p.trialDays}-DAY FREE TRIAL`
+              : null
+            : p.id === "single-lane"
+              ? "7-DAY FREE TRIAL"
+              : p.id === "dual-lane"
+                ? "14-DAY FREE TRIAL"
+                : null;
         return (
           <motion.button
             key={p.id}
@@ -436,8 +448,10 @@ export function PlanIntro({
   const [pay, setPay] = useState<"upi" | "wallet" | "card">("upi");
 
   const lane = store.targetExam || store.planLane || "cat";
-  const plan = PLANS.find((p) => p.id === planId)!;
-  const total = plan.billing[billing];
+  const { plans, annualAvailable, cycle } = usePricedPlans();
+  const cycleNow = cycle(billing);
+  const plan = plans.find((p) => p.id === planId)!;
+  const total = plan.billing[cycleNow];
   const isFree = planId === "initiate";
   const annualSavings = getAnnualSavingsPercent(plan.billing.annual, plan.billing.monthly);
 
@@ -499,9 +513,10 @@ export function PlanIntro({
 
           {/* billing switch - directly under the headline block, centred */}
           <BillingCycleToggle
-            billing={billing}
+            billing={cycleNow}
             onChange={setBilling}
             annualSavings={annualSavings}
+            hidden={!annualAvailable}
             className="mx-auto mt-5 w-full max-w-[420px]"
           />
 
@@ -513,7 +528,7 @@ export function PlanIntro({
               onChange={setPlanId}
               lane={lane}
               onLaneChange={store.setPlanLane}
-              billing={billing}
+              billing={cycleNow}
               layout="row"
             />
           </div>
@@ -579,7 +594,7 @@ export function PlanIntro({
                   ? "15 Days Unrestricted Access"
                   : isFree
                     ? "Join Free"
-                    : `Start My Pass ₹ ${inr(total)}/${billing === "annual" ? "Year" : "Month"}`}
+                    : `Start My Pass ₹ ${inr(total)}/${cycleNow === "annual" ? "Year" : "Month"}`}
             </button>
 
             <button

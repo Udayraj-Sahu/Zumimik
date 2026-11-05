@@ -8,6 +8,7 @@ const AUTHENTICATED_ROUTES = [
   "/dashboard",
   "/dashboard/feed",
   "/dashboard/analytics",
+  "/dashboard/family",
   "/learn",
   "/learn/explorer",
   "/learn/practice",

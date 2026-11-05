@@ -36,7 +36,7 @@ function SprintContent() {
 
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const feedback = useFeedback();
-  const { data, isLoading, error } = useSprintSession(topic, length, difficulty, targetExam);
+  const { data, isLoading, error, refetch } = useSprintSession(topic, length, difficulty, targetExam);
   const snapshot = useResumeStore((s) => s.snapshot);
   const saveSnapshot = useResumeStore((s) => s.saveSnapshot);
   const clearSnapshot = useResumeStore((s) => s.clearSnapshot);
@@ -313,7 +313,7 @@ function SprintContent() {
             Back
           </Button>
           <Button
-            onClick={() => router.refresh()}
+            onClick={() => void refetch()}
           >
             Retry
           </Button>
@@ -328,6 +328,20 @@ function SprintContent() {
         <div className="h-14 rounded-xl backdrop-blur-xl mb-4" style={{ backgroundColor: GLASS_BG }} />
         <div className="h-48 rounded-3xl backdrop-blur-xl mb-4" style={{ backgroundColor: GLASS_BG }} />
         <div className="h-12 rounded-xl backdrop-blur-xl" style={{ backgroundColor: GLASS_BG }} />
+      </PageContainer>
+    );
+  }
+
+  if (!isResume && data && data.questions.length === 0) {
+    return (
+      <PageContainer className="text-center">
+        <p data-testid="sprint-empty" role="status" className="text-[13px] font-semibold text-foreground">No questions are available for this topic right now.</p>
+        <p className="mt-2 text-[12px] text-muted-foreground/60">Try another topic, or come back later.</p>
+        <div className="mt-6 flex justify-center">
+          <Button variant="glass" onClick={() => router.push("/play/configure-sprint")}>
+            Choose another topic
+          </Button>
+        </div>
       </PageContainer>
     );
   }

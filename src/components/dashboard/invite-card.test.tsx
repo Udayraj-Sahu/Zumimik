@@ -52,3 +52,45 @@ describe("InviteCard uses the server's referral code", () => {
     expect(apiGet).not.toHaveBeenCalled();
   });
 });
+
+describe("InviteCard respects the referral feature flag", () => {
+  beforeEach(() => {
+    apiGet.mockReset();
+    localStorage.clear();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("flag off: says so, shows 'Not enabled' instead of 'Active', and never requests /referral", async () => {
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/api/config") return { flags: { referral_ladder: { enabled: false, rollout_pct: 100 } } };
+      throw new Error("must not be called: " + path);
+    });
+    await renderCard(false);
+    expect(await screen.findByTestId("referral-off")).toHaveTextContent("Referrals aren't enabled");
+    expect(screen.getByText("Not enabled")).toBeInTheDocument();
+    expect(screen.queryByText("Active")).not.toBeInTheDocument();
+    expect(apiGet).not.toHaveBeenCalledWith("/referral");
+  });
+
+  it("flag on: shows the server code and 'Active'", async () => {
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/api/config") return { flags: { referral_ladder: { enabled: true, rollout_pct: 100 } } };
+      if (path === "/referral") return { code: "ZXCV9876", verified_referrals: 0 };
+      throw new Error("unexpected " + path);
+    });
+    await renderCard(false);
+    await waitFor(() => expect(screen.getAllByText("ZXCV9876").length).toBeGreaterThan(0));
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.queryByTestId("referral-off")).not.toBeInTheDocument();
+  });
+
+  it("flag list unreadable: nothing is hidden (unknown is treated as available)", async () => {
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/api/config") throw new Error("config down");
+      return { code: "QWER5555", verified_referrals: 1 };
+    });
+    await renderCard(false);
+    await waitFor(() => expect(screen.getAllByText("QWER5555").length).toBeGreaterThan(0));
+    expect(screen.queryByTestId("referral-off")).not.toBeInTheDocument();
+  });
+});

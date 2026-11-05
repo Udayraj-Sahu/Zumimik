@@ -71,4 +71,10 @@ export async function resetAppState(): Promise<void> {
 
 export async function purgeUserData(): Promise<void> {
   await resetAppState();
+  // Logout keeps queued (unsynced) work, tagged by user. An explicit purge removes it.
+  try {
+    await db.eventQueue.clear();
+  } catch {
+    /* ignore dexie failures */
+  }
 }

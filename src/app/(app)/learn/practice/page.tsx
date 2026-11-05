@@ -32,7 +32,7 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useFeedback } from "@/hooks/use-feedback";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { checkPracticeAnswer, type AnswerCheckOutcome } from "@/lib/answer-check";
-import { buildSprintSyncEvents, postSyncEvents, type SyncEvent } from "@/services/telemetry";
+import { buildSprintSyncEvents, sendSyncBatch, type SyncEvent } from "@/services/telemetry";
 import { getTemplatesByDomain } from "@/services/templates";
 import RendererRouter from "@/components/renderers/renderer-router";
 import type { Question, SprintResult } from "@/lib/types/sprint-session";
@@ -75,7 +75,7 @@ export default function PracticePage() {
     error: sessionError,
     refetch: refetchSession,
   } = usePracticeSession(topic, 10, difficulty, targetExam, { enabled: phase === "active" && practiceType === "mcq" });
-  const [syncState, setSyncState] = useState<"idle" | "saving" | "saved" | "failed">("idle");
+  const [syncState, setSyncState] = useState<"idle" | "saving" | "saved" | "queued" | "failed">("idle");
   const pendingSyncRef = useRef<SyncEvent[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
@@ -192,9 +192,14 @@ export default function PracticePage() {
     if (!events) return;
     setSyncState("saving");
     try {
-      await postSyncEvents(events);
-      // Only now is the progress acknowledged. Clear the pending batch and refresh everything it feeds.
+      const outcome = await sendSyncBatch(events);
       pendingSyncRef.current = null;
+      if (outcome === "queued") {
+        // Not acknowledged by the server: stored on this device and retried automatically. Never reported as saved.
+        setSyncState("queued");
+        return;
+      }
+      // Acknowledged: refresh everything the attempts feed.
       setSyncState("saved");
       for (const key of ["adaptive-state", "dashboard", "account-summary", "sprint", "profile"]) {
         void queryClient.invalidateQueries({ queryKey: [key] });
@@ -609,6 +614,7 @@ export default function PracticePage() {
         >
           {syncState === "saving" && "Saving your progress…"}
           {syncState === "saved" && "Progress saved."}
+          {syncState === "queued" && "Saved on this device. It will sync automatically when you're back online."}
           {syncState === "failed" && (
             <>
               Couldn&apos;t save your progress.{" "}

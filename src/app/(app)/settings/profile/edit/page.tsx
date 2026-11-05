@@ -9,6 +9,7 @@ import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useProfileData } from "@/hooks/queries/use-profile";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuthStore } from "@/stores/auth-store";
+import { saveAccountName } from "@/services/onboarding";
 import { Button } from "@/components/ui/button";
 
 export default function EditProfilePage() {
@@ -23,11 +24,13 @@ export default function EditProfilePage() {
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { headerRef } = useEntranceAnimations();
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (saving) return;
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
     const trimmedPhone = phone.trim();
@@ -46,6 +49,19 @@ export default function EditProfilePage() {
     }
 
     setErrorMsg(null);
+    // The name is saved to the backend first and the edit only counts once the server accepted it.
+    // Email and phone have no backend field, so they remain device-local.
+    if (trimmedName !== (user?.name ?? "")) {
+      setSaving(true);
+      try {
+        await saveAccountName(trimmedName);
+      } catch (err) {
+        setErrorMsg(err instanceof Error ? err.message : "Couldn't save your name. Please try again.");
+        setSaving(false);
+        return;
+      }
+      setSaving(false);
+    }
     updateUser({ name: trimmedName, email: trimmedEmail, phone: trimmedPhone || undefined });
     setSaved(true);
     setTimeout(() => {
@@ -130,8 +146,8 @@ export default function EditProfilePage() {
         <Button
           fullWidth
           size="lg"
-          onClick={handleSave}
-          disabled={saved}
+          onClick={() => void handleSave()}
+          disabled={saved || saving}
           className={cn(
             "mt-8 max-[359px]:py-3",
             saved

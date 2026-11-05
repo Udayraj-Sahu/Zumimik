@@ -143,3 +143,15 @@ export async function saveOnboardingProfile(snapshot: OnboardingSnapshot): Promi
   // Keep the signed-in user in step with what the server now holds.
   if (res?.user) useAuthStore.getState().setUser(res.user as User);
 }
+
+/**
+ * Change the account name: PATCH /auth/me { name, display_name } (both are accepted by UpdateProfileRequest; the same value is sent
+ * to each so precedence cannot matter). Resolves only after a 2xx, and updates the signed-in user from the response.
+ * Mock mode has no server, so it stays local.
+ */
+export async function saveAccountName(name: string): Promise<void> {
+  const trimmed = name.trim();
+  if (!trimmed || IS_MOCK) return;
+  const res = await apiPatch<{ user?: ServerUser & { id: string } }>("/auth/me", { name: trimmed, display_name: trimmed });
+  if (res?.user) useAuthStore.getState().setUser(res.user as User);
+}

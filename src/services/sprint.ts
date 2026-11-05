@@ -26,6 +26,6 @@ export async function getSprintConfig(): Promise<SprintConfig> {
   }
   // Session lengths and labels are presentation defaults; the backend has no
   // user-specific sprint configuration endpoint.
-  const { SPRINT_CONFIG } = await import("@/lib/mock/sprint");
+  const { SPRINT_CONFIG } = await import("@/lib/config/sprint-config");
   return SPRINT_CONFIG;
 }
