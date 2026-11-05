@@ -10,6 +10,7 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { hydrateOnboardingFromUser, refreshProfileFromServer } from "@/services/onboarding";
 import { useRouter } from "next/navigation";
 import { IS_MOCK } from "@/lib/platform";
+import { redeemPendingReferral } from "@/services/referral";
 
 type AuthModalProps = {
   onClose: () => void;
@@ -44,6 +45,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
     if (data.authMethod === "email") {
       if (data.intent === "register") {
         await authRegister(data.email, data.password, data.displayName);
+        // A new account that arrived through an invite link (/?ref=CODE) is bound to its referrer; best effort.
+        void redeemPendingReferral();
       } else {
         await authLogin(data.email, data.password);
       }

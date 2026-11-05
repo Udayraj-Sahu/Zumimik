@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { SplashScreen } from "@/components/shell/splash-screen";
 import { useAuthStore } from "@/stores/auth-store";
 import { refreshProfileFromServer } from "@/services/onboarding";
+import { capturePendingReferral } from "@/services/referral";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { isNativeRuntime } from "@/lib/native/is-native";
 import { isDevAuthBypassEnabled } from "@/lib/platform/dev-auth-bypass";
@@ -32,6 +33,11 @@ export function AppEntry({ children }: { children: React.ReactNode }) {
   // earlier in this same session, so it never repeats within a session).
   useEffect(() => {
     useWelcomeStore.getState().requestOnAppOpen();
+  }, []);
+
+  // Invite link (/?ref=CODE): remember the code until this visitor registers.
+  useEffect(() => {
+    capturePendingReferral();
   }, []);
 
   // Session restored from storage: refresh the profile once from /auth/me. Server values only fill what is blank locally.
