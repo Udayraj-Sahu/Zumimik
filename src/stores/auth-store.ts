@@ -84,6 +84,33 @@ async function authFailureMessage(response: Response, fallback: string): Promise
   return fallback;
 }
 
+const AUTH_TIMEOUT_MS = 15_000;
+
+/**
+ * fetch for the credential endpoints (login/register/Firebase). A network failure or timeout becomes a readable message
+ * instead of the browser's raw "Failed to fetch"; HTTP errors are left to the caller. (Not api.ts: it imports this store.)
+ */
+async function authFetch(path: string, body: unknown): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AUTH_TIMEOUT_MS);
+  try {
+    return await fetch(apiUrl(path), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch {
+    throw new Error(
+      controller.signal.aborted
+        ? "The server took too long to respond. Please try again."
+        : "Could not reach the server. Check your connection and try again.",
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -102,11 +129,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
           });
         } else {
-          const res = await fetch(apiUrl("/auth/login"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password: _password }),
-          });
+          const res = await authFetch("/auth/login", { email, password: _password });
           if (!res.ok) throw new Error(await authFailureMessage(res, "Login failed"));
           const data = await res.json();
           set({
@@ -134,11 +157,7 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
-        const res = await fetch(apiUrl("/auth/register"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, display_name: displayName }),
-        });
+        const res = await authFetch("/auth/register", { email, password, display_name: displayName });
         if (!res.ok) throw new Error(await authFailureMessage(res, "Registration failed"));
         const data = await res.json();
         set({
@@ -177,11 +196,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
           });
         } else {
-          const res = await fetch(apiUrl(`/auth/${method}`), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idToken }),
-          });
+          const res = await authFetch(`/auth/${method}`, { idToken });
           if (!res.ok) throw new Error(await authFailureMessage(res, "Firebase auth failed"));
           const data = await res.json();
           set({ user: mergeUser(get().user, data.user), token: data.token, refreshToken: data.refreshToken, isAuthenticated: true });

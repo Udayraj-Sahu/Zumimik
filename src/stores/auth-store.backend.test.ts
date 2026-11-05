@@ -98,4 +98,15 @@ describe("backend authentication", () => {
       .rejects.toThrow("Mock sign-in is disabled");
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("turns a network failure on login/register into a readable message", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    vi.resetModules();
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+    const { useAuthStore } = await import("./auth-store");
+    await expect(useAuthStore.getState().login("ada@example.com", "password")).rejects.toThrow(/could not reach the server/i);
+    await expect(useAuthStore.getState().register("ada@example.com", "password1")).rejects.toThrow(/could not reach the server/i);
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
 });
