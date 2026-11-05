@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GLASS_BORDER } from "@/lib/theme";
-import { masteryNotice } from "@/lib/exam-scope";
+import { examMasteryNotice, masteryNotice } from "@/lib/exam-scope";
 import type { Topic } from "@/lib/types/dashboard";
 
 /**
@@ -18,6 +18,7 @@ export function MasteryPanel({
   onRetry,
   practicable,
   examLabel,
+  scoped = false,
   limit = 6,
 }: {
   mastery: Topic[] | undefined;
@@ -27,13 +28,15 @@ export function MasteryPanel({
   /** Skill names the practice catalog can serve. Only these link to Practice. */
   practicable: Set<string>;
   examLabel?: string | null;
+  /** True when the mastery was fetched for the selected exam, so the notice can say so. */
+  scoped?: boolean;
   limit?: number;
 }) {
   const items = [...(mastery ?? [])].sort((a, b) => b.value - a.value).slice(0, limit);
   return (
     <GlassCard className="mt-6 p-5 max-[359px]:p-4" data-testid="mastery-panel">
       <p className="text-micro font-semibold tracking-[0.18em] text-muted-foreground/40 uppercase">Your mastery</p>
-      <p className="mt-1 text-[11px] text-muted-foreground/50">{masteryNotice(examLabel)}</p>
+      <p className="mt-1 text-[11px] text-muted-foreground/50">{scoped && examLabel ? examMasteryNotice(examLabel) : masteryNotice(examLabel)}</p>
 
       {isLoading && <div className="mt-4 h-16 rounded-2xl bg-white/[0.05] animate-pulse" aria-busy="true" data-testid="mastery-loading" />}
 

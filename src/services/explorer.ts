@@ -1,6 +1,7 @@
 import type { TopicNode, TopicEdge } from "@/lib/types/technique";
 import { apiGet } from "./api";
 import { buildGlobalExplorerTree } from "./explorer-tree";
+import { isExamScopedDomain } from "@/lib/exam-scope";
 import {
   mapBackendPracticeEdges,
   mapBackendTechniqueSummaries,
@@ -18,16 +19,22 @@ export async function getSubjectTree(domain: string): Promise<TopicNode[]> {
     await delay(250);
     return mockGetTree(domain);
   }
-  // Both endpoints are global: neither accepts an exam, so `domain` is deliberately not sent.
+  // Both endpoints take the exam as `domain` (cat, gmat, gre, banking, vedic-math); an unknown domain gets the global catalog.
+  const query = domain ? `?domain=${encodeURIComponent(domain)}` : "";
   const [topics, techniques] = await Promise.all([
-    apiGet<BackendTopicCatalogResponse>("/api/topics"),
-    apiGet<BackendTechniqueSummaryResponse>(EXPLORER_TECHNIQUES_PATH),
+    apiGet<BackendTopicCatalogResponse>(`/api/topics${query}`),
+    apiGet<BackendTechniqueSummaryResponse>(explorerTechniquesPath(domain)),
   ]);
-  return buildGlobalExplorerTree(topics, techniques);
+  // An exam's topic names are the backend's display labels, not problem-corpus labels, so they cannot start a topic practice session.
+  return buildGlobalExplorerTree(topics, techniques, { linkBankTopics: !isExamScopedDomain(domain) });
 }
 
 /** /api/practice/techniques defaults to limit=100 (max 500) and the graph holds more skills than that. */
 export const EXPLORER_TECHNIQUES_PATH = "/api/practice/techniques?limit=500";
+
+export function explorerTechniquesPath(domain?: string | null): string {
+  return domain ? `/api/practice/techniques?domain=${encodeURIComponent(domain)}&limit=500` : EXPLORER_TECHNIQUES_PATH;
+}
 
 export async function findNodeInTree(domain: string, nodeId: string): Promise<TopicNode | null> {
   if (IS_MOCK) {
@@ -49,7 +56,7 @@ export async function getLeafTechniques(domain: string): Promise<TopicNode[]> {
     const tree = mockGetTree(domain);
     return mockGetLeaves(tree);
   }
-  const response = await apiGet<BackendTechniqueSummaryResponse>(EXPLORER_TECHNIQUES_PATH);
+  const response = await apiGet<BackendTechniqueSummaryResponse>(explorerTechniquesPath(domain));
   return mapBackendTechniqueSummaries(response);
 }
 

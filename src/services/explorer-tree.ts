@@ -31,7 +31,14 @@ function skillNode(t: Skill): TopicNode {
 export function buildGlobalExplorerTree(
   topics: BackendTopicCatalogResponse,
   techniques: BackendTechniqueSummaryResponse,
+  /**
+   * Whether a problem-bank topic can open Practice (GET /practice/session?topic= matches the corpus label exactly). True for the
+   * global list. For an exam's topics the backend returns its own display names ("Quantitative Aptitude") which are not corpus
+   * labels, so they return no questions; those nodes are shown but not linked.
+   */
+  options: { linkBankTopics?: boolean } = {},
 ): TopicNode[] {
+  const linkBankTopics = options.linkBankTopics ?? true;
   const byTopic = new Map<string, Skill[]>();
   const uncategorised: TopicNode[] = [];
   for (const t of techniques.techniques) {
@@ -90,7 +97,7 @@ export function buildGlobalExplorerTree(
       children: topics.topics.map(({ topic, problems, subtopics }) => ({
         id: `bank:${topic}`,
         type: "topic" as const,
-        bankTopic: topic,
+        ...(linkBankTopics ? { bankTopic: topic } : {}),
         title: titleOf(topic),
         slug: slugOf(`bank-${topic}`),
         description: `${problems} problems · ${subtopics} subtopics`,

@@ -43,15 +43,50 @@ const MASTERY = [
   { name: "Quadratics", value: 20, color: "primary" },
 ];
 
-function routeApi(over: Partial<Record<"topics" | "techniques" | "catalog" | "mastery", unknown>> = {}) {
+const REFERENCE_PAGES = {
+  count: 3,
+  pages: [
+    { subtopic_id: "nikhilam_sutra", topic: "Vedic Math", category: "Foundation", content_status: "complete", review_status: "approved", has_defects: false, attached_templates: 102 },
+    { subtopic_id: "urdhva_tiryak", topic: "Vedic Math", category: "Foundation", content_status: "needs_human_review", review_status: "pending_human_review", has_defects: false, attached_templates: 0 },
+    { subtopic_id: "draft_with_defects", topic: "Maths", category: "Foundation", content_status: "complete", review_status: "approved", has_defects: true, attached_templates: 3 },
+  ],
+};
+const REFERENCE_CARD = {
+  subtopic_id: "nikhilam_sutra",
+  name: "Nikhilam Navatashcaramam Dashatah",
+  topic: "Vedic Math",
+  category: "Foundation",
+  sutra: "Nikhilam Navatashcaramam Dashatah",
+  sutra_sanskrit: "निखिलं नवतश्चरमं दशतः",
+  translation: "All from 9 and the last from 10",
+  quick_ref: {
+    the_trick: { mental_steps: ["1. Pick the base from the digit count"], difficulty_label: "Beginner-friendly" },
+    top_traps: [{ name: "Wrong Base", description: "Choosing a base that does not match the digit count", prevention: "Count digits first" }],
+    quick_example: { problem: "96 × 93", answer: "8928" },
+  },
+  techniques_by_difficulty: { L1: [{ name: "Base 10" }], L2: [{ name: "Base 100" }] },
+  total_techniques: 2,
+  attached_templates: 102,
+  attached_by_level: { L2: 18 },
+  content_status: "complete",
+  review_status: "approved",
+  has_defects: false,
+};
+
+function routeApi(over: Partial<Record<"topics" | "techniques" | "catalog" | "mastery" | "reference", unknown>> = {}) {
   const table: Record<string, unknown> = {
     "/api/topics": over.topics ?? TOPICS,
     "/api/practice/techniques?limit=500": over.techniques ?? TECHNIQUES,
     "/practice/catalog": over.catalog ?? CATALOG,
     "/dashboard/topics": over.mastery ?? MASTERY,
+    "/api/subtopics/reference": over.reference ?? REFERENCE_PAGES,
+    "/api/subtopics/nikhilam_sutra/reference": REFERENCE_CARD,
   };
   apiGet.mockImplementation(async (path: string) => {
-    const key = path.startsWith("/dashboard/topics") ? "/dashboard/topics" : path;
+    let key = path;
+    if (path.startsWith("/dashboard/topics")) key = "/dashboard/topics";
+    else if (path.startsWith("/api/topics")) key = "/api/topics";
+    else if (path.startsWith("/api/practice/techniques")) key = "/api/practice/techniques?limit=500";
     if (!(key in table)) throw new Error(`unexpected GET ${path}`);
     const value = table[key];
     if (value instanceof Error) throw value;
@@ -80,6 +115,7 @@ async function renderExplorer(opts: { mock?: boolean; exam?: string; preps?: str
 }
 
 const calls = (path: string) => apiGet.mock.calls.filter(([p]) => p === path).length;
+const callsStarting = (prefix: string) => apiGet.mock.calls.filter(([p]) => String(p).startsWith(prefix)).length;
 
 describe("global topic/technique mapping", () => {
   it("builds subjects from skills (topic → sub-topic → skill), an uncategorised group, and the problem bank", async () => {
@@ -101,6 +137,16 @@ describe("global topic/technique mapping", () => {
     expect(bank.children!.every((c) => c.techniqueId === undefined)).toBe(true);
   });
 
+  it("exam topics are shown but not linked to practice (their names are not corpus labels)", async () => {
+    const { buildGlobalExplorerTree } = await import("@/services/explorer-tree");
+    const examTopics = { topics: [{ topic: "Quantitative Aptitude", problems: 25, subtopics: 4 }] };
+    const linked = buildGlobalExplorerTree(examTopics, { techniques: [] });
+    expect(linked[0].children![0].bankTopic).toBe("Quantitative Aptitude");
+    const unlinked = buildGlobalExplorerTree(examTopics, { techniques: [] }, { linkBankTopics: false });
+    expect(unlinked[0].children![0].bankTopic).toBeUndefined();
+    expect(unlinked[0].children![0].title).toBe("Quantitative Aptitude");
+  });
+
   it("never labels anything as an exam", async () => {
     const { buildGlobalExplorerTree } = await import("@/services/explorer-tree");
     const text = JSON.stringify(buildGlobalExplorerTree(TOPICS, TECHNIQUES)).toLowerCase();
@@ -114,12 +160,13 @@ describe("global topic/technique mapping", () => {
 });
 
 describe("query keys: exam and learning path", () => {
-  it("global data is keyed without the exam, so switching exams does not refetch or fork the cache", async () => {
+  it("exam-scoped data is keyed per exam, so each exam has its own cache entry", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { explorerKeys } = await import("@/hooks/queries/use-explorer");
-    expect(explorerKeys.tree("cat")).toEqual(explorerKeys.tree("gmat"));
-    expect(explorerKeys.techniques("cat")).toEqual(explorerKeys.techniques("gre"));
+    expect(explorerKeys.tree("cat")).not.toEqual(explorerKeys.tree("gmat"));
+    expect(explorerKeys.techniques("cat")).not.toEqual(explorerKeys.techniques("gre"));
+    expect(explorerKeys.mastery("cat")).not.toEqual(explorerKeys.mastery("gmat")); // mastery is per exam too
     expect(explorerKeys.mastery()).not.toEqual(explorerKeys.tree("cat")); // mastery is separate from the catalog
   });
 
@@ -140,7 +187,7 @@ describe("query keys: exam and learning path", () => {
 
   it("exam and learning path are resolved independently", async () => {
     const { resolveExplorerScope } = await import("@/lib/exam-scope");
-    expect(resolveExplorerScope("cat", "vedic_standalone")).toMatchObject({ exam: "cat", activePath: "vedic_standalone", catalog: "global", examCatalogUnavailable: true });
+    expect(resolveExplorerScope("cat", "vedic_standalone")).toMatchObject({ exam: "cat", activePath: "vedic_standalone", catalog: "exam", examCatalogUnavailable: false });
     expect(resolveExplorerScope("gmat", "vedic_standalone").activePath).toBe("vedic_standalone");
     expect(resolveExplorerScope("cat", "exam_prep").exam).toBe("cat");
     expect(resolveExplorerScope(null, "exam_prep").examCatalogUnavailable).toBe(false);
@@ -162,44 +209,31 @@ describe("/learn/explorer in real mode", () => {
     vi.doUnmock("@/lib/mock/techniques");
   });
 
-  it("shows the real global catalog, labelled as global, and says the exam catalog is not configured", async () => {
+  it("asks the backend for the selected exam's topics and says so", async () => {
     routeApi();
     await renderExplorer({ exam: "cat" });
     expect(await screen.findByText("Other skills")).toBeInTheDocument();
     expect(screen.getByText("Problem bank")).toBeInTheDocument();
-    const notice = screen.getByTestId("global-topics-notice");
-    expect(notice).toHaveTextContent("exam-specific catalog for CAT is not configured");
-    expect(notice).toHaveTextContent("shared across all exams");
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Explore Topics"); // not "Explore CAT"
-    expect(calls("/api/topics")).toBe(1);
-    expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?limit=500");
-    // no exam is ever sent
-    expect(apiGet.mock.calls.every(([p]) => !/exam=|domain=|cat\b/i.test(String(p).replace("catalog", "")))).toBe(true);
+    expect(screen.getByTestId("global-topics-notice")).toHaveTextContent("Showing the topics and techniques for CAT");
+    expect(screen.getByTestId("global-topics-notice")).not.toHaveTextContent("shared across all exams");
+    expect(apiGet).toHaveBeenCalledWith("/api/topics?domain=cat");
+    expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?domain=cat&limit=500");
+    expect(apiGet).toHaveBeenCalledWith("/dashboard/topics?domain=cat");
   });
 
-  it("changing the exam updates the notice but neither refetches global data nor touches the learning path", async () => {
+  it("changing the exam refetches that exam's topics and techniques, and never touches the learning path", async () => {
     routeApi();
     const { store } = await renderExplorer({ exam: "cat", preps: ["cat", "gmat"], activePath: "vedic_standalone" });
     await screen.findByText("Other skills");
-    const before = { topics: calls("/api/topics"), techniques: calls("/api/practice/techniques?limit=500") };
+    expect(callsStarting("/api/topics?domain=gmat")).toBe(0);
 
     fireEvent.click(screen.getByRole("button", { name: /GMAT/ }));
+    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/api/topics?domain=gmat"));
+    expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?domain=gmat&limit=500");
+    expect(apiGet).toHaveBeenCalledWith("/dashboard/topics?domain=gmat");
     await waitFor(() => expect(screen.getByTestId("global-topics-notice")).toHaveTextContent("GMAT"));
-    expect(calls("/api/topics")).toBe(before.topics);
-    expect(calls("/api/practice/techniques?limit=500")).toBe(before.techniques);
     expect(store.getState().activePath).toBe("vedic_standalone");
     expect(store.getState().targetExam).toBe("cat"); // the tab is a view switch, not a profile change
-  });
-
-  it("never presents the global topics as exam topics, whichever exam is selected", async () => {
-    routeApi();
-    const { view } = await renderExplorer({ exam: "gre" });
-    await screen.findByText("Other skills");
-    // "GRE" may appear only inside the two explicit disclaimers, never as a title of the data itself.
-    const clone = view.container.cloneNode(true) as HTMLElement;
-    for (const id of ["global-topics-notice", "mastery-panel"]) clone.querySelector(`[data-testid="${id}"]`)?.remove();
-    expect(clone.textContent).not.toMatch(/\bGRE\b/);
-    expect(screen.getByTestId("global-topics-notice")).toHaveTextContent("not configured");
   });
 
   it("shows an error with a working retry when the catalog fails", async () => {
@@ -224,7 +258,7 @@ describe("/learn/explorer in real mode", () => {
       const panel = await screen.findByTestId("mastery-panel");
       await waitFor(() => expect(panel).toHaveTextContent("64%"));
       expect(panel).toHaveTextContent("Quadratics");
-      expect(panel).toHaveTextContent("not a CAT syllabus");
+      expect(panel).toHaveTextContent("Your mastery across CAT topics.");
       // The catalog and mastery resolve independently, so wait for the catalog-gated link.
       const link = await screen.findByRole("link", { name: "Practise Fractions and Decimals" });
       expect(link).toHaveAttribute("href", "/learn/practice?skill=Fractions%20and%20Decimals");
@@ -358,5 +392,51 @@ describe("Practice deep link from the Explorer", () => {
     );
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/practice/session?topic=Number%20Theory&size=10"));
     expect(apiPost).not.toHaveBeenCalledWith("/practice/session", expect.anything());
+  });
+});
+
+describe("/learn/explorer quick reference (GET /api/subtopics/reference)", () => {
+  beforeEach(() => {
+    apiGet.mockReset();
+    localStorage.clear();
+    params = new URLSearchParams();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("lists finished pages as cards and the rest, including a page with defects, as coming soon", async () => {
+    routeApi();
+    await renderExplorer({ exam: "cat" });
+    const ready = await screen.findByTestId("reference-ready");
+    expect(ready).toHaveTextContent("Nikhilam Sutra");
+    expect(ready).toHaveTextContent("102 practice problems");
+    expect(ready).not.toHaveTextContent("Urdhva Tiryak");
+    const soon = screen.getByTestId("reference-soon");
+    expect(soon).toHaveTextContent("Coming soon (2)");
+    expect(soon).toHaveTextContent("Urdhva Tiryak");
+    expect(soon).toHaveTextContent("Draft With Defects");
+  });
+
+  it("opens the card for a finished page from GET /api/subtopics/{id}/reference", async () => {
+    routeApi();
+    await renderExplorer({ exam: "cat" });
+    fireEvent.click(await screen.findByRole("button", { name: /Nikhilam Sutra/ }));
+    expect(await screen.findByText("All from 9 and the last from 10")).toBeInTheDocument();
+    expect(screen.getByText("Wrong Base")).toBeInTheDocument();
+    expect(screen.getByText(/96 × 93 = 8928/)).toBeInTheDocument();
+    expect(apiGet).toHaveBeenCalledWith("/api/subtopics/nikhilam_sutra/reference");
+  });
+
+  it("shows a retryable error without affecting the rest of the Explorer", async () => {
+    routeApi({ reference: new Error("down") });
+    await renderExplorer({ exam: "cat" });
+    expect(await screen.findByTestId("reference-error")).toBeInTheDocument();
+    expect(screen.getByTestId("mastery-panel")).toBeInTheDocument();
+  });
+
+  it("is not shown in explicit mock mode (no fixtures, no request)", async () => {
+    await renderExplorer({ mock: true, exam: "cat" });
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByTestId("quick-reference")).not.toBeInTheDocument();
+    expect(apiGet.mock.calls.filter(([path]) => String(path).includes("/api/subtopics")).length).toBe(0);
   });
 });

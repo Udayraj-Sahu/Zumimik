@@ -18,6 +18,7 @@ import { DOMAIN_LABELS } from "@/lib/types/template";
 import type { TopicNode } from "@/lib/types/technique";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { globalTopicsNotice, resolveExplorerScope } from "@/lib/exam-scope";
+import { QuickReference } from "@/components/explorer/quick-reference";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 
@@ -115,7 +116,7 @@ function ExplorerContent() {
         : new Set((catalogData?.topics ?? []).map((t) => t.id)),
     [allTechniques, catalogData],
   );
-  const { data: mastery, isLoading: masteryLoading, isError: masteryError, refetch: refetchMastery } = useExplorerMastery();
+  const { data: mastery, isLoading: masteryLoading, isError: masteryError, refetch: refetchMastery } = useExplorerMastery(activeDomain);
   const loadFailed = treesError || (IS_MOCK ? techniquesError : catalogError);
 
   useEffect(() => {
@@ -241,7 +242,9 @@ function ExplorerContent() {
           <p data-testid="global-topics-notice" className="mt-1.5 text-[11px] text-muted-foreground/50">
             {scope.examCatalogUnavailable
               ? `The exam-specific catalog for ${label} is not configured. ${globalTopicsNotice(label)}`
-              : globalTopicsNotice(null)}
+              : scope.catalog === "exam"
+                ? `Showing the topics and techniques for ${label}.`
+                : globalTopicsNotice(null)}
           </p>
         )}
       </div>
@@ -408,6 +411,8 @@ function ExplorerContent() {
         </AnimatePresence>
       </div>
 
+      {!IS_MOCK && <QuickReference />}
+
       <MasteryPanel
         mastery={mastery}
         isLoading={masteryLoading}
@@ -415,6 +420,7 @@ function ExplorerContent() {
         onRetry={() => void refetchMastery()}
         practicable={availableTechniqueIds}
         examLabel={label}
+        scoped={scope.catalog === "exam"}
       />
       </div>
     </PageContainer>

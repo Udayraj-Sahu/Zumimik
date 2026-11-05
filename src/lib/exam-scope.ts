@@ -18,8 +18,19 @@ export function isActivePath(value: unknown): value is ActivePath {
   return typeof value === "string" && (ACTIVE_PATHS as readonly string[]).includes(value);
 }
 
-/** Whether the backend can return topics scoped to one exam. It cannot today. */
-export const EXAM_TOPIC_CATALOG_SUPPORTED = false;
+/**
+ * Whether the backend can return topics scoped to one exam. It can: GET /api/topics?domain=, GET /api/practice/techniques?domain=
+ * and GET /dashboard/topics?domain= (verified on staging). It only knows the exams in EXAM_SCOPED_DOMAINS; any other domain gets
+ * the global catalog back.
+ */
+export const EXAM_TOPIC_CATALOG_SUPPORTED = true;
+
+/** The domains the backend scopes topics for. Anything else (e.g. "school") is answered with the global catalog. */
+export const EXAM_SCOPED_DOMAINS = ["cat", "gmat", "gre", "banking", "vedic-math"] as const;
+
+export function isExamScopedDomain(domain: string | null | undefined): boolean {
+  return !!domain && (EXAM_SCOPED_DOMAINS as readonly string[]).includes(domain);
+}
 
 /** Notice for any screen that lists global topics while an exam is selected. */
 export function globalTopicsNotice(examLabel: string | null | undefined): string {
@@ -35,6 +46,11 @@ export function masteryNotice(examLabel: string | null | undefined): string {
     : "Your overall mastery across all topics.";
 }
 
+/** Notice for mastery fetched for one exam (GET /dashboard/topics?domain=): the learner's progress on that exam's topics. */
+export function examMasteryNotice(examLabel: string): string {
+  return `Your mastery across ${examLabel} topics.`;
+}
+
 /**
  * What the Explorer may claim about its data for the current selection. Exam and learning path are independent inputs;
  * neither changes which topics the backend returns today.
@@ -42,9 +58,9 @@ export function masteryNotice(examLabel: string | null | undefined): string {
 export type ExplorerScope = {
   exam: string | null;
   activePath: ActivePath | null;
-  /** "global": the catalog is the same for every exam. "exam": the backend scopes it (not available yet). */
+  /** "global": the catalog is the same for every exam. "exam": the backend scopes it to the selected exam. */
   catalog: "global" | "exam";
-  /** True when an exam is selected but no verified exam-specific catalog exists. */
+  /** True when an exam is selected but the backend has no exam-specific catalog for it (it answers with the global one). */
   examCatalogUnavailable: boolean;
 };
 
@@ -53,11 +69,12 @@ export function resolveExplorerScope(
   activePath: ActivePath | null | undefined,
 ): ExplorerScope {
   const selected = exam || null;
+  const scoped = EXAM_TOPIC_CATALOG_SUPPORTED && isExamScopedDomain(selected);
   return {
     exam: selected,
     activePath: activePath ?? null,
-    catalog: EXAM_TOPIC_CATALOG_SUPPORTED ? "exam" : "global",
-    examCatalogUnavailable: !!selected && !EXAM_TOPIC_CATALOG_SUPPORTED,
+    catalog: scoped ? "exam" : "global",
+    examCatalogUnavailable: !!selected && !scoped,
   };
 }
 

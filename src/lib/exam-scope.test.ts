@@ -3,6 +3,9 @@ import {
   EXAM_TOPIC_CATALOG_SUPPORTED,
   globalTopicsNotice,
   isActivePath,
+  isExamScopedDomain,
+  resolveExplorerScope,
+  examMasteryNotice,
   masteryNotice,
   toBackendTargetExam,
 } from "./exam-scope";
@@ -37,8 +40,16 @@ describe("exam scope contracts", () => {
     expect(isActivePath(null)).toBe(false);
   });
 
-  it("declares that the backend has no exam-specific topic catalog", () => {
-    expect(EXAM_TOPIC_CATALOG_SUPPORTED).toBe(false);
+  it("declares that the backend scopes topics per exam, for the exams it knows", () => {
+    expect(EXAM_TOPIC_CATALOG_SUPPORTED).toBe(true);
+    for (const d of ["cat", "gmat", "gre", "banking", "vedic-math"]) expect(isExamScopedDomain(d)).toBe(true);
+    for (const d of ["school", "", null, undefined]) expect(isExamScopedDomain(d)).toBe(false);
+  });
+
+  it("an exam the backend does not scope (it answers with the global catalog) is still reported as unavailable", () => {
+    expect(resolveExplorerScope("cat", null)).toMatchObject({ catalog: "exam", examCatalogUnavailable: false });
+    expect(resolveExplorerScope("school", null)).toMatchObject({ catalog: "global", examCatalogUnavailable: true });
+    expect(examMasteryNotice("CAT")).toBe("Your mastery across CAT topics.");
   });
 
   it("never labels global topics or mastery as exam content", () => {
@@ -58,18 +69,25 @@ describe("services: global topics, mastery and practice stay distinct (real API 
     vi.doMock("@/lib/platform", () => ({ IS_MOCK: false }));
   });
 
-  it("selecting CAT does not send an exam filter to /api/topics or return CAT-labelled nodes", async () => {
+  it("selecting CAT sends the exam as domain to /api/topics and /api/practice/techniques", async () => {
     const { getSubjectTree } = await import("@/services/explorer");
     apiGet.mockImplementation(async (path: string) =>
-      path === "/api/topics"
-        ? { topics: [{ topic: "Trigonometry", problems: 7, subtopics: 7 }] }
+      path.startsWith("/api/topics")
+        ? { topics: [{ topic: "Quantitative Aptitude", problems: 25, subtopics: 4 }] }
         : { techniques: [] },
     );
     const tree = await getSubjectTree("cat");
+    expect(apiGet).toHaveBeenCalledWith("/api/topics?domain=cat");
+    expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?domain=cat&limit=500");
+    expect(tree[0].children?.[0].title).toBe("Quantitative Aptitude");
+  });
+
+  it("with no exam selected, both calls stay global", async () => {
+    const { getSubjectTree } = await import("@/services/explorer");
+    apiGet.mockResolvedValue({ topics: [], techniques: [] });
+    await getSubjectTree("");
     expect(apiGet).toHaveBeenCalledWith("/api/topics");
-    expect(apiGet.mock.calls.every(([path]) => !/cat|exam|domain/i.test(String(path)))).toBe(true);
-    expect(JSON.stringify(tree).toLowerCase()).not.toContain("cat");
-    expect(tree[0].children?.[0].title).toBe("Trigonometry");
+    expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?limit=500");
   });
 
   it("dashboard topics are fetched as mastery only and returned unmodified", async () => {
