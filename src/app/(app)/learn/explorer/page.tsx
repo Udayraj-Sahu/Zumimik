@@ -5,7 +5,8 @@ import { BG, CTA_35, CYAN, CYAN_14, CYAN_18, CYAN_85, GLASS_02, GLASS_03, GLASS_
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSubjectTree, useExplorerMastery } from "@/hooks/queries/use-explorer";
+import { useSubjectTree, useExplorerMastery, useReferencePages } from "@/hooks/queries/use-explorer";
+import { linkReferencePages } from "@/services/explorer-tree";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { MasteryPanel } from "@/components/explorer/mastery-panel";
 import { IS_MOCK } from "@/lib/platform";
@@ -99,7 +100,8 @@ function ExplorerContent() {
   const scope = resolveExplorerScope(activeDomain, activePath);
 
   const { data: trees, isLoading, isError: treesError, refetch: refetchTrees } = useSubjectTree(activeDomain);
-  const subjects = useMemo(() => trees ?? [], [trees]);
+  const { data: referencePages } = useReferencePages(!IS_MOCK);
+  const subjects = useMemo(() => linkReferencePages(trees ?? [], referencePages ?? []), [trees, referencePages]);
 
   // Mock mode: bundled lessons decide which technique nodes open. Real mode: a node opens Practice only when the
   // practice catalog actually serves that skill (technique names are :Skill names, the catalog's vocabulary).
@@ -406,6 +408,7 @@ function ExplorerContent() {
               availableTechniqueIds={availableTechniqueIds}
               techniqueHref={IS_MOCK ? undefined : (id) => `/learn/practice?skill=${encodeURIComponent(id)}`}
               bankTopicHref={IS_MOCK ? undefined : (topic) => `/learn/practice?bankTopic=${encodeURIComponent(topic)}`}
+              referenceHref={IS_MOCK ? undefined : (id) => `/learn/technique/${encodeURIComponent(id)}`}
             />
           </motion.div>
         </AnimatePresence>

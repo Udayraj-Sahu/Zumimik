@@ -25,6 +25,8 @@ export type Question = {
 
 export type SprintSession = {
   id: string;
+  /** Mock exams: set when the server could not build a faithful paper and served a labelled practice attempt instead (not scored for percentile). */
+  practiceLabel?: string | null;
   domain?: string;
   topic: string;
   topicLabel: string;

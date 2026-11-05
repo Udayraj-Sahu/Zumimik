@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
 
 const TOPICS = {
   topics: [
-    { topic: "Vedic Mathematics", problems: 130, subtopics: 115 },
+    { topic: "Vedic Mathematics", problems: 130, subtopics: 115, subtopic_list: ["Addition Techniques", "Cubing Method", "Base Multiplication Method (Nikhilam Sutra)", "Squaring via Yavadunam"] },
     { topic: "Cognitive Deficits", problems: 2, subtopics: 2 },
   ],
 };
@@ -118,10 +118,10 @@ const calls = (path: string) => apiGet.mock.calls.filter(([p]) => p === path).le
 const callsStarting = (prefix: string) => apiGet.mock.calls.filter(([p]) => String(p).startsWith(prefix)).length;
 
 describe("global topic/technique mapping", () => {
-  it("builds subjects from skills (topic → sub-topic → skill), an uncategorised group, and the problem bank", async () => {
+  it("builds subjects from skills (topic → sub-topic → skill), an uncategorised group, and the topics with their sub-topics", async () => {
     const { buildGlobalExplorerTree } = await import("@/services/explorer-tree");
     const tree = buildGlobalExplorerTree(TOPICS, TECHNIQUES);
-    expect(tree.map((s) => s.title)).toEqual(["Arithmetic", "Other skills", "Problem bank"]);
+    expect(tree.map((s) => s.title)).toEqual(["Arithmetic", "Other skills", "Topics"]);
 
     const arithmetic = tree[0];
     const direct = arithmetic.children!.filter((c) => c.type === "technique").map((c) => c.techniqueId);
@@ -135,16 +135,56 @@ describe("global topic/technique mapping", () => {
     expect(bank.children![0]).toMatchObject({ type: "topic", description: "130 problems · 115 subtopics" });
     // Bank topics are not practicable skills: no techniqueId.
     expect(bank.children!.every((c) => c.techniqueId === undefined)).toBe(true);
+    // A topic opens into its sub-topic names (display-only) after one explicit "practise the whole topic" leaf.
+    const vedic = bank.children![0].children!;
+    expect(vedic.map((c) => c.title)).toEqual([
+      "Practise all Vedic Mathematics",
+      "Addition Techniques",
+      "Cubing Method",
+      "Base Multiplication Method (Nikhilam Sutra)",
+      "Squaring via Yavadunam",
+    ]);
+    expect(vedic[0].bankTopic).toBe("Vedic Mathematics");
+    expect(vedic.slice(1).every((c) => c.type === "subtopic" && c.bankTopic === undefined)).toBe(true);
+    // A topic with no sub-topic names still opens to its practise leaf only.
+    expect(bank.children![1].children!.map((c) => c.title)).toEqual(["Practise all Cognitive Deficits"]);
   });
 
-  it("exam topics are shown but not linked to practice (their names are not corpus labels)", async () => {
+  it("a sub-topic opens its technique page only when a FINISHED reference page clearly covers it", async () => {
+    const { buildGlobalExplorerTree, linkReferencePages } = await import("@/services/explorer-tree");
+    const { matchReferencePage } = await import("@/services/reference");
+    const pages = [
+      { subtopic_id: "nikhilam_sutra", content_status: "complete" as const, has_defects: false },
+      { subtopic_id: "yavadunam", content_status: "needs_human_review" as const, has_defects: false }, // a draft: never linked
+      { subtopic_id: "fractions", content_status: "complete" as const, has_defects: true }, // finished but flagged: never linked
+    ];
+    expect(matchReferencePage("Base Multiplication Method (Nikhilam Sutra)", pages)).toBe("nikhilam_sutra");
+    expect(matchReferencePage("Nikhilam Sutra for Cubing", pages)).toBe("nikhilam_sutra");
+    expect(matchReferencePage("Squaring via Yavadunam", pages)).toBeUndefined(); // draft page
+    expect(matchReferencePage("Decimal Conversion of Fractions", pages)).toBeUndefined(); // flagged page
+    expect(matchReferencePage("Nikhilam Method", pages)).toBeUndefined(); // the words must all be there, in order
+    expect(matchReferencePage("Sutra of Nikhilam", pages)).toBeUndefined();
+
+    const tree = linkReferencePages(buildGlobalExplorerTree(TOPICS, TECHNIQUES), pages as never);
+    const vedic = tree[2].children![0].children!;
+    expect(vedic.find((c) => c.title.startsWith("Base Multiplication"))!.referenceId).toBe("nikhilam_sutra");
+    expect(vedic.filter((c) => c.referenceId).length).toBe(1);
+    // The skill subjects and the practise leaf are untouched.
+    expect(JSON.stringify([tree[0], tree[1]])).not.toContain("referenceId");
+    expect(vedic[0].referenceId).toBeUndefined();
+  });
+
+  it("exam topics list their sub-topics but nothing opens Practice (their names are not corpus labels)", async () => {
     const { buildGlobalExplorerTree } = await import("@/services/explorer-tree");
-    const examTopics = { topics: [{ topic: "Quantitative Aptitude", problems: 25, subtopics: 4 }] };
-    const linked = buildGlobalExplorerTree(examTopics, { techniques: [] });
-    expect(linked[0].children![0].bankTopic).toBe("Quantitative Aptitude");
+    const examTopics = { topics: [{ topic: "Quantitative Aptitude", problems: 25, subtopics: 2, subtopic_list: ["Arithmetic", "Algebra"] }] };
     const unlinked = buildGlobalExplorerTree(examTopics, { techniques: [] }, { linkBankTopics: false });
-    expect(unlinked[0].children![0].bankTopic).toBeUndefined();
-    expect(unlinked[0].children![0].title).toBe("Quantitative Aptitude");
+    const topic = unlinked[0].children![0];
+    expect(topic.title).toBe("Quantitative Aptitude");
+    expect(topic.children!.map((c) => c.title)).toEqual(["Arithmetic", "Algebra"]);
+    expect(JSON.stringify(unlinked)).not.toContain("bankTopic");
+    expect(unlinked[0].description).toBe("Topics and subtopics for this exam");
+    // Sub-topic ids are namespaced so they cannot collide with skill sub-topic groups (`<topic>::<sub>`).
+    expect(topic.children![0].id).toBe("topic:Quantitative Aptitude::Arithmetic");
   });
 
   it("never labels anything as an exam", async () => {
@@ -213,12 +253,26 @@ describe("/learn/explorer in real mode", () => {
     routeApi();
     await renderExplorer({ exam: "cat" });
     expect(await screen.findByText("Other skills")).toBeInTheDocument();
-    expect(screen.getByText("Problem bank")).toBeInTheDocument();
+    expect(screen.getAllByText("Topics").length).toBeGreaterThan(0); // the subject tab (the page heading also says Topics)
     expect(screen.getByTestId("global-topics-notice")).toHaveTextContent("Showing the topics and techniques for CAT");
     expect(screen.getByTestId("global-topics-notice")).not.toHaveTextContent("shared across all exams");
     expect(apiGet).toHaveBeenCalledWith("/api/topics?domain=cat");
     expect(apiGet).toHaveBeenCalledWith("/api/practice/techniques?domain=cat&limit=500");
     expect(apiGet).toHaveBeenCalledWith("/dashboard/topics?domain=cat");
+  });
+
+  it("tapping a sub-topic covered by a finished reference page opens its technique page", async () => {
+    routeApi();
+    await renderExplorer({ exam: "cat" });
+    await screen.findByText("Other skills");
+    fireEvent.click(screen.getByRole("button", { name: /^Topics/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /Vedic Mathematics/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /Base Multiplication Method \(Nikhilam Sutra\)/ }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/learn/technique/nikhilam_sutra"));
+    // a sub-topic with no finished page stays display-only
+    push.mockReset();
+    fireEvent.click(screen.getByRole("button", { name: /Squaring via Yavadunam/ }));
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("changing the exam refetches that exam's topics and techniques, and never touches the learning path", async () => {
@@ -373,6 +427,43 @@ describe("Practice deep link from the Explorer", () => {
     expect(screen.getByRole("button", { name: /Start Practice/ })).toBeDisabled();
   });
 
+  async function renderPracticeWith(query: Record<string, string>) {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    params = new URLSearchParams(query);
+    routeApi();
+    apiPost.mockResolvedValue({ items: [], summary: { requested: 10, served: 0 } });
+    const { default: Practice } = await import("@/app/(app)/learn/practice/page");
+    const { useOnboardingStore } = await import("@/stores/onboarding-store");
+    useOnboardingStore.setState({ targetExam: "cat", isOnboarded: true });
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <Practice />
+      </QueryClientProvider>,
+    );
+  }
+
+  it("?skill=&level= starts the session at once, aimed at that difficulty level", async () => {
+    await renderPracticeWith({ skill: "Fractions and Decimals", level: "3" });
+    await waitFor(() => expect(apiPost).toHaveBeenCalled());
+    const [path, body] = apiPost.mock.calls[0] as [string, { slots: Array<{ skill: string }>; theta?: number }];
+    expect(path).toBe("/practice/session");
+    expect(body.slots[0].skill).toBe("Fractions and Decimals");
+    expect(body.theta).toBeCloseTo(0.847, 3); // the theta whose target difficulty is 3
+  });
+
+  it("?skill=&start=1 starts the session at once with no level", async () => {
+    await renderPracticeWith({ skill: "Fractions and Decimals", start: "1" });
+    await waitFor(() => expect(apiPost).toHaveBeenCalled());
+    expect((apiPost.mock.calls[0][1] as { theta?: number }).theta).toBeUndefined();
+  });
+
+  it("a skill the catalog does not serve is never started, even with a level", async () => {
+    await renderPracticeWith({ skill: "Not A Skill", level: "2" });
+    await screen.findByRole("button", { name: "Select Fractions and Decimals" });
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+
   it("starts a GET /practice/session for a problem-bank topic label", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
@@ -416,14 +507,12 @@ describe("/learn/explorer quick reference (GET /api/subtopics/reference)", () =>
     expect(soon).toHaveTextContent("Draft With Defects");
   });
 
-  it("opens the card for a finished page from GET /api/subtopics/{id}/reference", async () => {
+  it("a finished page links to its technique page; the card itself is not fetched from the Explorer", async () => {
     routeApi();
     await renderExplorer({ exam: "cat" });
-    fireEvent.click(await screen.findByRole("button", { name: /Nikhilam Sutra/ }));
-    expect(await screen.findByText("All from 9 and the last from 10")).toBeInTheDocument();
-    expect(screen.getByText("Wrong Base")).toBeInTheDocument();
-    expect(screen.getByText(/96 × 93 = 8928/)).toBeInTheDocument();
-    expect(apiGet).toHaveBeenCalledWith("/api/subtopics/nikhilam_sutra/reference");
+    const link = await screen.findByRole("link", { name: /Nikhilam Sutra/ });
+    expect(link).toHaveAttribute("href", "/learn/technique/nikhilam_sutra");
+    expect(apiGet).not.toHaveBeenCalledWith("/api/subtopics/nikhilam_sutra/reference");
   });
 
   it("shows a retryable error without affecting the rest of the Explorer", async () => {

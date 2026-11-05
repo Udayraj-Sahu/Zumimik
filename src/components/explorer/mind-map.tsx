@@ -25,6 +25,7 @@ export function MindMap({
   availableTechniqueIds,
   techniqueHref,
   bankTopicHref,
+  referenceHref,
 }: {
   tree: TopicNode | null;
   isLoading: boolean;
@@ -34,6 +35,8 @@ export function MindMap({
   techniqueHref?: (techniqueId: string) => string;
   /** Where a problem-bank topic leaf leads. Omitted: those nodes stay display-only. */
   bankTopicHref?: (bankTopic: string) => string;
+  /** Where a sub-topic covered by a finished reference page leads (the technique page). Omitted: those nodes stay display-only. */
+  referenceHref?: (referenceId: string) => string;
 }) {
   const router = useRouter();
   const [path, setPath] = useState<TopicNode[]>([]);
@@ -78,6 +81,8 @@ export function MindMap({
       router.push(techniqueHref ? techniqueHref(node.techniqueId) : `/learn/technique/${node.techniqueId}`);
     } else if (node.bankTopic && bankTopicHref) {
       router.push(bankTopicHref(node.bankTopic));
+    } else if (node.referenceId && referenceHref) {
+      router.push(referenceHref(node.referenceId));
     }
   };
 
@@ -261,7 +266,7 @@ function BranchNode({
         >
           {unavailable ? (
             <Lock size={15} />
-          ) : node.type === "technique" ? (
+          ) : node.type === "technique" || node.referenceId ? (
             <BookOpen size={15} />
           ) : (
             <Layers size={15} />

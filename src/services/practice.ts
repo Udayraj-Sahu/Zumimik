@@ -4,6 +4,23 @@ import { mapBackendPracticeSession, type BackendPracticeSessionResponse } from "
 
 import { IS_MOCK } from "@/lib/platform";
 
+export type PracticeLevel = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * The backend has no difficulty parameter, but POST /practice/session accepts the learner's `theta` (-3..3), from which it targets
+ * d* = clamp(round(3 + theta - ln(0.7/0.3)), 1, 5) and serves the items nearest d* first (an ordering, not a filter: when a level has
+ * few questions its neighbours fill the rest). This is the theta whose target is exactly `level`.
+ */
+export function levelToTheta(level: PracticeLevel): number {
+  return Math.round((level - 3 + Math.log(0.7 / 0.3)) * 1000) / 1000;
+}
+
+/** "L3" -> 3; anything else -> undefined. */
+export function parseLevel(value: string | number | null | undefined): PracticeLevel | undefined {
+  const n = typeof value === "number" ? value : Number(String(value ?? "").replace(/^L/i, ""));
+  return Number.isInteger(n) && n >= 1 && n <= 5 ? (n as PracticeLevel) : undefined;
+}
+
 /** Prefix marking a problem-bank topic label (GET /api/topics) in the `topic` slot, as opposed to a :Skill name. */
 export const BANK_TOPIC_PREFIX = "bank:";
 
@@ -12,6 +29,7 @@ export async function getPracticeSession(
   length: number,
   difficulty: string,
   domain?: string,
+  level?: PracticeLevel,
 ): Promise<SprintSession> {
   if (IS_MOCK) {
     const { generateSprintSession } = await import("@/lib/mock/sprint-session");
@@ -35,6 +53,7 @@ export async function getPracticeSession(
   const n = Math.min(50, Math.max(1, Math.floor(length)));
   const response = await apiPost<BackendPracticeSessionResponse>("/practice/session", {
     slots: [{ skill: topic, bucket: "primary", n }],
+    ...(level ? { theta: levelToTheta(level) } : {}),
   });
-  return mapBackendPracticeSession(response, { topic, difficulty, domain });
+  return mapBackendPracticeSession(response, { topic, difficulty: level ? `Level ${level}` : difficulty, domain });
 }

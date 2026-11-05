@@ -130,7 +130,8 @@ export function mapDashboardEventsToNotifications(
 }
 
 export type BackendTopicCatalogResponse = {
-  topics: Array<{ topic: string; problems: number; subtopics: number }>;
+  /** subtopic_list: the sub-topic NAMES behind the `subtopics` count (GET /api/topics, with or without ?domain=). */
+  topics: Array<{ topic: string; problems: number; subtopics: number; subtopic_list?: string[] }>;
 };
 
 export function mapBackendTopicCatalog(response: BackendTopicCatalogResponse): TopicNode[] {
@@ -481,6 +482,7 @@ export function mapMockConfigure(response: BackendMockConfigureResponse, title?:
     topic: response.exam,
     topicLabel: title ?? response.exam.toUpperCase(),
     difficulty: response.practice_label ?? "Full Test",
+    practiceLabel: response.practice_label ?? null,
     questions,
     totalTime: response.time_limit_seconds,
   };

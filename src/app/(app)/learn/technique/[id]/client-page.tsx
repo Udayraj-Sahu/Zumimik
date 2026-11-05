@@ -9,8 +9,11 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { QuickReferenceCard } from "@/components/technique/quick-reference-card";
 import { DifficultyTabs } from "@/components/technique/difficulty-tabs";
 import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
+import { IS_MOCK } from "@/lib/platform";
+import { ReferenceTechniquePage } from "@/components/technique/reference-technique";
 
-export function ClientTechniquePage() {
+/** Mock mode: the bundled lessons (lib/mock/techniques). */
+function MockTechniquePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { data: technique, isLoading, error } = useTechnique(params.id);
@@ -96,4 +99,9 @@ export function ClientTechniquePage() {
       </div>
     </PageContainer>
   );
+}
+
+/** Real mode shows the backend's Reference Library page for the id; mock mode keeps the bundled lessons. */
+export function ClientTechniquePage() {
+  return IS_MOCK ? <MockTechniquePage /> : <ReferenceTechniquePage />;
 }

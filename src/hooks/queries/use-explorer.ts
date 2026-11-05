@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubjectTree, getLeafTechniques } from "@/services/explorer";
 import { getTopicMastery } from "@/services/dashboard";
-import { getReferencePages, getReferenceCard, type ReferencePageSummary, type ReferenceCard } from "@/services/reference";
+import { getCorpusTopicNames, getReferencePages, getReferenceCard, type ReferencePageSummary, type ReferenceCard } from "@/services/reference";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { IS_MOCK } from "@/lib/platform";
 import { explorerScopeKey } from "@/lib/exam-scope";
@@ -61,6 +61,16 @@ export function useReferenceCard(subtopicId: string | null) {
     queryKey: ["explorer", "reference", "card", subtopicId],
     queryFn: () => getReferenceCard(subtopicId as string),
     enabled: !!subtopicId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** The problem-corpus topic names (GET /api/topics, global), for the technique page's topic-level practice fallback. */
+export function useCorpusTopicNames(enabled = true) {
+  return useQuery<string[]>({
+    queryKey: ["explorer", "corpus-topics"],
+    queryFn: getCorpusTopicNames,
+    enabled,
     staleTime: 5 * 60 * 1000,
   });
 }

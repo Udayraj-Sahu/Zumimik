@@ -54,15 +54,21 @@ describe("frontend routes implemented by Speed-Gym", () => {
   it("uses the backend's unversioned content routes and practice catalog", async () => {
     const { getSubjectTree, getLeafTechniques, getSubjectEdges } = await import("./explorer");
 
-    // The explorer tree combines the two global endpoints; neither is sent an exam.
+    // The explorer tree combines the two endpoints; both take the selected exam as `domain`.
     mockedApiGet.mockResolvedValueOnce({ topics: [] } as never).mockResolvedValueOnce({ techniques: [] } as never);
     await getSubjectTree("cat");
-    expect(mockedApiGet).toHaveBeenCalledWith("/api/topics");
-    expect(mockedApiGet).toHaveBeenCalledWith("/api/practice/techniques?limit=500");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/topics?domain=cat");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/practice/techniques?domain=cat&limit=500");
 
     mockedApiGet.mockResolvedValueOnce({ techniques: [] } as never);
     await getLeafTechniques("cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/api/practice/techniques?limit=500");
+    expect(mockedApiGet).toHaveBeenLastCalledWith("/api/practice/techniques?domain=cat&limit=500");
+
+    // With no exam selected both stay global.
+    mockedApiGet.mockResolvedValueOnce({ topics: [] } as never).mockResolvedValueOnce({ techniques: [] } as never);
+    await getSubjectTree("");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/topics");
+    expect(mockedApiGet).toHaveBeenCalledWith("/api/practice/techniques?limit=500");
 
     mockedApiGet.mockResolvedValueOnce({ skills: [] } as never);
     await getSubjectEdges();
@@ -95,6 +101,34 @@ describe("frontend routes implemented by Speed-Gym", () => {
     expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/session?topic=Number%20Theory&size=10");
     expect(mockedApiPost).not.toHaveBeenCalled();
     expect(session.topic).toBe("Number Theory");
+  });
+
+  it("a difficulty level is sent as the theta whose target difficulty is that level", async () => {
+    const { getPracticeSession, levelToTheta, parseLevel } = await import("./practice");
+    // The server targets d* = clamp(round(3 + theta - ln(0.7 / 0.3)), 1, 5) (routers/prescription.py target_difficulty).
+    const target = (theta: number) => Math.min(5, Math.max(1, Math.floor(3 + theta - Math.log(0.7 / 0.3) + 0.5)));
+    for (const level of [1, 2, 3, 4, 5] as const) {
+      const theta = levelToTheta(level);
+      expect(theta).toBeGreaterThanOrEqual(-3);
+      expect(theta).toBeLessThanOrEqual(3);
+      expect(target(theta)).toBe(level);
+    }
+    expect(parseLevel("L3")).toBe(3);
+    expect(parseLevel("4")).toBe(4);
+    for (const bad of ["L0", "L6", "x", "", null, undefined, "2.5"]) expect(parseLevel(bad as never)).toBeUndefined();
+
+    mockedApiPost.mockResolvedValueOnce({ items: [], summary: { requested: 10, served: 0 } } as never);
+    const session = await getPracticeSession("nikhilam", 10, "Beginner", "cat", 4);
+    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", {
+      slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }],
+      theta: levelToTheta(4),
+    });
+    expect(session.difficulty).toBe("Level 4");
+
+    // No level: the request is unchanged (no theta).
+    mockedApiPost.mockResolvedValueOnce({ items: [], summary: { requested: 10, served: 0 } } as never);
+    await getPracticeSession("nikhilam", 10, "Beginner", "cat");
+    expect(mockedApiPost).toHaveBeenLastCalledWith("/practice/session", { slots: [{ skill: "nikhilam", bucket: "primary", n: 10 }] });
   });
 
   it("uses the server-scored mock history and blueprint routes", async () => {

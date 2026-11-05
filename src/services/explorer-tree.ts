@@ -1,5 +1,6 @@
 import type { TopicNode } from "@/lib/types/technique";
 import type { BackendTechniqueSummaryResponse, BackendTopicCatalogResponse } from "./backend-adapters";
+import { matchReferencePage, type ReferencePageSummary } from "./reference";
 
 // ── Explorer: the GLOBAL catalog as a tree ──────────────────────────────────
 // Sources (both unfiltered; neither carries an exam):
@@ -26,6 +27,20 @@ function skillNode(t: Skill): TopicNode {
     description: `${t.problem_count} problems`,
     techniqueId: t.name,
   };
+}
+
+/**
+ * Marks the sub-topics under "Topics" that a finished reference page clearly covers (matchReferencePage) so they open that
+ * technique page. Everything else is returned unchanged; the input is not mutated.
+ */
+export function linkReferencePages(subjects: TopicNode[], pages: ReadonlyArray<ReferencePageSummary>): TopicNode[] {
+  if (pages.length === 0) return subjects;
+  const link = (node: TopicNode): TopicNode => {
+    const children = node.children?.map(link);
+    const referenceId = node.type === "subtopic" && !node.bankTopic ? matchReferencePage(node.title, pages) : undefined;
+    return { ...node, ...(children ? { children } : {}), ...(referenceId ? { referenceId } : {}) };
+  };
+  return subjects.map((s) => (s.id === EXPLORER_PROBLEM_BANK_ID ? link(s) : s));
 }
 
 export function buildGlobalExplorerTree(
@@ -91,17 +106,30 @@ export function buildGlobalExplorerTree(
     subjects.push({
       id: EXPLORER_PROBLEM_BANK_ID,
       type: "subject",
-      title: "Problem bank",
-      slug: "problem-bank",
-      description: "All topics in the problem bank (global)",
-      children: topics.topics.map(({ topic, problems, subtopics }) => ({
-        id: `bank:${topic}`,
-        type: "topic" as const,
-        ...(linkBankTopics ? { bankTopic: topic } : {}),
-        title: titleOf(topic),
-        slug: slugOf(`bank-${topic}`),
-        description: `${problems} problems · ${subtopics} subtopics`,
-      })),
+      title: "Topics",
+      slug: "topics",
+      description: linkBankTopics ? "All topics and subtopics in the problem bank" : "Topics and subtopics for this exam",
+      children: topics.topics.map(({ topic, problems, subtopics, subtopic_list }) => {
+        // A topic opens into its sub-topics. Practice filters on the topic label only (the sub-topic is not a filter on the
+        // fixed bank), so the sub-topics are display-only and a global topic gets one explicit "practise the whole topic" leaf.
+        const practise: TopicNode[] = linkBankTopics
+          ? [{ id: `topic:${topic}::practise`, type: "subtopic" as const, title: `Practise all ${titleOf(topic)}`, slug: slugOf(`topic-${topic}-practise`), bankTopic: topic }]
+          : [];
+        const subs: TopicNode[] = (subtopic_list ?? []).map((sub) => ({
+          id: `topic:${topic}::${sub}`,
+          type: "subtopic" as const,
+          title: titleOf(sub),
+          slug: slugOf(`${topic}-${sub}`),
+        }));
+        return {
+          id: `topic:${topic}`,
+          type: "topic" as const,
+          title: titleOf(topic),
+          slug: slugOf(`topic-${topic}`),
+          description: `${problems} problems · ${subtopics} subtopics`,
+          children: [...practise, ...subs],
+        };
+      }),
     });
   }
   return subjects;

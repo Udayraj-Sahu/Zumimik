@@ -20,6 +20,8 @@ export type TopicNode = {
   techniqueId?: string;
   /** Problem-bank topic label (GET /api/topics). Practised through GET /practice/session?topic=, not a :Skill slot. */
   bankTopic?: string;
+  /** Reference Library page (/learn/technique/<id>) this sub-topic opens, when a finished page clearly covers it. */
+  referenceId?: string;
   masteryLevel?: number;
 };
 

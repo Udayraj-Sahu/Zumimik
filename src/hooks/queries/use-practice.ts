@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPracticeSession } from "@/services/practice";
+import { getPracticeSession, type PracticeLevel } from "@/services/practice";
 import { ApiError } from "@/services/api";
 import type { SprintSession } from "@/lib/types/sprint-session";
 
@@ -8,11 +8,11 @@ export function usePracticeSession(
   length: number,
   difficulty: string,
   domain?: string,
-  options: { enabled?: boolean } = {},
+  options: { enabled?: boolean; level?: PracticeLevel } = {},
 ) {
   return useQuery<SprintSession>({
-    queryKey: ["practice", topic, length, difficulty, domain],
-    queryFn: () => getPracticeSession(topic, length, difficulty, domain),
+    queryKey: ["practice", topic, length, difficulty, domain, options.level ?? null],
+    queryFn: () => getPracticeSession(topic, length, difficulty, domain, options.level),
     enabled: !!topic && length > 0 && (options.enabled ?? true),
     // A served session must not change under the learner: a refetch (focus, reconnect) would swap the
     // questions and reset their progress. A new session is only requested explicitly.
