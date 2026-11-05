@@ -130,7 +130,9 @@ export async function getPracticeSession(
   if (response.items && response.items.length < n) {
     try {
       const fallback = await apiGet<BackendPracticeSessionResponse>(`/practice/session?size=${n - response.items.length}`);
-      if (fallback?.items?.length) response.items = uniqueItems([...response.items, ...fallback.items]);
+      // A chosen technique is never padded with another technique's questions: only items of the same skill are accepted.
+      const extra = isMix || isWarmup ? (fallback?.items ?? []) : (fallback?.items ?? []).filter((i) => i.skill === topic);
+      if (extra.length) response.items = uniqueItems([...response.items, ...extra]);
     } catch {
       /* best-effort fallback */
     }

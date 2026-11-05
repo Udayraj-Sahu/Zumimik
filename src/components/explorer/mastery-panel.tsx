@@ -6,6 +6,9 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { GLASS_BORDER } from "@/lib/theme";
 import { examMasteryNotice, masteryNotice } from "@/lib/exam-scope";
 import type { Topic } from "@/lib/types/dashboard";
+import type { LearnerStates } from "@/lib/learning/learner-state";
+import { stateOf } from "@/lib/learning/mastery-view";
+import { MasteryStateChip } from "./mastery-state-chip";
 
 /**
  * The learner's own mastery (GET /dashboard/topics). Shown separately from the topic catalog above it: it is
@@ -20,6 +23,7 @@ export function MasteryPanel({
   examLabel,
   scoped = false,
   limit = 6,
+  states,
 }: {
   mastery: Topic[] | undefined;
   isLoading: boolean;
@@ -31,6 +35,8 @@ export function MasteryPanel({
   /** True when the mastery was fetched for the selected exam, so the notice can say so. */
   scoped?: boolean;
   limit?: number;
+  /** The learner's hydrated engine states: each skill shows its Fractured / Fragile / Fluid label. */
+  states?: LearnerStates | null;
 }) {
   const items = [...(mastery ?? [])].sort((a, b) => b.value - a.value).slice(0, limit);
   return (
@@ -62,6 +68,7 @@ export function MasteryPanel({
             return (
               <li key={t.name} className="flex items-center gap-3">
                 <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/85">{t.name}</span>
+                <MasteryStateChip state={stateOf(states, t.name)} />
                 <span className="shrink-0 text-[12px] font-bold text-primary">{t.value}%</span>
                 {canPractise ? (
                   <Link

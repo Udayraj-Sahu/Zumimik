@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { AMBER, AMBER_14, CTA_14, CTA_LIME, CYAN, CYAN_14, GLASS_025, GLASS_14, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14 } from "@/lib/theme";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { BookOpen, ChevronDown, Layers, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TopicNode } from "@/lib/types/technique";
+import type { TechniqueStateName } from "@vmsg/shared-types";
+import { MasteryStateChip } from "./mastery-state-chip";
 
 const TYPE_META: Record<
   string,
@@ -18,7 +20,29 @@ const TYPE_META: Record<
   technique: { color: AMBER, softBg: AMBER_14, label: "Technique" },
 };
 
-export function MindMap({
+const MasteryStatesContext = createContext<((techniqueId: string) => TechniqueStateName | undefined) | undefined>(undefined);
+
+type MindMapProps = {
+  tree: TopicNode | null;
+  isLoading: boolean;
+  focusNodeId?: string;
+  availableTechniqueIds?: Set<string>;
+  techniqueHref?: (techniqueId: string) => string;
+  bankTopicHref?: (bankTopic: string) => string;
+  referenceHref?: (referenceId: string) => string;
+  /** The learner's mastery label for a technique (Fractured / Fragile / Fluid); undefined when they have no history with it. */
+  masteryStateOf?: (techniqueId: string) => TechniqueStateName | undefined;
+};
+
+export function MindMap({ masteryStateOf, ...props }: MindMapProps) {
+  return (
+    <MasteryStatesContext.Provider value={masteryStateOf}>
+      <MindMapInner {...props} />
+    </MasteryStatesContext.Provider>
+  );
+}
+
+function MindMapInner({
   tree,
   isLoading,
   focusNodeId,
@@ -234,6 +258,7 @@ function BranchNode({
   unavailable: boolean;
   onSelect: () => void;
 }) {
+  const masteryStateOf = useContext(MasteryStatesContext);
   return (
     <div className="flex flex-col items-center">
       <button
@@ -291,6 +316,9 @@ function BranchNode({
             {meta.label}
             {hasChildren ? ` · ${node.children!.length}` : ""}
           </span>
+          {node.type === "technique" && node.techniqueId && masteryStateOf ? (
+            <MasteryStateChip state={masteryStateOf(node.techniqueId)} className="mt-1" />
+          ) : null}
         </span>
         {!unavailable && hasChildren && (
           <span

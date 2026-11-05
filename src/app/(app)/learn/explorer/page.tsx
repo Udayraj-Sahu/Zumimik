@@ -9,6 +9,9 @@ import { useSubjectTree, useExplorerMastery, useReferencePages } from "@/hooks/q
 import { linkReferencePages } from "@/services/explorer-tree";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { MasteryPanel } from "@/components/explorer/mastery-panel";
+import { NextStepCard } from "@/components/explorer/next-step-card";
+import { useLearnerView } from "@/hooks/queries/use-learner-view";
+import { stateOf } from "@/lib/learning/mastery-view";
 import { IS_MOCK } from "@/lib/platform";
 import { useAllTechniques } from "@/hooks/queries/use-technique";
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -118,6 +121,7 @@ function ExplorerContent() {
         : new Set((catalogData?.topics ?? []).map((t) => t.id)),
     [allTechniques, catalogData],
   );
+  const { data: learnerView } = useLearnerView();
   const { data: mastery, isLoading: masteryLoading, isError: masteryError, refetch: refetchMastery } = useExplorerMastery(activeDomain);
   const loadFailed = treesError || (IS_MOCK ? techniquesError : catalogError);
 
@@ -392,6 +396,8 @@ function ExplorerContent() {
       )}
 
       {/* Mind map */}
+      {!IS_MOCK && <NextStepCard next={learnerView?.next} />}
+
       <div ref={animateSection} data-section-index={3} className="relative mt-6">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -409,6 +415,7 @@ function ExplorerContent() {
               techniqueHref={IS_MOCK ? undefined : (id) => `/learn/practice?skill=${encodeURIComponent(id)}`}
               bankTopicHref={IS_MOCK ? undefined : (topic) => `/learn/practice?bankTopic=${encodeURIComponent(topic)}`}
               referenceHref={IS_MOCK ? undefined : (id) => `/learn/technique/${encodeURIComponent(id)}`}
+              masteryStateOf={IS_MOCK ? undefined : (id) => stateOf(learnerView?.states, id)}
             />
           </motion.div>
         </AnimatePresence>
@@ -422,6 +429,7 @@ function ExplorerContent() {
         isError={masteryError}
         onRetry={() => void refetchMastery()}
         practicable={availableTechniqueIds}
+        states={IS_MOCK ? null : learnerView?.states}
         examLabel={label}
         scoped={scope.catalog === "exam"}
       />
