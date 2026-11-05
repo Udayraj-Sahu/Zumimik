@@ -4,6 +4,8 @@ import path from "node:path";
 export default defineConfig({
   resolve: {
     alias: {
+      "@vmsg/psychometrics": path.resolve(__dirname, "./src/vendor/psychometrics/index.ts"),
+      "@vmsg/shared-types": path.resolve(__dirname, "./src/vendor/shared-types/index.ts"),
       "@": path.resolve(__dirname, "./src"),
     },
   },

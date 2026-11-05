@@ -1,0 +1,66 @@
+# Adaptive learning engine: audit and integration status
+
+Audited 2026-11-06 against `Speed-Gym-main` (backend monorepo) and this frontend (`D:\Exam-Arena-Frontend`).
+
+## 1. Audit
+
+### What the backend actually does
+- **Mastery is computed on the device, never on the server.** `POST /sync` stores a `bkt_state_snapshots` row only when a `session_end` (or `bkt_state_snapshot`) event carries `metadata.technique_states` (`routers/sync.py:618,685`). `GET /practice/mastery` returns the latest stored entry per technique across devices (`mastery_read`). If no client sends `technique_states`, the server holds no mastery for the learner.
+- `POST /practice/session { slots: [{skill, bucket, n, p_learned?}], theta?, backfill? }` fills the slots the device composed (`routers/prescription.py`). Items carry `irt {a, b, source}`; the session carries `learner`. `theta` (-3..3) sets the difficulty window.
+- `GET /practice/catalog` lists skills with `parents` (the REQUIRES prerequisite edges), `servable`, `feeds_mastery`, `unseen`.
+- Mounted prefixes: the app calls `/practice/...`, `/sync` and `/social/...` through its API base (`/api/v1`); `/api/topics`, `/api/config` and `/api/subtopics/...` are under `/api` only. The services already use the right one for each.
+
+### What this frontend did before
+| Area | Finding |
+|---|---|
+| `@vmsg/psychometrics` | **Not used anywhere.** The package is private to the monorepo. |
+| Mastery | `getAdaptiveState` only maps the server snapshot for display. `lib/adaptive/engine.ts` has a local `applyOutcome` (`MASTERY_RATE = 24`) that is a mock-mode heuristic, not BKT. |
+| Persistence | `buildSprintSyncEvents` sent `problem_attempt` + `session_end` with **no `technique_states`**, so the server never received this app's mastery. All attempts shared one `client_timestamp`. |
+| Session building | One slot `{skill, bucket: "primary", n}`; `buildPools` / `composeSession` were never called. |
+| Hydration bug | Not present here (the monorepo's own `apps/web` practice page has it: it rebuilds states by hand and drops `distinctCorrectIds`, `recent`, `evidenceNats`, `lastPracticedAt`, `decayedFrom`, `engineVersion`). This app avoids it by never hand-building states. |
+
+## 2. What is integrated (influences the learner experience and is persisted)
+
+| Phase | Status | Where |
+|---|---|---|
+| Engine reuse | Done. Unmodified copy of the package under `src/vendor/psychometrics` (+ `shared-types/prescription`), imported as `@vmsg/psychometrics`. Re-copy when the backend package changes. | `src/vendor/`, `tsconfig.json`, `vitest.config.ts` |
+| 2 Hydration | Done. `hydrateStates` restores every field and applies decay; legacy snapshots hydrate safely; an unreadable snapshot is never treated as a new learner (no snapshot is written; last good snapshot is the offline fallback). | `lib/learning/learner-state.ts`, `services/learner.ts` |
+| 4 BKT | Done for Sprint and Practice. Eligible answers (answered, scored, canonical skill, not sandbox, `feeds_mastery` not false, one per problem) are replayed with `rebuildStates` (`processAttempt`) with real, ordered timestamps; the resulting `technique_states` ride on `session_end` through the durable queue. | `learner-state.ts`, `services/telemetry.ts` (`buildSessionSyncEvents`) |
+| 3 Adaptive sessions | Done. `buildPools` + `composeSession` (allocation, persona/cluster, prerequisites, empty-pool redistribution, any session size) produce the slots sent to `POST /practice/session`, with each skill's live `p_learned`. A chosen technique takes every slot and is labelled with its own pool. "Personalised mix" tile on Configure Sprint (real mode). | `lib/learning/session-plan.ts`, `services/practice.ts`, `play/configure-sprint` |
+| 5 IRT | Done for the live 2PL-lite (3PL shadow not used). Item `irt {a, b}` from the server is carried into each question (engine seed from `difficulty` when absent); eligible answers go through `recordResponse` (first scored attempt per problem, sandbox/ungraded ignored, MAP refit clamped to [-3, 3]); θ is stored per learner on the device, rebuilt from its responses on every read, sent on `session_end.metadata.theta`, and sent as `theta` on the next session request unless the learner chose an explicit level. Independent of every technique's BKT state. | `lib/learning/ability.ts`, `services/learner.ts`, `services/telemetry.ts`, `services/practice.ts`, `services/backend-adapters.ts` |
+| 6 Calibration | Done. A six-problem warm-up (`/learn/warmup`) composed by the engine for a learner with no history; each answer becomes the engine's outcome (`wrong`, `hint_or_slow` for a hint or beyond the engine's age target time, `correct_first_try`); `calibrationPriors` seeds only skills with no state (an established skill is never overwritten), `ansBaselineMs` gives the baseline, `routePath` the learning path (stored locally in `activePath`). Result stored per learner on the device, draft resumes after a restart, skip/partial handled, never offered twice, never offered when history is unknown or the learner is established. Sent once as `calibration_completed {priors, ans_baseline_ms, active_path}`. | `lib/learning/calibration.ts`, `services/calibration.ts`, `app/(app)/learn/warmup` |
+| 7 Review / spaced repetition | Done. Wrong answers create or raise review entries (`createSinking` / `bumpSinking`), a technique the engine calls fluid again leaves, techniques idle past the 7-day cliff are queued as `decay` (derived, not stored), a mock exam's deferred weak skills are queued as `mock_wrong_answer`. The engine's queue (priority above 0.7, at most five) and `dailyWeights` ORDER the engine's pools, so its own round-robin draw serves the techniques that most need review first; the allocation itself is unchanged. An exam countdown is used only from a valid future date. "Time to revisit" cards in the Adaptive Learning tab give each technique a plain reason and a 5-question refresher. A question is never served twice within a session. | `lib/learning/review.ts`, `lib/learning/session-plan.ts`, `services/learner.ts`, `services/mock-exam.ts`, `hooks/queries/use-review.ts` |
+| Placement | All adaptive entry points (warm-up invitation and the Personalised mix with a 5/10/15 length) live in the **Adaptive Learning tab** of `/learn` (`components/adaptive/adaptive-engine-section.tsx`). | |
+| 10 Persistence | Partly. Durable queue, retry and event-id idempotency are unchanged and used. Offline sessions build on the last snapshot, advanced after each session. | `services/learner.ts` |
+
+## 3. Not yet integrated (do not treat as done)
+
+- **IRT gaps:** (1) the server does not return θ from `GET /practice/mastery` (its `theta` column has no writer yet), so θ lives on the device and a new device or reinstall starts again at the cold start; (2) practice items carry no subject, so everything is `quant` and there is no `di` estimate; (3) the session `learner` object (age-adjusted target time) is still ignored.
+- **Cold-start calibration** (`calibrationPriors`, `ansBaselineMs`, `routePath`): no warm-up flow exists.
+- **Sinking skills / spaced repetition** (`sinkingReviewQueue`, `dailyWeights`): not wired. Today the fragile pool is the engine's "sinking" bucket, which does influence selection, but no review queue or exam-date weighting exists.
+- **Fatigue / CLR** (`fatigueCheckpoint`, `stepClr`): not wired; no interventions in the UI.
+- **Explorer technique flow** and mastery display per technique: unchanged. It is blocked on the backend sub-topic to technique link (see the earlier backend note).
+- **Mastery display** still maps the server snapshot (`mapBackendMastery`); the Fractured/Fragile/Fluid labels are not yet shown from the engine states.
+- **Tests not written:** browser restart / Android restart, multi-device, and the full end-to-end journey (they need the live backend and a device).
+
+## 4. Backend dependencies and risks
+
+- None of the integrated work needs a backend change. Two things to confirm with the backend team:
+  1. `session_end` events carrying large `technique_states` (one entry per practised technique) are accepted: the code sends the whole picture, as the server's readers expect.
+  2. If a queued batch is delivered after a newer one from another device, `mastery_read` merges per technique by latest practice, which is the intended multi-device behaviour; it has not been exercised end to end.
+- For IRT: return the learner's θ per subject from `GET /practice/mastery` (the design persists it "in the snapshot under `theta`", but the snapshot table only stores `technique_states`; today `metadata.theta` survives only in `raw_events`), and add a subject to practice items so Data-Insights ability can be kept separately.
+- For the Explorer: a sub-topic to technique/skill link in `GET /api/topics` (see the backend requirement already shared).
+
+## 5. Learner-state flow (reliability pass, 2026-11-06)
+
+Answer submitted -> the device time is captured on the answer (`answeredAt`) -> session end: `queueSessionSync`, under one learner lock, (1) flushes older queued batches, (2) reads the server snapshot (last good copy offline), (3) replays only the still-unacknowledged queued attempts over it (`attemptsFromEvents` + `rebuildStates`), (4) replays this session over that (`buildSessionLog` + `rebuildStates`), (5) attaches `technique_states` and `theta` to `session_end`, (6) stores the batch in Dexie, keyed by its first event id -> `sendSyncBatch` delivers older batches first, then this one; a batch is deleted only after the server acknowledged it, and a rejected one is parked, never deleted -> the next session or planner call repeats steps 1-3, so acknowledged events come from the snapshot and unacknowledged ones from the queue (never both).
+
+- Timestamps: `resolveAttemptTimes` is the single source for BKT replay, forgetting decay, IRT order and event stamps. Actual submission time when usable; otherwise a reconstructed time (session end minus the durations still to come), labelled `at_source: "reconstructed"` on the event. Times never decrease, are never in the future, and a clock before 2020 or beyond a 5 minute skew is not trusted. Queued events from before this change have no `skill_id` and are skipped from replay (they still sync to the server).
+- Two devices: the server keeps, per technique, the entry with the latest practice time; this device replays only its own unsent attempts over what the server returns.
+
+## 6. Known limitations
+- Review: the server's `sinking_skills` table has no writer or read route, so review entries live on the device (not shared between devices). `dailyWeights` is normalised, so an exam countdown scales every technique equally and does not change the order; it matters only if the weights are later used as absolute values. No high-yield or damage-control data exists, so those weight options are not used; the learner's daily-minutes setting is not used either.
+- Calibration: the backend has no write route for `users.active_path`, the priors or the ANS baseline, so they are kept on the device (and logged by `calibration_completed`); `vedic_standalone` is unreachable because no Vedic-familiarity value is collected.
+- Fatigue/CLR interventions, fatigue/CLR interventions, Explorer technique mastery and the per-subject theta persistence are NOT done (see section 3).
+- A queued batch whose events predate `skill_id` cannot update mastery locally; they are still delivered.
+- Android: the same code runs in the Capacitor WebView (IndexedDB and localStorage), but no Android run or device restart was executed.
