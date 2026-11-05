@@ -12,10 +12,10 @@ import {
   Target,
   Calendar,
   Users,
+  UserPlus,
   ShoppingBag,
   Rss,
   Home,
-  Plus,
   ArrowUpRight,
   Flame,
   BookOpen,
@@ -71,6 +71,7 @@ const QUICK_ACCESS_ITEMS = [
   { label: "Skill Build", icon: Zap, color: CYAN_LIGHT, bg: CYAN_LIGHT_12, href: "/learn/mastery" },
   { label: "Train Plan", icon: Calendar, color: VIOLET_PURPLE_2, bg: VIOLET_PURPLE_2_12, href: "/settings/planner" },
   { label: "Clubs", icon: Users, color: AMBER_LIGHT, bg: AMBER_LIGHT_12, href: "/dashboard/clubs" },
+  { label: "Friends", icon: UserPlus, color: CYAN_LIGHT, bg: CYAN_LIGHT_12, href: "/dashboard/friends" },
   { label: "Store", icon: ShoppingBag, color: ROSE_PINK, bg: ROSE_PINK_12, href: "/dashboard" },
   { label: "Feed", icon: Rss, color: GREEN_SOFT, bg: GREEN_SOFT_12, href: "/dashboard/feed" },
   { label: "Family", icon: Home, color: ROSE_PINK, bg: ROSE_PINK_12, href: "/dashboard/family" },
@@ -896,12 +897,6 @@ export default function DashboardPage() {
               </button>
               );
             })}
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl py-4 opacity-35">
-              <div className="h-11 w-11 rounded-full flex items-center justify-center">
-                <Plus size={15} className="text-muted-foreground" />
-              </div>
-              <span className="text-micro font-medium text-muted-foreground text-center leading-tight tracking-[0.01em]">Coming Soon</span>
-            </div>
           </div>
         </GlassCard>
         {hasResume && (

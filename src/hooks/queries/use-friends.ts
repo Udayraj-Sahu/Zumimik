@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getFriendsSummary, getFriendActivity, respondToFriendRequest, sendFriendRequest, removeFriend, type FriendRequestAction } from "@/services/friends";
+import { getFriendsSummary, getFriendActivity, respondToFriendRequest, sendFriendRequest, removeFriend, generateFriendQr, redeemFriendQr, type FriendRequestAction } from "@/services/friends";
 import type { Friend, FriendActivity } from "@/lib/types/friends";
 
 type FriendsData = {
@@ -20,6 +20,11 @@ export function useFriends() {
   });
 }
 
+/** Ask the server for a fresh one-time friend QR code. Every call issues a new code, so this is a mutation, not a cached query. */
+export function useGenerateFriendQr() {
+  return useMutation({ mutationFn: generateFriendQr });
+}
+
 /** Accept or decline an incoming request, then refresh the friends list (the single source of truth). */
 export function useRespondToFriendRequest() {
   const queryClient = useQueryClient();
@@ -34,6 +39,15 @@ export function useSendFriendRequest() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (email: string) => sendFriendRequest(email),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
+  });
+}
+
+/** Redeem a scanned or pasted friend code; on success the new friend appears (the friends list is refreshed). */
+export function useRedeemFriendQr() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (scanned: string) => redeemFriendQr(scanned),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["friends"] }),
   });
 }

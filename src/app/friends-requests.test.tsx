@@ -154,3 +154,129 @@ describe("add and remove friends use the backend's request/remove contract", () 
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["friends"] }));
   });
 });
+
+describe("adding a friend with a QR code uses the backend's qr/redeem contract", () => {
+  const SIG = "b".repeat(64);
+  beforeEach(() => {
+    apiGet.mockReset();
+    apiPost.mockReset();
+    localStorage.clear();
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/social/friends") return FRIENDS;
+      throw new Error(`unexpected GET ${path}`);
+    });
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  async function openCodeForm() {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    render(
+      <QueryClientProvider client={client}>
+        <Page />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    return { invalidate, input: screen.getByPlaceholderText("Code from their Add friend QR") };
+  }
+
+  it("a valid code.sig POSTs { code, sig }, says they are friends, and refreshes the list", async () => {
+    apiPost.mockResolvedValue({ friendship_id: "f-5", status: "accepted" });
+    const { invalidate, input } = await openCodeForm();
+    fireEvent.change(input, { target: { value: ` friendcode123456.${SIG} ` } });
+    fireEvent.click(screen.getByRole("button", { name: "Add with code" }));
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/social/friends/qr/redeem", { code: "friendcode123456", sig: SIG }));
+    expect(await screen.findByTestId("friend-code-message")).toHaveTextContent("now friends");
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["friends"] }));
+  });
+
+  it("text that is not a friend code is rejected locally with no request", async () => {
+    const { input } = await openCodeForm();
+    fireEvent.change(input, { target: { value: "hello world" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add with code" }));
+    expect(await screen.findByTestId("friend-code-message")).toHaveTextContent(/doesn't look like a friend code/);
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+
+  it("shows the server's refusal as returned (expired, own code)", async () => {
+    const { ApiError } = await import("@/services/api");
+    apiPost.mockRejectedValueOnce(new ApiError(410, "code expired or already used"));
+    const { input } = await openCodeForm();
+    fireEvent.change(input, { target: { value: `friendcode123456.${SIG}` } });
+    fireEvent.click(screen.getByRole("button", { name: "Add with code" }));
+    expect(await screen.findByTestId("friend-code-message")).toHaveTextContent("code expired or already used");
+  });
+});
+
+describe("scanning a friend's QR with the camera", () => {
+  const SIG = "c".repeat(64);
+  const stopTrack = vi.fn();
+  const jsQR = vi.fn();
+
+  beforeEach(() => {
+    apiGet.mockReset();
+    apiPost.mockReset();
+    stopTrack.mockReset();
+    jsQR.mockReset();
+    localStorage.clear();
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/social/friends") return FRIENDS;
+      throw new Error(`unexpected GET ${path}`);
+    });
+    vi.doMock("jsqr", () => ({ default: (...a: unknown[]) => jsQR(...a) }));
+    Object.defineProperty(HTMLVideoElement.prototype, "videoWidth", { configurable: true, get: () => 64 });
+    Object.defineProperty(HTMLVideoElement.prototype, "videoHeight", { configurable: true, get: () => 64 });
+    HTMLVideoElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+      drawImage: vi.fn(),
+      getImageData: () => ({ data: new Uint8ClampedArray(4), width: 64, height: 64 }),
+    }) as never;
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.doUnmock("jsqr");
+  });
+
+  async function openScanner(getUserMedia: unknown) {
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia } });
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <Page />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Scan QR with camera/ }));
+  }
+
+  it("a scanned friend code is redeemed and the camera is switched off", async () => {
+    jsQR.mockReturnValue({ data: `friendcode123456.${SIG}` });
+    apiPost.mockResolvedValue({ friendship_id: "f-6", status: "accepted" });
+    const getUserMedia = vi.fn().mockResolvedValue({ getTracks: () => [{ stop: stopTrack }] });
+    await openScanner(getUserMedia);
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/social/friends/qr/redeem", { code: "friendcode123456", sig: SIG }));
+    expect(getUserMedia).toHaveBeenCalledWith(expect.objectContaining({ audio: false }));
+    expect(stopTrack).toHaveBeenCalled();
+    expect(await screen.findByTestId("friend-code-message")).toHaveTextContent("now friends");
+  });
+
+  it("a QR that is not a friend code is ignored (no request)", async () => {
+    jsQR.mockReturnValue({ data: "https://app.example/?ref=ABCD1234" });
+    const getUserMedia = vi.fn().mockResolvedValue({ getTracks: () => [{ stop: stopTrack }] });
+    await openScanner(getUserMedia);
+    await waitFor(() => expect(jsQR).toHaveBeenCalled());
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+
+  it("a blocked camera says so and points to pasting the code", async () => {
+    const getUserMedia = vi.fn().mockRejectedValue(new DOMException("denied", "NotAllowedError"));
+    await openScanner(getUserMedia);
+    expect(await screen.findByTestId("scanner-error")).toHaveTextContent(/Camera access was blocked/);
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+});

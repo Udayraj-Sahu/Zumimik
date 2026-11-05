@@ -1,11 +1,16 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.setConfig({ testTimeout: 30000 });
 
 const apiGet = vi.fn();
-vi.mock("@/services/api", async (orig) => ({ ...(await orig<object>()), apiGet: (...a: unknown[]) => apiGet(...a) }));
+const apiPost = vi.fn();
+vi.mock("@/services/api", async (orig) => ({
+  ...(await orig<object>()),
+  apiGet: (...a: unknown[]) => apiGet(...a),
+  apiPost: (...a: unknown[]) => apiPost(...a),
+}));
 
 async function renderCard(mock: boolean) {
   vi.resetModules();
@@ -92,5 +97,55 @@ describe("InviteCard respects the referral feature flag", () => {
     await renderCard(false);
     await waitFor(() => expect(screen.getAllByText("QWER5555").length).toBeGreaterThan(0));
     expect(screen.queryByTestId("referral-off")).not.toBeInTheDocument();
+  });
+});
+
+describe("InviteCard friend QR (POST /social/friends/qr/generate)", () => {
+  const SIG = "a".repeat(64);
+  beforeEach(() => {
+    apiGet.mockReset();
+    apiPost.mockReset();
+    localStorage.clear();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  function routeGet(flags: Record<string, unknown> = {}) {
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/api/config") return { flags };
+      if (path === "/referral") return { code: "ABCD1234", verified_referrals: 0 };
+      throw new Error("unexpected " + path);
+    });
+  }
+  async function openFriendTab() {
+    await renderCard(false);
+    fireEvent.click(await screen.findByRole("button", { name: "Show invite QR code" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Add friend" }));
+  }
+
+  it("requests a code only when the Add friend tab is opened, and shows its expiry", async () => {
+    routeGet();
+    apiPost.mockResolvedValue({ code: "friendcode123456", sig: SIG, expiresIn: 300 });
+    await renderCard(false);
+    fireEvent.click(await screen.findByRole("button", { name: "Show invite QR code" }));
+    expect(apiPost).not.toHaveBeenCalled(); // the invite-link tab does not touch the friend route
+    fireEvent.click(await screen.findByRole("tab", { name: "Add friend" }));
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/social/friends/qr/generate"));
+    expect(await screen.findByText(/Expires in 5:00|Expires in 4:5/)).toBeInTheDocument();
+  });
+
+  it("flag off: explains it and never calls the route", async () => {
+    routeGet({ social_friends: { enabled: false, rollout_pct: 100 } });
+    await openFriendTab();
+    expect(await screen.findByText(/Adding friends isn't enabled/)).toBeInTheDocument();
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+
+  it("shows the server's refusal (e.g. a child account) and offers to retry", async () => {
+    routeGet();
+    const { ApiError } = await import("@/services/api");
+    apiPost.mockRejectedValue(new ApiError(403, "QR pairing is not available for this account"));
+    await openFriendTab();
+    expect(await screen.findByRole("alert")).toHaveTextContent(/not available for this account/);
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });

@@ -9,7 +9,9 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useReferralStore } from "@/stores/referral-store";
 import { useReferralStatus } from "@/hooks/queries/use-referral";
 import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
-import { isFeatureOff } from "@/services/flags";
+import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
+import { useGenerateFriendQr } from "@/hooks/queries/use-friends";
+import { cn } from "@/lib/utils";
 import { IS_MOCK } from "@/lib/platform";
 
 const REWARD_XP = 50;
@@ -30,6 +32,44 @@ export function InviteCard() {
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [origin, setOrigin] = useState("");
+  const [qrTab, setQrTab] = useState<"invite" | "friend">("invite");
+  const friendQr = useGenerateFriendQr();
+  const friendsOff = !IS_MOCK && isFeatureOff(flags, "social_friends");
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const { mutate: generateFriend, reset: resetFriend } = friendQr;
+
+  // The friend code is issued by the server (one-time, 300 s), so it is requested only while that tab is showing.
+  useEffect(() => {
+    if (!qrOpen || qrTab !== "friend" || friendsOff) return;
+    generateFriend(undefined, { onSuccess: (r) => setExpiresAt(Date.now() + r.expiresIn * 1000) });
+  }, [qrOpen, qrTab, friendsOff, generateFriend]);
+
+  useEffect(() => {
+    if (!qrOpen) {
+      resetFriend();
+      setExpiresAt(null);
+      setQrTab("invite");
+    }
+  }, [qrOpen, resetFriend]);
+
+  useEffect(() => {
+    if (expiresAt === null) return;
+    const tick = () => setSecondsLeft(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  const friendCode = friendQr.data ? `${friendQr.data.code}.${friendQr.data.sig}` : null;
+  const friendExpired = !!friendQr.data && expiresAt !== null && secondsLeft <= 0;
+  const friendError = friendQr.error
+    ? (gatedFeatureMessage(friendQr.error, "Friend QR") ?? (friendQr.error instanceof Error ? friendQr.error.message : "Couldn't create a friend code."))
+    : null;
+  const regenerateFriend = () => {
+    setExpiresAt(null);
+    generateFriend(undefined, { onSuccess: (r) => setExpiresAt(Date.now() + r.expiresIn * 1000) });
+  };
 
   useEffect(() => {
     if (IS_MOCK) ensureCode(firstName); // development-only local code
@@ -194,6 +234,58 @@ export function InviteCard() {
             </button>
           </div>
 
+          <div role="tablist" aria-label="QR type" className="mt-3 grid grid-cols-2 gap-1 rounded-full border border-[var(--glass-border)] bg-[var(--glass-05)] p-1">
+            {([["invite", "Invite link"], ["friend", "Add friend"]] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={qrTab === id}
+                onClick={() => setQrTab(id)}
+                className={cn(
+                  "rounded-full px-3 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider transition-all",
+                  qrTab === id ? "bg-[var(--accent-10)] text-[var(--primary)]" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {qrTab === "friend" ? (
+            <div data-testid="friend-qr" className="mt-4">
+              {friendsOff ? (
+                <p role="status" className="py-8 text-center text-[11px] text-muted-foreground/60">Adding friends isn&apos;t enabled for your account yet.</p>
+              ) : friendError ? (
+                <div role="alert" className="py-6 text-center">
+                  <p className="text-[11px] text-destructive">{friendError}</p>
+                  <button type="button" onClick={regenerateFriend} className="mt-3 rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground">Try again</button>
+                </div>
+              ) : friendCode ? (
+                <>
+                  <div className="flex justify-center">
+                    <div className={cn("rounded-2xl bg-white p-3 transition-opacity", friendExpired && "opacity-20")} style={{ boxShadow: "0 0 30px var(--accent-15)" }}>
+                      <QRCodeSVG value={friendCode} size={196} level="M" marginSize={0} />
+                    </div>
+                  </div>
+                  <p className="mt-3 text-center font-mono text-[11px] text-muted-foreground" aria-live="polite">
+                    {friendExpired ? "Code expired" : `Expires in ${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
+                  </p>
+                  {friendExpired && (
+                    <div className="mt-2 flex justify-center">
+                      <button type="button" onClick={regenerateFriend} className="rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground">New code</button>
+                    </div>
+                  )}
+                  <p className="mt-2 text-center font-mono text-[10.5px] leading-relaxed text-muted-foreground">
+                    Show this to a friend in person. It works once.
+                  </p>
+                </>
+              ) : (
+                <p className="py-10 text-center font-mono text-[11px] text-muted-foreground" role="status">Creating your friend code…</p>
+              )}
+            </div>
+          ) : (
+          <>
           <div className="mt-4 flex justify-center">
             <div className="rounded-2xl bg-white p-3" style={{ boxShadow: "0 0 30px var(--accent-15)" }}>
               {inviteLink && (
@@ -219,6 +311,8 @@ export function InviteCard() {
           <p className="mt-3 text-center font-mono text-[10.5px] leading-relaxed text-muted-foreground">
             Point your friend&apos;s camera at the code — or share the {REWARD_XP} XP invite.
           </p>
+          </>
+          )}
         </div>
       </Dialog>
     </GlassCard>

@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Users, UserPlus, Swords, Zap, Award, Check, X } from "lucide-react";
+import { Users, UserPlus, Swords, Zap, Award, Check, X, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
-import { useFriends, useRespondToFriendRequest, useSendFriendRequest, useRemoveFriend } from "@/hooks/queries/use-friends";
+import { useFriends, useRespondToFriendRequest, useSendFriendRequest, useRemoveFriend, useRedeemFriendQr } from "@/hooks/queries/use-friends";
 import { toast } from "@/stores/toast-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { FriendQrScanner } from "@/components/friends/friend-qr-scanner";
 import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 
 export default function FriendsPage() {
@@ -18,6 +20,20 @@ export default function FriendsPage() {
   const respond = useRespondToFriendRequest();
   const sendRequest = useSendFriendRequest();
   const remove = useRemoveFriend();
+  const redeemQr = useRedeemFriendQr();
+  const [qrCode, setQrCode] = useState("");
+  const [qrMessage, setQrMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const submitQr = (scanned: string = qrCode) => {
+    setQrMessage(null);
+    redeemQr.mutate(scanned, {
+      onSuccess: () => {
+        setQrMessage({ kind: "ok", text: "You're now friends." });
+        setQrCode("");
+      },
+      onError: (err) => setQrMessage({ kind: "error", text: err instanceof Error ? err.message : "Couldn't use that code." }),
+    });
+  };
   const [addOpen, setAddOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [addMessage, setAddMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -75,54 +91,9 @@ export default function FriendsPage() {
       <div ref={headerRef} className="text-center">
         <div className="inline-flex items-center gap-2 pill px-4 py-1.5 mb-3 max-[359px]:px-3">
           <Users size={12} className="text-primary" />
-          <span className="text-micro font-semibold tracking-[0.22em] text-primary/80">FRIENDS</span>
+          <h1 className="text-micro font-semibold tracking-[0.22em] text-primary/80">FRIENDS</h1>
         </div>
-        <h1 className="text-[20px] font-bold tracking-[-0.02em] text-foreground leading-tight">Friends</h1>
-        <p className="text-[12px] text-muted-foreground/45 font-normal mt-1">Compete and stay motivated together</p>
-        <div className="mt-3 flex justify-center">
-          <Button
-            size="sm"
-            onClick={() => {
-              setAddOpen((open) => !open);
-              setAddMessage(null);
-            }}
-            aria-expanded={addOpen}
-            className="rounded-xl px-3 py-2.5 min-h-[44px] hover:scale-[1.05] active:scale-[0.95] max-[359px]:px-2.5 max-[359px]:py-2"
-          >
-            <UserPlus size={14} /> Add
-          </Button>
-        </div>
-        {addOpen && (
-          <form
-            data-testid="add-friend-form"
-            noValidate
-            className="mx-auto mt-3 flex w-full max-w-sm flex-col gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              submitAdd();
-            }}
-          >
-            <label className="text-left text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
-              Friend&apos;s email
-              <input
-                type="email"
-                autoComplete="off"
-                value={addEmail}
-                onChange={(e) => setAddEmail(e.target.value)}
-                placeholder="friend@example.com"
-                className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[14px] font-semibold text-foreground outline-none focus:border-primary/40"
-              />
-            </label>
-            <Button type="submit" size="sm" disabled={sendRequest.isPending || !addEmail.trim()} className="min-h-[44px]">
-              {sendRequest.isPending ? "Sending…" : "Send request"}
-            </Button>
-            {addMessage && (
-              <p role={addMessage.kind === "error" ? "alert" : "status"} data-testid="add-friend-message" className={cn("text-[12px]", addMessage.kind === "error" ? "text-destructive" : "text-primary")}>
-                {addMessage.text}
-              </p>
-            )}
-          </form>
-        )}
+        <p className="text-[12px] text-muted-foreground/45 font-normal">Compete and stay motivated together</p>
       </div>
 
       <div ref={animateSection} data-section-index="0" className="mt-5 flex gap-2 overflow-x-auto max-[359px]:gap-1.5">
@@ -130,7 +101,7 @@ export default function FriendsPage() {
           type="button"
           onClick={() => setTab("friends")}
           className={cn(
-            "rounded-full px-4 py-3 text-micro font-bold uppercase tracking-wider outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
+            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
             tab === "friends"
               ? "bg-primary text-primary-foreground"
               : "border border-white/[0.06] text-muted-foreground hover:text-foreground",
@@ -144,7 +115,7 @@ export default function FriendsPage() {
           type="button"
           onClick={() => setTab("activity")}
           className={cn(
-            "rounded-full px-4 py-3 text-micro font-bold uppercase tracking-wider outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
+            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
             tab === "activity"
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -157,7 +128,7 @@ export default function FriendsPage() {
           type="button"
           onClick={() => setTab("requests")}
           className={cn(
-            "rounded-full px-4 py-3 text-micro font-bold uppercase tracking-wider outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
+            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
             tab === "requests"
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -318,6 +289,103 @@ export default function FriendsPage() {
         </div>
       </div>
       </div>
+
+      <Button
+        aria-label="Add friend"
+        size="icon"
+        onClick={() => {
+          setAddOpen(true);
+          setAddMessage(null);
+          setQrMessage(null);
+        }}
+        aria-haspopup="dialog"
+        className="fixed right-5 bottom-20 z-40 size-14 rounded-full shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 max-[359px]:right-4"
+      >
+        <UserPlus size={22} strokeWidth={2.5} />
+      </Button>
+
+      <Dialog open={addOpen} onClose={() => setAddOpen(false)} placement="center" className="max-w-[380px] border-[var(--glass-border)] bg-[var(--glass-02)]" ariaLabel="Add a friend">
+        <div className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <UserPlus size={15} className="text-primary" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.12em]">Add a friend</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAddOpen(false)}
+              aria-label="Close"
+              className="rounded-full p-1.5 text-muted-foreground transition-all hover:bg-[var(--glass-07)] hover:text-foreground active:scale-90"
+            >
+              <X size={15} />
+            </button>
+          </div>
+          <form
+            data-testid="add-friend-form"
+            noValidate
+            className="mx-auto mt-3 flex w-full max-w-sm flex-col gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitAdd();
+            }}
+          >
+            <label className="text-left text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+              Friend&apos;s email
+              <input
+                type="email"
+                autoComplete="off"
+                value={addEmail}
+                onChange={(e) => setAddEmail(e.target.value)}
+                placeholder="friend@example.com"
+                className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[14px] font-semibold text-foreground outline-none focus:border-primary/40"
+              />
+            </label>
+            <Button type="submit" size="sm" disabled={sendRequest.isPending || !addEmail.trim()} className="min-h-[44px]">
+              {sendRequest.isPending ? "Sending…" : "Send request"}
+            </Button>
+            {addMessage && (
+              <p role={addMessage.kind === "error" ? "alert" : "status"} data-testid="add-friend-message" className={cn("text-[12px]", addMessage.kind === "error" ? "text-destructive" : "text-primary")}>
+                {addMessage.text}
+              </p>
+            )}
+          </form>
+          <form
+            data-testid="friend-code-form"
+            noValidate
+            className="mx-auto mt-4 flex w-full max-w-sm flex-col gap-2 border-t border-white/[0.06] pt-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitQr();
+            }}
+          >
+            <label className="text-left text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+              Or paste a friend&apos;s code
+              <input
+                type="text"
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                value={qrCode}
+                onChange={(e) => setQrCode(e.target.value)}
+                placeholder="Code from their Add friend QR"
+                className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 font-mono text-[13px] font-semibold text-foreground outline-none focus:border-primary/40"
+              />
+            </label>
+            <Button type="submit" size="sm" disabled={redeemQr.isPending || !qrCode.trim()} className="min-h-[44px]">
+              {redeemQr.isPending ? "Adding…" : "Add with code"}
+            </Button>
+            <Button type="button" size="sm" variant="glass" onClick={() => setScanOpen(true)} disabled={redeemQr.isPending} className="min-h-[44px]">
+              <Camera size={14} /> Scan QR with camera
+            </Button>
+            {qrMessage && (
+              <p role={qrMessage.kind === "error" ? "alert" : "status"} data-testid="friend-code-message" className={cn("text-[12px]", qrMessage.kind === "error" ? "text-destructive" : "text-primary")}>
+                {qrMessage.text}
+              </p>
+            )}
+          </form>
+        </div>
+      </Dialog>
+      <FriendQrScanner open={scanOpen} onClose={() => setScanOpen(false)} onScan={(text) => submitQr(text)} />
     </PageContainer>
   );
 }
