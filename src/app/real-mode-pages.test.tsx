@@ -15,7 +15,6 @@ function wrap(ui: ReactNode) {
 }
 
 const PAGES: Array<[string, () => Promise<{ default: () => JSX.Element }>]> = [
-  ["Feed", () => import("@/app/(app)/dashboard/feed/page")],
   ["Duel", () => import("@/app/(app)/play/duel/page")],
   ["Class Calendar", () => import("@/app/(app)/settings/planner/page")],
   ["Linked Devices", () => import("@/app/(app)/settings/linked-devices/page")],
@@ -35,16 +34,11 @@ describe("pages whose backend API does not exist", () => {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     });
 
-    it("Clubs and Feed render none of the bundled fixture content", async () => {
+    it("Clubs render none of the bundled fixture content", async () => {
       const { MOCK_CLUBS } = await import("@/lib/mock/clubs");
-      const { FEED_STORIES } = await import("@/lib/mock/feed");
       const clubs = await import("@/app/(app)/dashboard/clubs/page");
       const view = wrap(<clubs.default />);
       for (const club of MOCK_CLUBS) expect(view.container.textContent).not.toContain(club.name);
-      view.unmount();
-      const feed = await import("@/app/(app)/dashboard/feed/page");
-      const feedView = wrap(<feed.default />);
-      for (const story of FEED_STORIES) expect(feedView.container.textContent).not.toContain(story.subtitle);
     });
   });
 

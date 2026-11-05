@@ -185,13 +185,15 @@ describe("loading & empty-state inventory (static)", () => {
 });
 
 describe("images & media (static)", () => {
-  const FEED = join(SRC, "app", "(app)", "dashboard", "feed", "page.tsx");
+  const FEED = join(SRC, "components", "feed", "feed-live.tsx"); // the Feed page is a thin wrapper; the images live here
   const CLUBS = join(SRC, "app", "(app)", "dashboard", "clubs", "page.tsx");
 
   it("14. feed/club images load lazily with fixed boxes + object-cover (no layout shift)", () => {
     const feed = readFileSync(FEED, "utf8");
     const clubs = readFileSync(CLUBS, "utf8");
     expect(feed).toContain("decoding=\"async\"");
+    expect(feed).toContain("loading=\"lazy\"");
+    expect(feed).toContain("object-cover");
     expect(clubs).toContain("loading=\"lazy\"");
     expect(clubs).toContain("object-cover");
   });
