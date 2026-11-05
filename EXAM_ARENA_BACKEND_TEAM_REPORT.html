@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Arena: backend and frontend gaps, and API contract</title>
+<style>
+  :root{--bg:#fff;--fg:#1b1f24;--mut:#5a6270;--line:#dde1e7;--card:#f6f8fa;--ok:#0f7b45;--okbg:#e3f5ea;--no:#b3261e;--nobg:#fdeceb;--part:#8a5a00;--partbg:#fff3d6;--na:#4b5563;--nabg:#eceff3;--acc:#1a4fd6}
+  @media (prefers-color-scheme:dark){:root{--bg:#10141a;--fg:#e8ebf0;--mut:#a3acba;--line:#2a313b;--card:#171c24;--ok:#6fd49b;--okbg:#14301f;--no:#ff8a80;--nobg:#3a1715;--part:#f0c36a;--partbg:#33270a;--na:#b6bfcc;--nabg:#222833;--acc:#8ab0ff}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  h1{font-size:28px;line-height:1.2;margin:0 0 6px}
+  h2{font-size:22px;margin:44px 0 8px;padding-top:14px;border-top:3px solid var(--acc)}
+  h3{font-size:18px;margin:30px 0 10px}
+  h3 small{font-weight:400;color:var(--mut);font-size:13px;margin-left:8px}
+  h4{font-size:16px;margin:0 0 8px}
+  p{margin:8px 0}
+  .lead{color:var(--mut)}
+  nav.top{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+  nav.top a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;color:var(--acc);text-decoration:none;font-weight:600;font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+  .stat{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card)}
+  .stat b{display:block;font-size:26px;line-height:1.1}
+  .stat span{color:var(--mut);font-size:13px}
+  .box{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:14px 16px;margin:14px 0}
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0;background:var(--card)}
+  dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:6px 14px}
+  dt{font-weight:700;color:var(--mut);font-size:14px}
+  dd{margin:0}
+  table{width:100%;border-collapse:collapse;margin:10px 0 6px;font-size:14px;border:1px solid var(--line)}
+  th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+  thead th{background:var(--card);font-size:13px;position:sticky;top:0}
+  tbody tr:nth-child(even){background:color-mix(in srgb,var(--card) 55%,transparent)}
+  code{font:13px ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+  table.contract{table-layout:fixed;min-width:820px}
+  table.contract th:nth-child(1){width:27%}table.contract th:nth-child(2){width:20%}table.contract th:nth-child(3){width:27%}table.contract th:nth-child(4){width:12%}table.contract th:nth-child(5){width:14%}
+  .scroll>table:not(.contract){min-width:720px}
+  .b{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.5}
+  .b-ok{background:var(--okbg);color:var(--ok)} .b-no{background:var(--nobg);color:var(--no)}
+  .b-part{background:var(--partbg);color:var(--part)} .b-off{background:var(--partbg);color:var(--part)}
+  .b-na,.b-skip{background:var(--nabg);color:var(--na)}
+  .m{display:inline-block;min-width:54px;text-align:center;border-radius:6px;font:700 11px/1.7 ui-monospace,Consolas,monospace;background:var(--nabg);color:var(--na)}
+  .m-GET{color:var(--ok)} .m-POST{color:var(--acc)} .m-PATCH,.m-PUT{color:var(--part)} .m-DELETE{color:var(--no)}
+  .pub{font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:0 5px}
+  .sub{font-size:12px;color:var(--mut);margin-top:2px}
+  ul.plain{padding-left:20px} ul.plain li{margin:6px 0}
+  .scroll{overflow-x:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px}
+  @media (max-width:720px){dl{grid-template-columns:1fr}dt{margin-top:6px}table{font-size:13px}}
+  @media print{nav.top{display:none}thead th{position:static}.card{break-inside:avoid}h2{break-before:page}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Exam Arena: what is missing, and how the app and server connect</h1>
+    <p class="lead">Prepared 5 November 2026 for the backend team. It covers the staging server (examarena-staging.duckdns.org) and the frontend app. Everything marked "tested" was checked on staging on this date using a test account. Things we only read in the code are said to be so.</p>
+    <nav class="top" aria-label="Sections"><a href="#backend">1. What the backend is missing</a><a href="#frontend">2. What the frontend is missing</a><a href="#contract">3. API contract</a></nav>
+    <div class="stats">
+      <div class="stat"><b>109</b><span>routes the app could use</span></div>
+      <div class="stat"><b>68</b><span>of them used by the app</span></div>
+      <div class="stat"><b>22</b><span>pages fully connected</span></div>
+      <div class="stat"><b>4</b><span>pages partly connected</span></div>
+      <div class="stat"><b>3</b><span>pages not connected</span></div>
+      <div class="stat"><b>4</b><span>pages that need no server data</span></div>
+    </div>
+    <div class="box"><strong>How to read the colours.</strong> Every colour also has a word.
+      <div class="legend" style="margin-top:6px"><span class="b b-ok">Connected / Works</span> <span class="b b-part">Partly</span> <span class="b b-no">Not connected / No</span> <span class="b b-off">Switched off</span> <span class="b b-na">Not tested / not needed</span></div>
+    </div>
+  </header>
+
+  <section id="backend">
+    <h2>1. What the backend is missing</h2>
+    <p class="lead">Things the server must add, fix or switch on so the app can finish its screens. Each item says what is wrong, why it matters, and what we ask for. They are grouped from "affects real users now" to "cannot test yet".</p>
+    
+  <h3>A. Problems that affect real users today</h3>
+  
+  <article class="card">
+    <h4>No full mock exam can be started: the question bank is missing question types</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Starting a full paper fails with error 503 for all three exams (tested on staging today). CAT: &quot;VARC is 16 reading comprehension + 8 verbal ability; verbal ability: needs 8, the pool has 0&quot;. GMAT: the Verbal section &quot;cannot run as a scored mock&quot; because the questions carry no question type or passage id. GRE: the Verbal section cannot run because there is no &quot;select two&quot; question type, so sentence equivalence and multi-blank questions cannot be served. Only a labelled practice version works (asking with practice: true gave CAT: 24 + 20 + 22 questions), and CAT sectional DILR also worked.</dd>
+      <dt>Why it matters</dt><dd>Users who tap a full mock paper see an error. The app now explains it and offers &quot;Take it as practice&quot;, but a real, scored full mock cannot be taken, and practice attempts do not count toward the percentile.</dd>
+      <dt>What we ask</dt><dd>Add verbal-ability questions to the bank (para jumble, para summary, odd sentence out, at least 8 for CAT), add question type and passage id to the GMAT questions, and add a &quot;select two&quot; question type for GRE. Or tell us which papers should be offered as practice only.</dd>
+      <dt>Screens affected</dt><dd>Learn &gt; Mock exam</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Nobody can pay: no payment provider is set up</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The plans list says no payment provider is available (&quot;providers_available&quot; is empty). Because of this, the checkout, verify, cancel, resume and change-plan routes cannot be used.</dd>
+      <dt>Why it matters</dt><dd>Users can see Pro and Bundle prices but cannot buy them. Family seats (child accounts) also need a paid plan, so they cannot be created either.</dd>
+      <dt>What we ask</dt><dd>Set up Razorpay (and/or Stripe) on staging in test mode, and tell us which one and which currency to use. Also decide: monthly only, or monthly and yearly (the plans have monthly prices only).</dd>
+      <dt>Screens affected</dt><dd>Upgrade pop-up, Family page</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>The server never learns a user's age</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The app asks for date of birth during onboarding and saves it. But the server only keeps it inside the profile text; the user's real &quot;age&quot; field stays empty. The only accounts that get an age are child seats made from the Family page (we read this in the server code).</dd>
+      <dt>Why it matters</dt><dd>The server then treats every normal user as &quot;age unknown&quot;. We checked: the test account says age_known: false. As the code stands, the ads rule needs a known age, so ads cannot show for anyone, and child-safety rules cannot be applied to a real child who signs up alone.</dd>
+      <dt>What we ask</dt><dd>When a date of birth is saved, work out and store the age. Or tell us another way to set it.</dd>
+      <dt>Screens affected</dt><dd>Onboarding, ads, friends, clubs, tournaments</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Exam topic lists use made-up numbers and names that have no questions</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Asking for topics for an exam (for example CAT) returns five names typed into the code, like &quot;Quantitative Aptitude&quot;. The numbers next to them (25 problems, 4 subtopics) are a default, not a real count. We tested: asking the practice route for &quot;Quantitative Aptitude&quot; returns zero questions.</dd>
+      <dt>Why it matters</dt><dd>The Explorer shows these names and counts, but they cannot be practised, and the counts are not true.</dd>
+      <dt>What we ask</dt><dd>Link each exam topic to real topics or skills with true counts, or return a clear &quot;no content yet&quot; for it.</dd>
+      <dt>Screens affected</dt><dd>Explorer (Topics tab)</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Practice cannot be limited to one sub-topic</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The new route /api/topics/{topic}/subtopics works well (names and problem counts, for example Algebra has &quot;Polynomial Factorization&quot;: 5 problems). But the practice route can only filter by topic and technique, not by sub-topic.</dd>
+      <dt>Why it matters</dt><dd>A user can see sub-topics but cannot practise one.</dd>
+      <dt>What we ask</dt><dd>Let the practice route accept a sub-topic (the problems already store one).</dd>
+      <dt>Screens affected</dt><dd>Explorer, Technique page</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Study cards are not linked to practice skills, and most are not finished</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>There are 44 study cards. Only 2 are finished (Nikhilam Sutra and Urdhva-Tiryakbhyam); 42 are waiting for review. Nothing tells us which practice skill belongs to a card. Result: the Urdhva card has no practice skill at all in the practice list.</dd>
+      <dt>Why it matters</dt><dd>The technique page can only show real content for 2 cards, and its Practice buttons only work when a skill happens to have the same name.</dd>
+      <dt>What we ask</dt><dd>Add the matching practice skill to each study card (or the other way round), and finish and approve the remaining cards.</dd>
+      <dt>Screens affected</dt><dd>Technique page, Explorer</dd>
+    </dl>
+  </article>
+  <h3>B. Screens that cannot work because the routes do not exist</h3>
+  
+  <article class="card">
+    <h4>Class Calendar (planner) has no routes</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The app expects days, tasks and stats for a planner. The server has nothing for it.</dd>
+      <dt>Why it matters</dt><dd>The page shows &quot;not available yet&quot;.</dd>
+      <dt>What we ask</dt><dd>Routes to list, add, change and delete planner tasks, and to read planner stats, per user.</dd>
+      <dt>Screens affected</dt><dd>Settings &gt; Class Calendar</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Linked devices has no routes</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Only QR login exists. There is no list of signed-in devices and no way to sign one out.</dd>
+      <dt>Why it matters</dt><dd>The page shows &quot;not available yet&quot;.</dd>
+      <dt>What we ask</dt><dd>A route to list a user's devices and one to sign a device out (revoke its refresh tokens).</dd>
+      <dt>Screens affected</dt><dd>Settings &gt; Linked devices</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Duel: no normal routes, and the live protocol is not written down</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The app calls /duel/topics, /duel/opponents and /duel/result. They do not exist. The real duel runs on the game server (Socket.IO), but its messages are not documented for the app team.</dd>
+      <dt>Why it matters</dt><dd>The Duel page shows &quot;not available&quot;. We would need a live game connection to build it.</dd>
+      <dt>What we ask</dt><dd>Either routes for a simple duel, or a short document of the live game messages (join, match found, round start, answer, round end, match end) with example data.</dd>
+      <dt>Screens affected</dt><dd>Play &gt; Duel</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Mastery does not update from answers</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Our earlier check found that the mastery numbers only change when the app sends its own saved snapshot. Answers sent to the server did not change them.</dd>
+      <dt>Why it matters</dt><dd>A learner can practise and see no change on another device.</dd>
+      <dt>What we ask</dt><dd>Work out mastery on the server from the answers it receives.</dd>
+      <dt>Screens affected</dt><dd>Learn &gt; Mastery, Dashboard</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Mock exam passages are missing</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Our earlier check found that questions belonging to a set (reading passage, data table) come without the shared passage text. The way to send typed answers is also not described.</dd>
+      <dt>Why it matters</dt><dd>Those questions cannot be shown properly.</dd>
+      <dt>What we ask</dt><dd>Send the shared passage with each set, and describe the answer format.</dd>
+      <dt>Screens affected</dt><dd>Learn &gt; Mock exam</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Notifications: only a list of events</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>There is a list of events, but no &quot;read / unread&quot; and no way to register a phone for push messages.</dd>
+      <dt>Why it matters</dt><dd>The Notifications page can only show a simple list.</dd>
+      <dt>What we ask</dt><dd>A notification list with read state, and a route to save a push token.</dd>
+      <dt>Screens affected</dt><dd>Settings &gt; Notifications</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Friends: no friend activity route</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>There is no route for what friends have done recently.</dd>
+      <dt>Why it matters</dt><dd>The activity tab on the Friends page is always empty.</dd>
+      <dt>What we ask</dt><dd>A route for friend activity (or confirm it is not planned).</dd>
+      <dt>Screens affected</dt><dd>Friends</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Tournaments: nobody can find one</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>A tournament can be created, joined, and read by its id. There is no route that lists tournaments. Creating, closing registration and pairing a round are for admins only.</dd>
+      <dt>Why it matters</dt><dd>Even when the feature is switched on, the app cannot show a list of tournaments to join.</dd>
+      <dt>What we ask</dt><dd>A route that lists open and running tournaments.</dd>
+      <dt>Screens affected</dt><dd>(Tournaments screen not built yet)</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Google and phone sign-in are not set up</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Both routes answer &quot;501 not configured&quot;.</dd>
+      <dt>Why it matters</dt><dd>Those sign-in buttons cannot work.</dd>
+      <dt>What we ask</dt><dd>Set them up, or tell us to remove the buttons.</dd>
+      <dt>Screens affected</dt><dd>Sign in</dd>
+    </dl>
+  </article>
+  <h3>C. Content and data gaps</h3>
+  
+  <article class="card">
+    <h4>Feed content is fixed text inside the code</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The feed route works and returns 5 stories and 3 videos, but they are written in the code. Stories have no page to open, videos have no link, and there is no search.</dd>
+      <dt>Why it matters</dt><dd>Users see the same few cards and cannot open them.</dd>
+      <dt>What we ask</dt><dd>Decide whether the feed becomes real content (stored, editable), and add a route to open one story and a link for each video.</dd>
+      <dt>Screens affected</dt><dd>Feed</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Clubs lack the details the design shows</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>A club only has a name, type, city and member count. There is no moderator, picture, description, tags or last-activity time. Members can only be seen through the weekly leaderboard.</dd>
+      <dt>Why it matters</dt><dd>Club cards look plain compared with the design.</dd>
+      <dt>What we ask</dt><dd>Add the fields the product wants, or tell us the design should be simplified.</dd>
+      <dt>Screens affected</dt><dd>Clubs</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Profile saving is too loose</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Gender, goal and persona accept any text. Date of birth accepts any shape. Sending only a name overwrites the first name. The answers are kept in one text block and the reply is not described.</dd>
+      <dt>Why it matters</dt><dd>Wrong values are stored without an error and cannot be relied on later.</dd>
+      <dt>What we ask</dt><dd>Check values (reject wrong ones with a clear error), keep the first name when only the name is sent, and describe the reply shape.</dd>
+      <dt>Screens affected</dt><dd>Onboarding, Profile</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Delete account: confirm what is erased</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The route is live and deletes the user and their attempt tables.</dd>
+      <dt>Why it matters</dt><dd>We need to be sure login tokens, friends, subscriptions, device sessions and any stored files are removed, and that the old token stops working.</dd>
+      <dt>What we ask</dt><dd>Confirm the full list of what is deleted, and describe the reply.</dd>
+      <dt>Screens affected</dt><dd>Settings &gt; Delete account</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Referral wording does not match what the server does</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>The invite card says a friend gets 50 bonus XP. When a friend uses the code the server records it and gives nothing at that moment; rewards come later from the ladder (15, 30, 45, 60 verified friends).</dd>
+      <dt>Why it matters</dt><dd>Users may expect XP that never arrives.</dd>
+      <dt>What we ask</dt><dd>Tell us the correct promise, or give the XP when the code is used.</dd>
+      <dt>Screens affected</dt><dd>Dashboard invite card</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Some routes exist under two or three names</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Clubs are available as /clubs and as /hub (identical). The feed is at /api/v1/feed, /api/feed and /feed, but the plain /feed address answers &quot;not found&quot; from outside.</dd>
+      <dt>Why it matters</dt><dd>It is unclear which names are official, and the duplicates make the contract longer than it needs to be.</dd>
+      <dt>What we ask</dt><dd>Pick one official name for each and tell us. We use /clubs and /api/v1/feed today.</dd>
+      <dt>Screens affected</dt><dd>Clubs, Feed</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h4>Many answers are not described in the API description</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Login, current user, delete account and others are described only as &quot;any object&quot;.</dd>
+      <dt>Why it matters</dt><dd>We cannot rely on the exact shape, and mistakes show up late.</dd>
+      <dt>What we ask</dt><dd>Give each route a fixed reply shape in the API description.</dd>
+      <dt>Screens affected</dt><dd>All</dd>
+    </dl>
+  </article>
+  <h3>D. Switched off on staging, so we cannot test</h3>
+  
+  <article class="card">
+    <h4>Features that exist but are turned off</h4>
+    <dl>
+      <dt>What is wrong</dt><dd>Turned off (checked on staging today): ads (ad_engine), tournaments (tournament), location check-in (location_gamification), video clips (social_clips), closed beta and feedback (closed_beta). The chat helper's AI answers (chatbot_llm) are also off, so chat gives rule-based hints only.</dd>
+      <dt>Why it matters</dt><dd>We built the ads screens already, but cannot see them. The other features have no screens until we can try them.</dd>
+      <dt>What we ask</dt><dd>Turn these on for staging (or tell us which to skip), and give us three test accounts: an adult with a known age, a child, and a paid-plan user.</dd>
+      <dt>Screens affected</dt><dd>Ads, Tournaments, Check-in, Clips, Feedback</dd>
+    </dl>
+  </article>
+  </section>
+
+  <section id="frontend">
+    <h2>2. What the frontend is missing</h2>
+    <p class="lead">Our side of the work, and a check of every page in the app.</p>
+    <h3>2.1 Screens we cannot finish until the backend adds something</h3>
+    <ul class="plain"><li><strong>Duel (live match).</strong> Waiting on the backend: simple routes or a written game-message guide.</li><li><strong>Class Calendar.</strong> Waiting on the backend: planner routes.</li><li><strong>Linked devices.</strong> Waiting on the backend: device list and sign-out routes.</li><li><strong>Real notifications.</strong> Waiting on the backend: read state and push registration.</li><li><strong>Buying a plan.</strong> Waiting on the backend: a payment provider. We will build the whole flow (choose plan, pay, verify, cancel, resume, change) once one is set up, and test only with test-mode keys.</li><li><strong>Tournaments screen.</strong> Waiting on the backend: the feature is off and there is no list route.</li><li><strong>Check-in at a club, video clips, beta feedback form.</strong> Waiting on the backend: these features are switched off.</li></ul>
+    <h3>2.2 Screens we can build now (the server is ready, the app is not)</h3>
+    <ul class="plain"><li><strong>Daily challenge.</strong> The server is ready (today's 10 problems, submit your score, leaderboard). We have not built the screen.</li><li><strong>Race a ghost.</strong> The server is ready (save a run, race it). We have not built the screen.</li><li><strong>Kids and safety rules from the server.</strong> The policy route works. The app does not read it yet, so it cannot hide features for a child or show a session limit.</li><li><strong>Real sub-topic counts.</strong> The new sub-topics route gives real problem counts per sub-topic. The Explorer does not use it yet.</li><li><strong>Chat usage and budget.</strong> The route works. The app does not show the daily hint budget.</li><li><strong>Ads without a connection.</strong> The route that gives ads to keep offline is not used. Without internet, no ad is shown.</li><li><strong>Beta code at sign-up.</strong> The server accepts an invite code at registration and after. The app has no place to type it (the feature is off, so low priority).</li></ul>
+    <h3>2.3 Things on our side that are wrong or unfinished</h3>
+    <ul class="plain"><li><strong>Sprint difficulty does nothing.</strong> The Beginner / Advanced choice on Configure Sprint is not used when the session starts. The server can aim at a difficulty level, so we can make it real.</li><li><strong>Learn cards on Configure Sprint are built-in lessons.</strong> They are written inside the app, not from the server. They should come out or be replaced.</li><li><strong>Solve-along lessons are built-in.</strong> The step-by-step lessons in practice come from the app files, not the server.</li><li><strong>Share invite shares the code, not the link.</strong> The Share button sends the text with the code but not the link that records the referral.</li><li><strong>Google and phone sign-in buttons.</strong> They lead to &quot;not set up&quot;. They should say so or be hidden until the backend is ready.</li><li><strong>Sign-in token is stored in plain browser storage on Android.</strong> It should move to secure storage on the phone (needs a plugin).</li><li><strong>Android app is not tested on a phone.</strong> The APK built earlier today was never installed and does not include the later work (ads, feed, club details, hints, referral claim). The camera scan, onboarding save, clubs and delete account all still need a real-device check on a new build.</li><li><strong>Live checks with real data.</strong> Saving onboarding and logging in again, creating a club, delete account, friend QR, referral claim: tested with fake data only. They need a run on a test account.</li><li><strong>Production build check.</strong> The build with the new technique pages (one page per study card id) has not been run.</li><li><strong>12 old tests fail.</strong> They are in the onboarding intro carousel, stall timer and review carousel. They are old and not caused by recent work, but they should be fixed.</li><li><strong>Small &quot;Coming soon&quot; rows.</strong> Settings still has rows named Call Reminder and Payments marked Coming soon.</li></ul>
+    <h3>2.4 Is every page connected to the server?</h3>
+    <p>33 pages checked. <strong>22</strong> are connected, <strong>4</strong> partly, <strong>3</strong> not connected, and <strong>4</strong> need no server data. We read what each page loads when it runs against the real server (not the demo data).</p>
+    <div class="scroll">
+<table>
+  <thead><tr><th>Page</th><th>What it is</th><th>Connected to the server?</th><th>What it uses</th><th>What is missing or wrong</th></tr></thead>
+  <tbody><tr><td><code>/</code></td><td>Landing page</td><td><span class="b b-na">No server data needed</span></td><td>No server data is needed (marketing page). After a new user signs up through an invite link it records the referral.</td><td>Nothing known.</td></tr><tr><td><code>/auth</code></td><td>Sign in / sign up, scan-to-login</td><td><span class="b b-ok">Connected</span></td><td>Login, register, refresh, logout. QR login (generate, verify, poll).</td><td>Google and phone sign-in answer &quot;not set up&quot;.</td></tr><tr><td><code>/onboarding</code></td><td>First-time questions</td><td><span class="b b-ok">Connected</span></td><td>Saves the profile to the server (PATCH /auth/me).</td><td>Date of birth is saved but never becomes the user's age on the server.</td></tr><tr><td><code>/dashboard</code></td><td>Home</td><td><span class="b b-ok">Connected</span></td><td>Stats, radar, metrics, streak, events, leaderboard, recent activity, topic mastery, plans, friends, referral card, ad banner.</td><td>Ads need the server switch on.</td></tr><tr><td><code>/dashboard/analytics</code></td><td>Analytics</td><td><span class="b b-ok">Connected</span></td><td>Stats and streak.</td><td>Nothing known.</td></tr><tr><td><code>/dashboard/clubs</code></td><td>Clubs</td><td><span class="b b-ok">Connected</span></td><td>Search/list, mine, create, join, leave, club details, weekly leaderboard.</td><td>Club cards show only name, type, city, members (the server has no more).</td></tr><tr><td><code>/dashboard/family</code></td><td>Family accounts</td><td><span class="b b-ok">Connected</span></td><td>Family list, create/pause/remove child seats, child friends, plans.</td><td>Creating a seat needs a paid plan, which cannot be bought yet.</td></tr><tr><td><code>/dashboard/feed</code></td><td>Feed</td><td><span class="b b-ok">Connected</span></td><td>GET /feed (stories, videos, hero card).</td><td>Content is fixed text; stories and videos cannot be opened.</td></tr><tr><td><code>/dashboard/friends</code></td><td>Friends</td><td><span class="b b-ok">Connected</span></td><td>List, add by email, accept/decline, remove, friend QR (show, scan, paste).</td><td>Friend activity is always empty (no route). The Duel button does nothing.</td></tr><tr><td><code>/learn</code></td><td>Learn home</td><td><span class="b b-ok">Connected</span></td><td>Topic mastery, mock exam list, plans and dashboard numbers.</td><td>Some practice cards use built-in lessons.</td></tr><tr><td><code>/learn/explorer</code></td><td>Topic Explorer</td><td><span class="b b-ok">Connected</span></td><td>Topics and techniques per exam, study cards, practice catalog, mastery.</td><td>Exam topic names/counts are placeholders; the new sub-topics route is not used yet.</td></tr><tr><td><code>/learn/mastery</code></td><td>Mastery</td><td><span class="b b-ok">Connected</span></td><td>Topic mastery.</td><td>Mastery does not change from answers (server side).</td></tr><tr><td><code>/learn/mock/run</code></td><td>Mock exam</td><td><span class="b b-part">Partly connected</span></td><td>Configure, answer, submit, results.</td><td>Full papers fail on staging (the question bank cannot build them), so the page now offers &quot;Take it as practice&quot;. Set questions have no passage text; the app has no sectional mode.</td></tr><tr><td><code>/learn/practice</code></td><td>Practice</td><td><span class="b b-ok">Connected</span></td><td>Practice session (skill, topic, level), hints, catalog, saving answers.</td><td>Step-by-step lesson mode is built into the app.</td></tr><tr><td><code>/learn/technique/[id]</code></td><td>Technique page</td><td><span class="b b-part">Partly connected</span></td><td>Study card from the server.</td><td>Only 2 of 44 cards are finished; practice buttons need a matching skill.</td></tr><tr><td><code>/play</code></td><td>Play menu</td><td><span class="b b-na">No server data needed</span></td><td>No server data is needed (a menu of game modes).</td><td>Puzzle, Memory and Logic say Coming soon.</td></tr><tr><td><code>/play/configure-sprint</code></td><td>Sprint setup</td><td><span class="b b-part">Partly connected</span></td><td>Topic list from the server.</td><td>Difficulty is not used; the Learn cards are built-in.</td></tr><tr><td><code>/play/duel</code></td><td>Duel</td><td><span class="b b-no">Not connected</span></td><td>Nothing.</td><td>No duel routes; the live game is not built in the app.</td></tr><tr><td><code>/play/sprint</code></td><td>Sprint</td><td><span class="b b-ok">Connected</span></td><td>Practice session and saving results.</td><td>Nothing known.</td></tr><tr><td><code>/play/sprint/results</code></td><td>Sprint results</td><td><span class="b b-ok">Connected</span></td><td>Saves the result; shows the post-session ad when allowed.</td><td>Nothing known.</td></tr><tr><td><code>/play/sprint/results/analysis</code></td><td>Sprint analysis</td><td><span class="b b-na">No server data needed</span></td><td>No server data (worked out from the sprint just played).</td><td>Nothing known.</td></tr><tr><td><code>/settings</code></td><td>Settings</td><td><span class="b b-ok">Connected</span></td><td>Profile, plan, delete account, dashboard numbers, ad banner.</td><td>Call Reminder and Payments rows say Coming soon.</td></tr><tr><td><code>/settings/achievements</code></td><td>Achievements</td><td><span class="b b-ok">Connected</span></td><td>Achievements list.</td><td>Nothing known.</td></tr><tr><td><code>/settings/help</code></td><td>Help</td><td><span class="b b-na">No server data needed</span></td><td>No server data (the questions and answers are inside the app).</td><td>No help or support routes exist.</td></tr><tr><td><code>/settings/history</code></td><td>History</td><td><span class="b b-ok">Connected</span></td><td>Mock exam history.</td><td>Nothing known.</td></tr><tr><td><code>/settings/leaderboard</code></td><td>Leaderboard</td><td><span class="b b-ok">Connected</span></td><td>Leaderboard.</td><td>Nothing known.</td></tr><tr><td><code>/settings/linked-devices</code></td><td>Linked devices</td><td><span class="b b-no">Not connected</span></td><td>Nothing.</td><td>Server has no device list or sign-out route.</td></tr><tr><td><code>/settings/notifications</code></td><td>Notifications</td><td><span class="b b-part">Partly connected</span></td><td>Uses the events list as notifications.</td><td>No read state and no push messages.</td></tr><tr><td><code>/settings/planner</code></td><td>Class Calendar</td><td><span class="b b-no">Not connected</span></td><td>Nothing.</td><td>Server has no planner routes.</td></tr><tr><td><code>/settings/profile</code></td><td>Profile</td><td><span class="b b-ok">Connected</span></td><td>Profile, streak, achievements.</td><td>Nothing known.</td></tr><tr><td><code>/settings/profile/edit</code></td><td>Edit profile</td><td><span class="b b-ok">Connected</span></td><td>Saves the name to the server.</td><td>Nothing known.</td></tr><tr><td><code>/settings/reports</code></td><td>Reports</td><td><span class="b b-ok">Connected</span></td><td>Worked out from mock exam history and streak.</td><td>Nothing known.</td></tr><tr><td><code>/settings/scan-to-login</code></td><td>Scan to log in</td><td><span class="b b-ok">Connected</span></td><td>QR login routes (approve a code from another device).</td><td>Nothing known.</td></tr></tbody>
+</table></div>
+  </section>
+
+  <section id="contract">
+    <h2>3. API contract</h2>
+    <p class="lead">Every route the server offers, in plain words: what it does, what the app sends and gets back, whether the app uses it, and what we saw on staging. Answers are shown in outline, not exact field lists. Public routes are marked "public"; all others need the user to be signed in. 109 routes are for the app; 24 more are admin tools, payment callbacks or game-server only.</p>
+    <div class="box">
+      <strong>Staging check, in short.</strong> We called 49 routes for real (read-only, plus a few safe calls such as login, hint and an empty ads report) and the results are in the last column. Routes that create, change or delete data were not called, except where the table says "tested". Routes behind a feature switch that is off answer "not found".
+    </div>
+    <h3 id="c-auth">Sign in and account <small>12 of 12 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>google</code> <span class="pub">public</span></td>
+    <td>Sign in with Google.</td>
+    <td>A Google token → not set up (error 501).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Sign in</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>login</code> <span class="pub">public</span></td>
+    <td>Signs in.</td>
+    <td>Email, password → the user and a login token.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Sign in</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>logout</code> <span class="pub">public</span></td>
+    <td>Ends the session on the server.</td>
+    <td>The refresh token → &quot;logged out&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Log out</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-DELETE">DELETE</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>me</code></td>
+    <td>Deletes the account for good.</td>
+    <td>Nothing → &quot;deleted&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Settings</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>me</code></td>
+    <td>Gets the signed-in user.</td>
+    <td>Nothing → the user (name, email, plan, onboarding answers).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Whole app</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-PATCH">PATCH</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>me</code></td>
+    <td>Saves profile answers.</td>
+    <td>Any of name, goal, persona, exam, gender, date of birth, triggers, preps, onboarded → the updated user.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Onboarding, Edit profile</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>phone</code> <span class="pub">public</span></td>
+    <td>Sign in with a phone number.</td>
+    <td>A phone token → not set up (error 501).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Sign in</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>refresh</code> <span class="pub">public</span></td>
+    <td>Gets a new login token without asking for the password.</td>
+    <td>The refresh token → a new token and a new refresh token (the old one stops working).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Automatic</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>register</code> <span class="pub">public</span></td>
+    <td>Creates an account.</td>
+    <td>Email, password, name (optional), invite code (optional) → the user and a login token.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Sign up</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>scanner-login/<wbr>generate</code> <span class="pub">public</span></td>
+    <td>Starts a QR login on a new device.</td>
+    <td>Nothing → a code, a signature, a wait token, 300 seconds.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Scan to log in</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>scanner-login/<wbr>poll</code> <span class="pub">public</span></td>
+    <td>The new device asks whether it was approved.</td>
+    <td>Code and wait token → &quot;pending&quot; or the login tokens.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Scan to log in</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>auth/<wbr>scanner-login/<wbr>verify</code></td>
+    <td>Approves the QR code from a signed-in device.</td>
+    <td>Code and signature → &quot;approved&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Scan to log in</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-practice">Practice and skills <small>5 of 5 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>practice/<wbr>techniques</code> <span class="pub">public</span></td>
+    <td>Lists all skills with their topic and problem count.</td>
+    <td>How many (up to 500), and optionally the exam → the skills.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Explorer</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>practice/<wbr>catalog</code></td>
+    <td>Lists the skills that have questions to practise.</td>
+    <td>Nothing → each skill with counts of questions.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Practice, Sprint, Explorer</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>practice/<wbr>mastery</code></td>
+    <td>Gets the saved mastery of each skill.</td>
+    <td>Nothing → mastery per skill.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mastery</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>practice/<wbr>session</code></td>
+    <td>Builds a practice session from one topic.</td>
+    <td>Topic or technique, and how many (up to 50) → questions, learner targets and a summary.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Explorer topics, Practice</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>practice/<wbr>session</code></td>
+    <td>Builds a practice session for chosen skills.</td>
+    <td>Skills with counts, and optionally a difficulty (theta) → the same kind of reply.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Practice, Sprint, Technique page</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-sync">Saving answers <small>2 of 2 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>sync</code></td>
+    <td>Sends answers and session results to the server.</td>
+    <td>A batch of events → how many were accepted.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Practice, Sprint</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>sync/<wbr>{key}</code></td>
+    <td>Sends one kind of data (for example feedback on a question).</td>
+    <td>The data → accepted.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mock exam, Sprint</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-billing">Plans and payments <small>2 of 7 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>cancel</code></td>
+    <td>Cancels at the end of the paid period.</td>
+    <td>Nothing → &quot;cancel scheduled&quot;.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: no payment provider is set up</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>change</code></td>
+    <td>Moves to another plan.</td>
+    <td>The new plan → the new price.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: no payment provider is set up</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>checkout</code></td>
+    <td>Starts buying a plan.</td>
+    <td>Plan, provider, currency → a payment request and the price.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: no payment provider is set up</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>checkout/<wbr>verify</code></td>
+    <td>Confirms a payment after it is made.</td>
+    <td>The Razorpay payment details → plan and subscription.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: no payment provider is set up</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>plans</code> <span class="pub">public</span></td>
+    <td>Lists plans and prices.</td>
+    <td>Nothing → plans, prices in rupees and dollars, trial days, and which payment providers are on.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Upgrade pop-up, Family</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>resume</code></td>
+    <td>Undoes a cancel.</td>
+    <td>Nothing → &quot;resumed&quot;.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: no payment provider is set up</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>billing/<wbr>subscription</code></td>
+    <td>Gets the user's current plan.</td>
+    <td>Nothing → plan and entitlement.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Settings, Family</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-dashboard">Dashboard numbers <small>8 of 8 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>events</code></td>
+    <td>Gets upcoming events.</td>
+    <td>Nothing → a list.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home, Notifications</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>leaderboard</code></td>
+    <td>Gets the leaderboard.</td>
+    <td>Nothing → ranked list.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Leaderboard</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>metrics</code></td>
+    <td>Gets the headline metrics.</td>
+    <td>Nothing → the metrics.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>radar</code></td>
+    <td>Gets the skill radar chart numbers.</td>
+    <td>Nothing → axes and values.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>recent-activity</code></td>
+    <td>Gets the user's recent activity.</td>
+    <td>Nothing → a list.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home, Analytics</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>stats</code></td>
+    <td>Gets accuracy, speed, rank and totals.</td>
+    <td>Nothing → the numbers.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home, Analytics, Settings</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>streak</code></td>
+    <td>Gets the daily streak and XP.</td>
+    <td>Nothing → streak, XP, days.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home, Profile</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>dashboard/<wbr>topics</code></td>
+    <td>Gets the learner's mastery by topic (for an exam if given).</td>
+    <td>Optionally the exam → topics with a score.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Home, Mastery, Explorer</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-social">Friends and social <small>7 of 19 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>achievements</code></td>
+    <td>Lists achievements.</td>
+    <td>Nothing → achievements and which are unlocked.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Achievements, Profile</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>clips</code></td>
+    <td>Creates a video clip of a match.</td>
+    <td>A match id → a clip.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>clips/<wbr>{clip_id}</code></td>
+    <td>Reads a clip.</td>
+    <td>The clip id → the clip.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>clips/<wbr>{clip_id}/<wbr>consent</code></td>
+    <td>Agrees to share a clip.</td>
+    <td>The clip → the new state.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>clips/<wbr>{clip_id}/<wbr>revoke</code></td>
+    <td>Takes a clip back.</td>
+    <td>The clip → the new state.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>daily</code></td>
+    <td>Gets today's daily challenge (the same 10 problems for everyone).</td>
+    <td>Nothing → problems (no answers) and your result if done.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>daily/<wbr>leaderboard</code></td>
+    <td>Gets today's challenge ranking.</td>
+    <td>Nothing → entries and your place.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>daily/<wbr>submit</code></td>
+    <td>Sends the daily challenge result.</td>
+    <td>Your answers and times → score, rank, XP, streak.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends</code></td>
+    <td>Lists friends and friend requests.</td>
+    <td>Nothing → friends and requests.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Friends</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends/<wbr>qr/<wbr>generate</code></td>
+    <td>Makes a one-time QR code to show a friend in person.</td>
+    <td>Nothing → a code, a signature, 300 seconds.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Invite card</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends/<wbr>qr/<wbr>redeem</code></td>
+    <td>Becomes friends by scanning a friend's code.</td>
+    <td>Code and signature → &quot;accepted&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Friends</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends/<wbr>remove</code></td>
+    <td>Removes a friend.</td>
+    <td>The friendship → &quot;removed&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Friends</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends/<wbr>request</code></td>
+    <td>Sends a friend request by email.</td>
+    <td>Email → &quot;pending&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Friends</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>friends/<wbr>respond</code></td>
+    <td>Accepts or declines a request.</td>
+    <td>The request and the choice → the new state.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Friends</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>ghosts</code></td>
+    <td>Lists recorded runs you can race.</td>
+    <td>Nothing → ghosts.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>ghosts</code></td>
+    <td>Saves one of your runs as a ghost.</td>
+    <td>Problems, times, correct answers → the ghost id.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>ghosts/<wbr>{ghost_id}/<wbr>race</code></td>
+    <td>Races a ghost.</td>
+    <td>Your time and correct count → won or lost, XP, the ghost's result.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>policy</code></td>
+    <td>Says which social rules apply to this user (child mode, ads, session limit).</td>
+    <td>Nothing → the rules.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>social/<wbr>taunts/<wbr>{match_id}</code></td>
+    <td>Gets a taunt message for a match.</td>
+    <td>A match id → the taunt or none.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested with a made-up id)</span></td>
+  </tr></tbody></table></div><h3 id="c-referral">Invites and rewards <small>3 of 3 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>referral</code></td>
+    <td>Gets the user's referral code and reward ladder.</td>
+    <td>Nothing → code, verified friends, the four rungs, what can be claimed.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Invite card</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>referral/<wbr>claim</code></td>
+    <td>Claims the reward that is due.</td>
+    <td>Nothing → the reward claimed, or a clear refusal.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Invite card</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>referral/<wbr>redeem</code></td>
+    <td>Links a new account to the friend who invited it.</td>
+    <td>The invite code → recorded (rewards come later).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">After sign-up</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-ads">Ads <small>2 of 3 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>ads/<wbr>decision</code></td>
+    <td>Asks whether to show an ad here and now.</td>
+    <td>The place and screen → &quot;show&quot; with the ad and a signed token, or &quot;no&quot; with a reason.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Dashboard, Settings, Profile, Results</div></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>ads/<wbr>impressions</code></td>
+    <td>Reports ads that were shown.</td>
+    <td>Up to 50 reports with their tokens → accepted, repeats, rejected.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Automatic</div></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>ads/<wbr>units</code></td>
+    <td>Gives the ads to keep for offline use.</td>
+    <td>Nothing → ads and the rules.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr></tbody></table></div><h3 id="c-mocks">Mock exams <small>6 of 6 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>blueprints</code></td>
+    <td>Lists the mock exam papers.</td>
+    <td>Nothing → the papers.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Learn, History</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>configure</code></td>
+    <td>Starts a mock exam.</td>
+    <td>Paper and options → the questions.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mock exam</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>history</code></td>
+    <td>Lists past mock exams.</td>
+    <td>Nothing → attempts.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">History, Reports</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>results/<wbr>{mock_id}</code></td>
+    <td>Gets the result of an exam.</td>
+    <td>The exam id → score and review.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mock exam</div></td>
+    <td><span class="b b-na">Not tested (needs an exam id)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>submit</code></td>
+    <td>Finishes the exam.</td>
+    <td>The exam → the result.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mock exam</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>mocks/<wbr>submit-answer</code></td>
+    <td>Saves one answer.</td>
+    <td>Question and answer → saved.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Mock exam</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-chat">Hints (chat helper) <small>1 of 2 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>chat/<wbr>policy</code></td>
+    <td>Says how many hints are left today.</td>
+    <td>Nothing → budget, and whether AI answers are on.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>chat/<wbr>query</code></td>
+    <td>Gives a hint for a problem without the answer.</td>
+    <td>The problem id and a hint level (1 to 3) → the hint, and the highest level available.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Practice</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-family">Family accounts <small>8 of 8 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>family</code></td>
+    <td>Gets the family and its child seats.</td>
+    <td>Nothing → seats and prices.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>friends/<wbr>{child_user_id}</code></td>
+    <td>Lists a child's friends and requests.</td>
+    <td>The child → friends and requests.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>friends/<wbr>request</code></td>
+    <td>A parent sends a request for a child.</td>
+    <td>The child and the email → &quot;pending&quot;.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>friends/<wbr>respond</code></td>
+    <td>A parent approves or declines for a child.</td>
+    <td>The request and choice → the state.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>friends/<wbr>revoke</code></td>
+    <td>A parent ends a child's friendship.</td>
+    <td>The friendship → removed.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>sub-account/<wbr>create</code></td>
+    <td>Creates a child account.</td>
+    <td>Child details and age → the seat.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>sub-account/<wbr>override</code></td>
+    <td>Pauses or resumes a child seat.</td>
+    <td>The seat and the choice → the state.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>family/<wbr>sub-account/<wbr>remove</code></td>
+    <td>Removes a child seat.</td>
+    <td>The seat → removed.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Family</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr></tbody></table></div><h3 id="c-tournament">Tournaments <small>0 of 7 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}</code></td>
+    <td>Gets one tournament.</td>
+    <td>The id → details and whether you joined.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}/<wbr>bracket</code></td>
+    <td>Gets the knockout bracket.</td>
+    <td>The id → rounds and places.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}/<wbr>close-registration</code></td>
+    <td>An admin closes sign-up.</td>
+    <td>Nothing → the tournament.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}/<wbr>register</code></td>
+    <td>A player joins a tournament (bundle plans, adults only).</td>
+    <td>Nothing → registered.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}/<wbr>round</code></td>
+    <td>An admin pairs the next round.</td>
+    <td>Nothing → the round.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>{tournament_id}/<wbr>standings</code></td>
+    <td>Gets the table.</td>
+    <td>The id → ranked players.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (tested: not found)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>tournament/<wbr>create</code></td>
+    <td>An admin creates a tournament.</td>
+    <td>Name, rounds, players → the tournament.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr></tbody></table></div><h3 id="c-hubs">Clubs (hubs) <small>7 of 16 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs</code></td>
+    <td>Searches and lists clubs.</td>
+    <td>Search text, city, how many → clubs.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>{hub_id}</code></td>
+    <td>Gets one club.</td>
+    <td>The id → details and your role.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>{hub_id}/<wbr>join</code></td>
+    <td>Joins a club.</td>
+    <td>Nothing → the club and your role.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>{hub_id}/<wbr>leaderboard</code></td>
+    <td>Gets the club's weekly XP ranking (members only).</td>
+    <td>The id → ranked members, last 7 days.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>{hub_id}/<wbr>leave</code></td>
+    <td>Leaves a club.</td>
+    <td>Nothing → left.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>create</code></td>
+    <td>Creates a club.</td>
+    <td>Name, type, city → the club (you are the owner).</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>mine</code></td>
+    <td>Lists clubs you joined.</td>
+    <td>Nothing → clubs with your role.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Clubs</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>clubs/<wbr>search</code></td>
+    <td>Same as the list (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>{hub_id}</code></td>
+    <td>Same (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Route exists (tested with a made-up id: &quot;no such hub&quot;)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>{hub_id}/<wbr>join</code></td>
+    <td>Same (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>{hub_id}/<wbr>leaderboard</code></td>
+    <td>Same (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Route exists (tested with a made-up id: &quot;no such hub&quot;)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>{hub_id}/<wbr>leave</code></td>
+    <td>Same (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>create</code></td>
+    <td>Same as creating a club (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>mine</code></td>
+    <td>Same as your clubs (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>hub/<wbr>search</code></td>
+    <td>Same as the list (another name).</td>
+    <td>Same.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>location/<wbr>checkin</code></td>
+    <td>Checks in at a club's place for double XP for an hour.</td>
+    <td>The club and the position → bonus and time.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (feature switch is off)</span></td>
+  </tr></tbody></table></div><h3 id="c-beta">Beta testing and feedback <small>0 of 3 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>beta/<wbr>redeem</code></td>
+    <td>Joins the closed beta with a code.</td>
+    <td>The code → joined.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-na">Not tested: it changes data</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>beta/<wbr>status</code></td>
+    <td>Says whether the user is a beta tester.</td>
+    <td>Nothing → tester or not.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-POST">POST</span> <code>/<wbr>api/<wbr>v1/<wbr>feedback</code></td>
+    <td>Sends tester feedback.</td>
+    <td>Category and message → received.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-off">Switched off (closed beta is off)</span></td>
+  </tr></tbody></table></div><h3 id="c-feed">Feed <small>1 of 1 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>v1/<wbr>feed</code> <span class="pub">public</span></td>
+    <td>Gets the feed.</td>
+    <td>Optionally category, how many, where to start → hero card, categories, stories, videos.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Feed</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-content">Topics <small>2 of 3 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>topics</code> <span class="pub">public</span></td>
+    <td>Lists topics with problem counts (for an exam if given).</td>
+    <td>Optionally the exam → topics, counts and sub-topic names.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Explorer</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>topics/<wbr>{topic_name}/<wbr>subtopics</code> <span class="pub">public</span></td>
+    <td>Lists the sub-topics of a topic with real counts.</td>
+    <td>The topic → sub-topics, counts, short names.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>config</code> <span class="pub">public</span></td>
+    <td>Says which features are switched on.</td>
+    <td>Nothing → the feature switches.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Whole app</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-reference">Study cards <small>2 of 2 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>subtopics/<wbr>{subtopic_id}/<wbr>reference</code> <span class="pub">public</span></td>
+    <td>Gets one study card.</td>
+    <td>The card id → the method, steps, traps, example and levels.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Technique page</div></td>
+    <td><span class="b b-na">Not tested (needs an id)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>api/<wbr>subtopics/<wbr>reference</code> <span class="pub">public</span></td>
+    <td>Lists the study cards.</td>
+    <td>Nothing → each card and whether it is finished.</td>
+    <td><span class="b b-ok">Yes</span><div class="sub">Explorer</div></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div><h3 id="c-health">Health checks <small>0 of 2 used by the app</small></h3>
+  <div class="scroll"><table class="contract"><thead><tr><th>Route</th><th>What it does</th><th>What the app sends → what comes back</th><th>Used by the app?</th><th>On staging</th></tr></thead><tbody><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>health</code> <span class="pub">public</span></td>
+    <td>Says the server is running.</td>
+    <td>Nothing → &quot;ok&quot; and the version.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr><tr>
+    <td><span class="m m-GET">GET</span> <code>/<wbr>ready</code> <span class="pub">public</span></td>
+    <td>Says the server and its databases are ready.</td>
+    <td>Nothing → ready, and the state of each database.</td>
+    <td><span class="b b-no">No</span></td>
+    <td><span class="b b-ok">Works (tested)</span></td>
+  </tr></tbody></table></div>
+    <h3>Admin tools <small>17 routes, not for the app</small></h3>
+    <div class="scroll"><table><thead><tr><th>Route</th><th>What it is</th></tr></thead><tbody><tr><td><span class="m m-GET">GET</span> <code>/api/v1/referral/admin/all</code></td><td>All referrals (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/content/trust</code></td><td>Review how much each question is trusted (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/content/trust/{content_id}</code></td><td>Review how much each question is trusted (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/content/trust/{content_id}</code></td><td>Review how much each question is trusted (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/flags</code></td><td>See and change the feature switches (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/flags/{flag_name}</code></td><td>See and change the feature switches (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/beta/invites</code></td><td>Make and list beta invite codes (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/beta/invites</code></td><td>Make and list beta invite codes (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/beta/invites/{code}/revoke</code></td><td>Make and list beta invite codes (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/beta/testers</code></td><td>Manage the beta tester list (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/beta/testers</code></td><td>Manage the beta tester list (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/beta/testers/{user_id}/remove</code></td><td>Manage the beta tester list (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/beta/feedback</code></td><td>Read and sort tester feedback (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/beta/feedback/{feedback_id}</code></td><td>Read and sort tester feedback (admin)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/admin/kpi/refresh</code></td><td>Business numbers (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/kpi</code></td><td>Business numbers (admin)</td></tr><tr><td><span class="m m-GET">GET</span> <code>/api/admin/telemetry/registry</code></td><td>List of tracked events (admin)</td></tr></tbody></table></div>
+    <h3>Payment callbacks and game server <small>7 routes, not for the app</small></h3>
+    <div class="scroll"><table><thead><tr><th>Route</th><th>What it is</th></tr></thead><tbody><tr><td><span class="m m-POST">POST</span> <code>/internal/user/context</code></td><td>Used only by the game server, behind a secret key</td></tr><tr><td><span class="m m-POST">POST</span> <code>/internal/game/mode-eligibility</code></td><td>Used only by the game server, behind a secret key</td></tr><tr><td><span class="m m-POST">POST</span> <code>/internal/game/problem-batch</code></td><td>Used only by the game server, behind a secret key</td></tr><tr><td><span class="m m-POST">POST</span> <code>/internal/match/complete</code></td><td>Used only by the game server, behind a secret key</td></tr><tr><td><span class="m m-GET">GET</span> <code>/internal/game/leaderboard</code></td><td>Used only by the game server, behind a secret key</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/webhooks/razorpay</code></td><td>Called by the payment company, not by the app (signed messages about payments)</td></tr><tr><td><span class="m m-POST">POST</span> <code>/api/webhooks/stripe</code></td><td>Called by the payment company, not by the app (signed messages about payments)</td></tr></tbody></table></div>
+  </section>
+</div>
+</body>
+</html>
