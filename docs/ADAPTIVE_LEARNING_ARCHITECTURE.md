@@ -52,15 +52,15 @@ flowchart LR
 |---|---|---|
 | BKT mastery (`processAttempt`, decay, state machine) | engine, driven by `learner-state.ts` / `learner.ts` | **Complete** (Practice, Sprint, warm-up) |
 | Fractured / Fragile / Fluid | engine state, shown by `mastery-view.ts` and chips | **Complete** |
-| IRT ability (2PL-lite) | `ability.ts` over `recordResponse` | **Complete** locally. Cross-device recovery **Blocked** (backend does not return theta) |
-| Quant and Data Insights separately | `PRACTICE_SUBJECT = "quant"` | **Blocked**: practice items carry no subject, so everything is `quant` (nothing is guessed) |
+| IRT ability (2PL-lite) | `ability.ts` over `recordResponse`, kept per subject by `ability-book.ts` | **Complete** locally. Recovery on a new device is implemented against the agreed response shape and tested with simulated data; it **needs the backend** (`BACKEND_TEAM_HANDOFF.md` T1) |
+| Quant and Data Insights separately | one estimate per subject the backend names; items with no subject feed a local-only "unclassified" estimate that is never sent and never counted as Quant | Frontend **complete**; subjects **Blocked** until the backend names them (T2) |
 | Adaptive allocation | engine `composeAllocation` (60/20/20 default, persona/cluster) | **Complete** |
 | Session composition | `session-plan.ts` -> `POST /practice/session` slots with `p_learned` | **Complete** |
 | State hydration and reconstruction | `hydrateStates` + `rebuildStates`, event-sourced reconcile | **Complete** |
 | Calibration | warm-up flow, `calibrationPriors`, `ansBaselineMs`, `routePath` | **Complete** on the device. Server storage **Blocked** (no write route for the baseline or `active_path`) |
 | Revision scheduling | `review.ts` over the scheduler | **Complete** on the device. Server `sinking_skills` has no writer, so it is not shared between devices (**Blocked**) |
-| Fatigue and cognitive load | `wellbeing.ts`, `use-wellbeing.ts`, break overlay | **Complete** for Practice. Sprint is **Not implemented**. The engine marks its weights and thresholds as provisional and the UI makes no claim about them |
-| Per-question cognitive load (`cognitive-load.ts`) | vendored, but nothing in the app calls it, so `clrQueue` orders by difficulty only (its load tiebreak is never supplied) | **Not implemented** |
+| Fatigue and cognitive load | `wellbeing.ts`, `use-wellbeing.ts`, break overlay | **Complete** for Practice (interventions). Timed Sprint **records the checkpoint only** (no break, hint or reordering). The engine marks its weights and thresholds as provisional and the UI makes no claim about them |
+| Per-question cognitive load (`cognitive-load.ts`) | `cognitiveLoadOf` calls the engine's `bclFeatures` and `baseCognitiveLoad` on the question text (the engine's own counting); it is the tiebreak in `clrQueue` ordering and is logged as `bcl` on each attempt. Separate from IRT difficulty | **Complete**. No backend metadata is required (T7) |
 
 ## 3. How the plan is decided
 
@@ -89,7 +89,9 @@ flowchart TD
 |---|---|---|---|
 | Account (auth, onboarding, settings, plan, habits) | zustand `persist` in localStorage | yes (`resetAppState`) | yes |
 | Learner psychometrics (snapshot copy, theta, review book, calibration, warm-up draft) | localStorage keys from `lib/learning/storage-keys.ts`, per learner id | **kept** (so offline work and re-login keep their data) | **wiped** (`purgeUserData`) |
-| Unsent events | Dexie `eventQueue`, per learner id | **kept** | **wiped** |
+| Unsent events | Dexie `eventQueue`, per learner id. An acknowledged batch is removed only inside the transaction that parks any rejected events; it also advances the remembered snapshot and the acknowledgement counter that invalidates cached reads | **kept** | **wiped** |
+| Mastery timeline | Dexie `masteryHistory`, per learner id | **kept** | **wiped** |
+| Device id | `zuzumik:device-id`, one per install, sent with every sync | kept | kept (it names the install, not the person) |
 | Server mastery snapshots | backend `bkt_state_snapshots`, written from `session_end.technique_states` | n/a | server side |
 
 ## 5. Not part of the learner model (by design)

@@ -72,6 +72,8 @@ Each answer stores `answeredAt` (device time at submission). `resolveAttemptTime
 
 Queued events that predate this carry no `skill_id` and are skipped from the local replay (they are still delivered). Their `client_timestamp` is one shared stamp per batch, so they keep their array order.
 
+Every attempt event also carries the engine's `bcl` (base cognitive load) for its question, when the question has text.
+
 ## 4. Offline and failure handling
 
 ```mermaid
@@ -86,10 +88,12 @@ flowchart TD
   H --> I["parked events are not retried and not replayed into the learner state"]
 ```
 
+- When a batch is acknowledged, the transaction that removes it also advances the remembered snapshot with that batch's `technique_states` and bumps an acknowledgement counter, so a cached older server snapshot is never used for the next session. An acknowledged session cannot disappear from the learner's state, online or after an offline restart.
+- Ability is routed by subject: each eligible answer updates the estimate of the subject the backend named for its item; an item with no subject updates a local-only estimate that is never sent.
 - Duplicate delivery is harmless: the server deduplicates on `event_id`, the queue is keyed by the batch's first event id, and the local replay applies each event id once.
 - Two sessions finishing together are serialised by `withLearnerLock`, so the second starts from a state that already contains the first.
 - A browser or Android restart keeps Dexie and localStorage, so queued events and the remembered snapshot survive; the session itself is not resumable in Practice.
 
 ## 5. Sprint differences
 
-`/play/sprint` builds its questions with `getSprintQuestions -> getPracticeSession` (same planner, same request), but answers live in `stores/sprint-store.ts` and are synced from the results page through `syncSprintResult -> queueSessionSync` (same pipeline, same lock). The sprint does not run the fatigue watch. An explicit level (Beginner = 2, Advanced = 4) is sent as the matching theta; "Adaptive" sends the learner's own ability.
+`/play/sprint` builds its questions with `getSprintQuestions -> getPracticeSession` (same planner, same request), but answers live in `stores/sprint-store.ts` and are synced from the results page through `syncSprintResult -> queueSessionSync` (same pipeline, same lock). The sprint records the engine's fatigue checkpoints (observe only, handed to the results screen and logged with the result) and never interrupts the learner. An explicit level (Beginner = 2, Advanced = 4) is sent as the matching theta; "Adaptive" sends the learner's own ability.

@@ -40,6 +40,8 @@ All of these need a bearer token except the public content and reference reads.
 
 ## 5. Contracts that cannot support a requirement (backend work needed)
 
+**The authoritative task list, contracts, tests and decisions are in `BACKEND_TEAM_HANDOFF.md`** (T0 to T8). Where item 1 below differs from its T1 (which writes to `user_cognitive_profiles.subject_profiles` and merges on the server), T1 wins. Note also that `active_path` is a column of `users`, not of `user_cognitive_profiles`.
+
 1. **Theta (IRT) persistence and recovery.** The full proposal is `docs/proposals/IRT_THETA_PERSISTENCE.md`. Summary, verified against the backend source. **Proposal only: not applied and not run** (the backend copy has no database to run it against).
 
    What the schema and code actually say:

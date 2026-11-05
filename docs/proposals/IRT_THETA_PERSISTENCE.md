@@ -1,5 +1,7 @@
 # Proposal: persist and return a learner's IRT ability (theta)
 
+> **Superseded for the recommended design by `BACKEND_TEAM_HANDOFF.md` T1.** That document stores ability in the existing `subject_profiles` JSONB (no migration) and merges on the server. This file remains the **alternative** (a new per-device `learner_ability` table, merge in the client) and still holds the verified facts in section 2.
+
 **Status: proposal for the backend team. Nothing here has been applied, run or tested.** The backend copy used to write it (`Speed-Gym-main`) has no database, no git history, and no Python on the machine it was read on. Every fact below was read from that source; each states where, so it can be re-checked.
 
 ## 1. Problem
