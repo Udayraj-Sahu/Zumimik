@@ -39,6 +39,8 @@ import { useThemeStore } from "@/stores/theme-store";
 import { resetAppState } from "@/lib/platform";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
+import { Dialog } from "@/components/ui/dialog";
+import { deleteAccount } from "@/services/account";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
 import { DOMAIN_LABELS } from "@/lib/types/template";
@@ -323,6 +325,32 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
     void resetAppState().then(() => router.replace("/"));
   };
 
+  // Delete account: DELETE /auth/me, then clear everything local. Never signs out unless the server confirmed the deletion.
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const closeDelete = () => {
+    if (deleting) return;
+    setDeleteOpen(false);
+    setDeleteConfirm("");
+    setDeleteError(null);
+  };
+  const handleDeleteAccount = async () => {
+    if (deleting || deleteConfirm.trim().toUpperCase() !== "DELETE") return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAccount();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Couldn't delete your account. Please try again.");
+      setDeleting(false);
+      return;
+    }
+    await resetAppState();
+    router.replace("/");
+  };
+
   return (
     <PageContainer className="pt-1">
       <div className="mx-auto w-full md:max-w-3xl">
@@ -506,6 +534,7 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
               <Row icon={<LogOut className="h-5 w-5" />} title="Logout" subtitle="Sign out of your account" danger onClick={handleLogout} />
               <button
                 type="button"
+                onClick={() => setDeleteOpen(true)}
                 className="flex w-full items-center gap-4 rounded-2xl border border-[var(--red-soft-25)] bg-[var(--red-soft-06)] backdrop-blur-xl px-5 py-4 text-left transition-all hover:bg-[var(--red-soft-12)] active:scale-[0.99] max-[359px]:gap-3 max-[359px]:px-4 max-[359px]:py-3"
               >
                 <span className="text-[var(--red-soft)]">
@@ -519,13 +548,57 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
             </div>
             <div className="hidden md:grid grid-cols-2 gap-2.5 md:items-stretch">
               <HeadingTile icon={<LogOut className="h-5 w-5" />} heading="Logout" danger onClick={handleLogout} />
-              <HeadingTile icon={<Trash2 className="h-5 w-5" />} heading="Delete Account" danger />
+              <HeadingTile icon={<Trash2 className="h-5 w-5" />} heading="Delete Account" danger onClick={() => setDeleteOpen(true)} />
             </div>
           </CollapsibleSection>
         </div>
       </div>
 
       {showAddPrep && <AddPrepModal onClose={() => setShowAddPrep(false)} />}
+      <Dialog open={deleteOpen} onClose={closeDelete} placement="center" className="max-w-[360px] border-[var(--glass-border)] bg-[var(--glass-02)]" ariaLabel="Delete account">
+        <div className="p-5" data-testid="delete-account-dialog">
+          <h2 className="text-[15px] font-bold text-foreground">Delete your account?</h2>
+          <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+            This permanently deletes your account and your practice history. It cannot be undone.
+          </p>
+          <label className="mt-4 block text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">
+            Type DELETE to confirm
+            <input
+              type="text"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              disabled={deleting}
+              className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 font-mono text-[13px] font-semibold text-foreground outline-none focus:border-destructive/50"
+            />
+          </label>
+          {deleteError && (
+            <p role="alert" data-testid="delete-account-error" className="mt-3 text-[12px] text-destructive">
+              {deleteError}
+            </p>
+          )}
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={closeDelete}
+              disabled={deleting}
+              className="min-h-[44px] flex-1 rounded-full border border-white/[0.08] px-4 text-micro font-bold uppercase tracking-wider text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDeleteAccount()}
+              disabled={deleting || deleteConfirm.trim().toUpperCase() !== "DELETE"}
+              className="min-h-[44px] flex-1 rounded-full border border-[var(--red-soft-25)] bg-[var(--red-soft-12)] px-4 text-micro font-bold uppercase tracking-wider text-[var(--red-soft)] outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            >
+              {deleting ? "Deleting…" : "Delete forever"}
+            </button>
+          </div>
+        </div>
+      </Dialog>
       <PaywallModal />
       </div>
     </PageContainer>
