@@ -1,4 +1,5 @@
 "use client";
+import { AdBanner } from "@/components/ads/ad-banner";
 
 import { Zap, Trophy, Target, Star, Flame, Shield, Swords, Medal, User } from "lucide-react";
 import { useProfileData } from "@/hooks/queries/use-profile";
@@ -120,6 +121,7 @@ export default function ProfilePage() {
             })}
           </div>
         </section>
+        <AdBanner placement="profile_banner" className="mt-5" />
         </div>
       </PageContainer>
   );

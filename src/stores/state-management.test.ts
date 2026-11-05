@@ -641,6 +641,14 @@ describe("state management edge cases", () => {
     }
   });
 
+  it("12c. sign-out also drops the queued ad impressions (their tokens belong to the learner who left)", async () => {
+    const { queueImpression, pendingImpressionCount } = await import("@/services/ads");
+    queueImpression({ token: "t", unit_id: "house_referral", placement: "dashboard_banner", screen: "dashboard", shown_at: 1, duration_ms: 5000 });
+    expect(pendingImpressionCount()).toBe(1);
+    await resetAppState();
+    expect(pendingImpressionCount()).toBe(0);
+  });
+
   it("13. store resets correctly: resetAppState restores every store and clears scratch data", async () => {
     useToastStore.setState({ toasts: [] });
     useAuthStore.getState().setToken("tk-13");

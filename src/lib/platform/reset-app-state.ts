@@ -15,6 +15,7 @@ import { useNetworkStore } from "@/stores/network-store";
 import { usePaywallStore } from "@/stores/paywall-store";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { queryClient } from "@/providers/query-provider";
+import { clearImpressionQueue } from "@/services/ads";
 
 const STORAGE_KEYS = [
   "zuzumik-auth",
@@ -65,6 +66,9 @@ export async function resetAppState(): Promise<void> {
   } catch {
     /* ignore dexie failures */
   }
+
+  // The ad impression queue is not a store (its tokens belong to the signed-in learner), so it is cleared here, not via STORAGE_KEYS.
+  clearImpressionQueue();
 
   queryClient.clear();
 }

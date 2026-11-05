@@ -7,8 +7,13 @@ export type QueuedMutation = {
   timestamp: number;
 };
 
+/** What the last silent GET /ready check found (see services/health). Never shown to the learner. */
+export type ServerState = "unknown" | "ready" | "degraded" | "unreachable";
+
 type NetworkState = {
   isOnline: boolean;
+  serverState: ServerState;
+  setServerState: (state: ServerState) => void;
   syncQueue: QueuedMutation[];
   setOnline: (online: boolean) => void;
   addToQueue: (mutation: QueuedMutation) => void;
@@ -19,6 +24,8 @@ type NetworkState = {
 
 export const useNetworkStore = create<NetworkState>((set) => ({
   isOnline: true,
+  serverState: "unknown",
+  setServerState: (serverState) => set({ serverState }),
   syncQueue: [],
   setOnline: (online) => set({ isOnline: online }),
   addToQueue: (mutation) =>
@@ -26,5 +33,5 @@ export const useNetworkStore = create<NetworkState>((set) => ({
   removeFromQueue: (id) =>
     set((s) => ({ syncQueue: s.syncQueue.filter((m) => m.id !== id) })),
   clearQueue: () => set({ syncQueue: [] }),
-  reset: () => set({ isOnline: true, syncQueue: [] }),
+  reset: () => set({ isOnline: true, serverState: "unknown", syncQueue: [] }),
 }));

@@ -40,6 +40,7 @@ import { resetAppState } from "@/lib/platform";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
 import { Dialog } from "@/components/ui/dialog";
+import { AdBanner } from "@/components/ads/ad-banner";
 import { deleteAccount } from "@/services/account";
 import { AddPrepModal } from "@/components/learn/add-prep-modal";
 import { PaywallModal } from "@/components/paywall/paywall-modal";
@@ -528,6 +529,8 @@ const ModeIcon = theme === "light" ? Sun : theme === "study" ? BookOpen : Moon;
               <HeadingTile icon={<Phone className="h-5 w-5" />} heading="Support" />
             </div>
           </CollapsibleSection>
+
+          <AdBanner placement="settings_banner" className="mb-4" />
 
           <CollapsibleSection label="ACCOUNT & SESSION" defaultOpen>
             <div className="space-y-2.5 md:hidden max-[359px]:space-y-2">

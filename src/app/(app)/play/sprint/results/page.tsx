@@ -1,4 +1,5 @@
 "use client";
+import { AdInterstitial } from "@/components/ads/ad-interstitial";
 import { PageContainer } from "@/components/ui/page-container";
 
 import { useCallback, useRef, useEffect, Suspense } from "react";
@@ -116,6 +117,7 @@ function SprintResultsContent() {
 
   return (
     <PageContainer>
+      <AdInterstitial />
       <div className="mx-auto w-full md:max-w-3xl">
       {/* Header */}
       <div ref={resultRef}>

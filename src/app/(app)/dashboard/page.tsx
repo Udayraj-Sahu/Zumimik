@@ -49,6 +49,7 @@ import { DashboardWelcome } from "@/components/dashboard/mascot/dashboard-welcom
 import { StreakXpPill } from "@/components/dashboard/streak-xp-pill";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { InviteCard } from "@/components/dashboard/invite-card";
+import { AdBanner } from "@/components/ads/ad-banner";
 import { ResumeProtocolCard } from "@/components/adaptive/resume-protocol-card";
 import { NumberTicker } from "@/registry/magicui/number-ticker";
 import { useResumeStore } from "@/stores/resume-store";
@@ -1056,6 +1057,8 @@ export default function DashboardPage() {
           </div>
         </GlassCard>
       </div>
+
+      <AdBanner placement="dashboard_banner" className="mt-4 md:mt-0 md:mb-5 break-inside-avoid" />
 
       <div ref={animateSection} data-section-index={11} className="mt-4 md:mt-0 md:mb-5 break-inside-avoid">
         <InviteCard />
