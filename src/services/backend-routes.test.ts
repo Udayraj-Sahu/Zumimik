@@ -4,7 +4,7 @@ import { apiGet, apiPost } from "./api";
 vi.mock("./api", () => ({ apiGet: vi.fn(), apiPost: vi.fn() }));
 vi.mock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
 // Mastery is unreadable here, so session building takes the plain single-skill request (the planner has its own tests).
-vi.mock("./learner", () => ({ loadLearnerStates: vi.fn().mockResolvedValue(null), loadCatalogSkills: vi.fn().mockResolvedValue([]), loadAbility: vi.fn(() => ({ subject: "quant", theta: 0, se: 1, n: 0, responses: [] })), commitAbility: vi.fn(), invalidateLearnerCache: vi.fn(), reconcileLearnerStates: vi.fn().mockResolvedValue(null), withLearnerLock: <T,>(fn: () => Promise<T>) => fn() }));
+vi.mock("./learner", () => ({ loadLearnerStates: vi.fn().mockResolvedValue(null), loadCatalogSkills: vi.fn().mockResolvedValue([]), loadAbilityBook: vi.fn(async () => ({})), commitAbilityBook: vi.fn(), invalidateLearnerCache: vi.fn(), reconcileLearnerStates: vi.fn().mockResolvedValue(null), withLearnerLock: <T,>(fn: () => Promise<T>) => fn() }));
 
 const mockedApiGet = vi.mocked(apiGet);
 const mockedApiPost = vi.mocked(apiPost);
@@ -172,36 +172,10 @@ describe("frontend routes implemented by Speed-Gym", () => {
     expect(mockedApiGet).toHaveBeenNthCalledWith(3, "/dashboard/streak");
   });
 
-  it("hydrates adaptive state from practice mastery and records sessions through sync", async () => {
-    const { getAdaptiveState, recordAdaptiveSession } = await import("./adaptive");
+  it("hydrates adaptive state from practice mastery", async () => {
+    const { getAdaptiveState } = await import("./adaptive");
     mockedApiGet.mockResolvedValueOnce({ technique_states: {}, selection: {} } as never);
     await getAdaptiveState("cat");
-    expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/mastery");
-
-    mockedApiPost.mockResolvedValueOnce({ accepted: 1 } as never);
-    mockedApiGet.mockResolvedValueOnce({ technique_states: {}, selection: {} } as never);
-    await recordAdaptiveSession({
-      domain: "cat",
-      topicId: "qa",
-      topicLabel: "Quantitative Aptitude",
-      difficulty: "Adaptive",
-      score: 6,
-      total: 10,
-      accuracy: 60,
-      xpEarned: 50,
-      totalTimeSpent: 120,
-      ts: 1_800_000_000_000,
-    });
-    expect(mockedApiPost).toHaveBeenCalledWith(
-      "/sync",
-      expect.objectContaining({
-        events: [expect.objectContaining({ event_type: "session_end", metadata: expect.objectContaining({
-          domain: "cat",
-          problems_attempted: 10,
-          problems_correct: 6,
-        }) })],
-      }),
-    );
     expect(mockedApiGet).toHaveBeenLastCalledWith("/practice/mastery");
   });
 

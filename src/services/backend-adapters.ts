@@ -271,6 +271,7 @@ export type BackendPracticeSessionResponse = {
     feeds_mastery: boolean;
     irt?: { a?: number; b?: number; source?: string } | null;
     bucket?: string | null;
+    subject?: string | null;
     answer_check: "client_extract" | "server_sympy";
     expected_answer: number | null;
     answer_key_display?: string | null;
@@ -313,6 +314,7 @@ export function mapBackendPracticeSession(
         hint,
         techniqueId: item.skill ?? item.technique ?? undefined,
         ...(item.skill ? { skillId: item.skill } : {}),
+        ...(item.subject === "quant" || item.subject === "di" ? { subject: item.subject } : {}),
         ...(item.bucket === "primary" || item.bucket === "sinking" || item.bucket === "frontier" ? { bucket: item.bucket } : {}),
         ...(typeof item.irt?.a === "number" && Number.isFinite(item.irt.a) && item.irt.a > 0 && typeof item.irt.b === "number" && Number.isFinite(item.irt.b)
           ? { irt: { a: item.irt.a, b: item.irt.b, source: item.irt.source ?? "seed" } }

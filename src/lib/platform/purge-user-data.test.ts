@@ -14,12 +14,17 @@ async function seed() {
     { id: "b1", userId: "u1", events: [ev("e1")], createdAt: 1, attempts: 0, status: "pending" },
     { id: "b2", userId: "u2", events: [ev("e2")], createdAt: 2, attempts: 0, status: "pending" },
   ]);
+  await db.masteryHistory.bulkPut([
+    { id: "s1:A", userId: "u1", skill: "A", at: 1, sessionId: "s1", after: "fluid" },
+    { id: "s2:A", userId: "u2", skill: "A", at: 2, sessionId: "s2", after: "fluid" },
+  ]);
 }
 
 describe("what is kept and what is wiped", () => {
   beforeEach(async () => {
     localStorage.clear();
     await db.eventQueue.clear();
+    await db.masteryHistory.clear();
   });
 
   it("covers every learner key (one place knows them all)", () => {
@@ -31,6 +36,7 @@ describe("what is kept and what is wiped", () => {
     await seed();
     await resetAppState();
     expect(await db.eventQueue.count()).toBe(2);
+    expect(await db.masteryHistory.count()).toBe(2);
     for (const key of allLearnerKeys("u1")) expect(localStorage.getItem(key)).toBe("x");
   });
 
@@ -39,6 +45,7 @@ describe("what is kept and what is wiped", () => {
     await purgeUserData();
     for (const key of allLearnerKeys("u1")) expect(localStorage.getItem(key)).toBeNull();
     expect((await db.eventQueue.toArray()).map((b) => b.id)).toEqual(["b2"]); // the other account on this device is untouched
+    expect((await db.masteryHistory.toArray()).map((r) => r.userId)).toEqual(["u2"]); // so is its progress history
     for (const key of allLearnerKeys("u2")) expect(localStorage.getItem(key)).toBe("x");
   });
 });

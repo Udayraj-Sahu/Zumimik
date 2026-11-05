@@ -79,3 +79,36 @@ describe("POST /sync answers 200 but may reject individual events", () => {
     expect((await db.eventQueue.toArray()).map((r) => r.id)).toEqual(["rejected:b"]);
   });
 });
+
+describe("cognitive load is logged with the attempt", () => {
+  it("each problem_attempt carries the engine's load for its question, and an item with no text carries none", async () => {
+    const { buildSprintSyncEvents } = await import("@/services/telemetry");
+    const q = (id: string, text: string) => ({ id, text, options: [], correctIndex: 0, timeLimit: 30, skillId: "S" });
+    const events = buildSprintSyncEvents(
+      { topic: "S", questions: [q("a", "98 × 97 = ?"), q("b", "")] },
+      { answers: [{ questionId: "a", selectedIndex: -1, answerText: "1", correct: true, timeSpent: 3 }, { questionId: "b", selectedIndex: -1, answerText: "1", correct: true, timeSpent: 3 }], score: 2, total: 2, accuracy: 100, totalTimeSpent: 6, xpEarned: 0 },
+    );
+    const attempts = events.filter((e) => e.event_type === "problem_attempt") as Array<{ metadata: { bcl?: number } }>;
+    expect(attempts[0].metadata.bcl).toBe(5);
+    expect(attempts[1].metadata.bcl).toBeUndefined();
+  });
+});
+
+describe("a sprint's recorded checkpoints are logged with its result", () => {
+  it("syncSprintResult sends the extra psychometric events in the same batch, before session_end", async () => {
+    apiPost.mockResolvedValue({ accepted: 3, rejected: [] });
+    const { syncSprintResult } = await import("@/services/telemetry");
+    const question = { id: "a", text: "1 + 1", options: [], correctIndex: 0, timeLimit: 30, skillId: "S" };
+    await syncSprintResult(
+      { topic: "S", questions: [question] },
+      { answers: [{ questionId: "a", selectedIndex: -1, answerText: "2", correct: true, timeSpent: 3, answeredAt: Date.now() - 1000 }], score: 1, total: 1, accuracy: 100, totalTimeSpent: 3, xpEarned: 0 },
+      "cat",
+      "sprint",
+      [{ event_type: "fatigue_index_computed", metadata: { evaluated: false, skip_reason: "too_few_attempts" } }],
+    );
+    const sent = (apiPost.mock.calls.find(([p]) => p === "/sync") as unknown as [string, { events: Array<{ event_type: string }> }])[1].events.map((e) => e.event_type);
+    expect(sent).toContain("fatigue_index_computed");
+    expect(sent[sent.length - 1]).toBe("session_end");
+    expect(sent.indexOf("fatigue_index_computed")).toBeLessThan(sent.indexOf("session_end"));
+  });
+});

@@ -263,3 +263,19 @@ describe("backend response adapters", () => {
     ]);
   });
 });
+
+describe("practice items carry the subject the backend names, and nothing else", () => {
+  const item = (template_id: string, subject?: string | null) => ({
+    source: "tier1_static", template_id, question_text: "q", difficulty: 2, skill: "S", technique: null, topic: null, sub_topic: null,
+    trust: "trusted", feeds_mastery: true, answer_check: "client_extract" as const, expected_answer: 1, ...(subject === undefined ? {} : { subject }),
+  });
+
+  it("quant and di pass through; a missing or unrecognised subject stays absent (never defaulted to quant)", async () => {
+    const { mapBackendPracticeSession } = await import("./backend-adapters");
+    const session = mapBackendPracticeSession(
+      { items: [item("a", "quant"), item("b", "di"), item("c"), item("d", "varc"), item("e", "Quant"), item("f", null)], summary: { requested: 6, served: 6 } },
+      { topic: "S", difficulty: "Adaptive" },
+    );
+    expect(session.questions.map((x) => x.subject)).toEqual(["quant", "di", undefined, undefined, undefined, undefined]);
+  });
+});

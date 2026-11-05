@@ -1,5 +1,6 @@
 "use client";
 
+import { TechniqueMasteryPanel } from "@/components/technique/technique-mastery-panel";
 import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -98,6 +99,8 @@ export function ReferenceTechniquePage() {
           {card.translation && <p className="mt-0.5 text-[12px] italic text-muted-foreground/70">{card.translation}</p>}
           <p className="mt-1 text-[11px] text-muted-foreground/50">{[card.topic, card.category].filter(Boolean).join(" › ")}</p>
         </div>
+
+        {skill && <TechniqueMasteryPanel skillId={skill.id} skillLabel={skill.label} />}
 
         <SectionPill>Quick Reference</SectionPill>
         <QuickReference card={card} />

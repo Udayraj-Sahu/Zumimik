@@ -1,7 +1,10 @@
 import "fake-indexeddb/auto";
 import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterEach } from "vitest";
+
+// The whole suite runs in parallel, so a cold dynamic import can take longer than the 1 s default; a wait that never succeeds still fails.
+configure({ asyncUtilTimeout: 5000 });
 
 // jsdom has no matchMedia; the avatar engine and reduced-motion hooks rely on it.
 if (!window.matchMedia) {

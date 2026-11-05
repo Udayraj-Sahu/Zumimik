@@ -22,6 +22,7 @@ const sessionOf = (...ids: string[]) => ({ session: { topic: "Fractions", questi
 function makeServer(initial: Record<string, TechniqueState>) {
   const server = {
     online: true,
+    postDown: false,    // only POST /sync fails (the snapshot is still readable)
     snapshotReadable: true,
     states: { ...initial } as Record<string, TechniqueState>,
     accepted: new Set<string>(),
@@ -35,7 +36,7 @@ function makeServer(initial: Record<string, TechniqueState>) {
   });
   const apiPost = vi.fn(async (path: string, body: { events: Array<Record<string, unknown>> }) => {
     server.postCalls += 1;
-    if (!server.online) throw new Error("offline");
+    if (!server.online || server.postDown) throw new Error("offline");
     if (path !== "/sync") throw new Error("unexpected " + path);
     for (const e of body.events) {
       const id = e.event_id as string;
@@ -218,5 +219,107 @@ describe("learner state across offline, retry, duplicates, devices and concurren
     expect(attemptsFromEvents([{ ...withSkill, event_id: "5", metadata: { ...withSkill.metadata, is_correct: null } }], NOW)).toHaveLength(0); // deferred
     expect(attemptsFromEvents([{ ...withSkill, event_id: "6", metadata: { ...withSkill.metadata, feeds_mastery: false } }], NOW)).toHaveLength(0); // sandbox
     expect(attemptsFromEvents([{ ...withSkill, event_id: "7" }, { ...withSkill, event_id: "7" }], NOW)).toHaveLength(1); // same id twice
+  });
+});
+
+describe("P0: reconciliation never loses a session, whichever way the network fails", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    const { db } = await import("@/services/offline/db");
+    await db.eventQueue.clear();
+    clock = NOW - 60_000;
+  });
+  const base = () => ({ Fractions: practised("Fractions", 3, NOW - 3 * DAY) });
+
+  it("a queued session followed by another ONLINE session: the snapshot is readable but older, and the first session is still counted", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1");
+    h.server.postDown = true; // the batch cannot be delivered, but the server (and its older snapshot) is reachable
+    const s1 = sessionOf("n1", "n2");
+    await h.telemetry.sendSyncBatch(await h.telemetry.queueSessionSync(s1.session, s1.result));
+    expect(h.server.states.Fractions.totalAttempts).toBe(3); // the server really is behind
+    const s2 = sessionOf("n3", "n4");
+    const events2 = await h.telemetry.queueSessionSync(s2.session, s2.result);
+    expect(endOf(events2).metadata.technique_states?.Fractions.totalAttempts).toBe(3 + 2 + 2);
+  });
+
+  it("the snapshot cannot be fetched but the server accepts events: the remembered snapshot plus the queue is the base", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1");
+    h.server.snapshotReadable = false;
+    const s1 = sessionOf("n1", "n2");
+    const events = await h.telemetry.queueSessionSync(s1.session, s1.result);
+    expect(endOf(events).metadata.technique_states?.Fractions.totalAttempts).toBe(5);
+    await h.telemetry.sendSyncBatch(events);
+    expect(h.server.states.Fractions.totalAttempts).toBe(5);
+    expect(await h.db.eventQueue.count()).toBe(0);
+  });
+
+  it("the network fails part way through flushing: delivered batches are not replayed twice, undelivered ones are not lost", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1");
+    h.server.online = false;
+    const batches = [sessionOf("a1", "a2"), sessionOf("b1", "b2"), sessionOf("c1", "c2")];
+    for (const b of batches) await h.telemetry.sendSyncBatch(await h.telemetry.queueSessionSync(b.session, b.result));
+    expect(await h.db.eventQueue.count()).toBe(3);
+
+    h.server.online = true;
+    let posts = 0;
+    const deliver = h.apiPost.getMockImplementation()!;
+    h.apiPost.mockImplementation(async (path: string, body: { events: Array<Record<string, unknown>> }) => {
+      posts += 1;
+      if (posts > 1) throw new Error("connection dropped"); // the second delivery fails
+      return deliver(path, body); // the first one reaches the server, which stores it
+    });
+    await h.learner.loadLearnerStates("u1"); // flushes: one batch delivered, then the network drops
+    expect(await h.db.eventQueue.count()).toBe(2);
+    expect(h.server.states.Fractions.totalAttempts).toBe(5); // the server holds the delivered batch (3 + 2)
+    const states = await h.learner.loadLearnerStates("u1");
+    expect(states?.Fractions.totalAttempts).toBe(3 + 2 + 2 + 2); // 5 from the server, then only the two undelivered batches replayed
+  });
+
+  it("a batch acknowledged by the BACKGROUND flush is visible at once, not hidden behind the 60-second snapshot cache", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1"); // caches the snapshot as it was
+    h.server.postDown = true;
+    const s1 = sessionOf("n1", "n2");
+    await h.telemetry.sendSyncBatch(await h.telemetry.queueSessionSync(s1.session, s1.result));
+    h.server.postDown = false;
+    const { flushEventQueue } = await import("@/services/offline/sync");
+    expect(await flushEventQueue()).toBe(1); // what the reconnect handler (syncAll) does
+    expect(h.server.states.Fractions.totalAttempts).toBe(5);
+    const states = await h.learner.loadLearnerStates("u1");
+    expect(states?.Fractions.totalAttempts).toBe(5); // not 3 from the cached older snapshot
+  });
+
+  it("after an acknowledgement the device can go offline and restart without losing that session", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1"); // remembers the snapshot as it was (3 attempts)
+    const s1 = sessionOf("n1", "n2");
+    expect(await h.telemetry.sendSyncBatch(await h.telemetry.queueSessionSync(s1.session, s1.result))).toBe("synced");
+    expect(await h.db.eventQueue.count()).toBe(0); // acknowledged: nothing left to replay
+
+    h.server.online = false;
+    const again = await boot({}, h); // restart while offline
+    const states = await again.learner.loadLearnerStates("u1");
+    expect(states?.Fractions.totalAttempts).toBe(5);
+  });
+
+  it("mixed accepted and rejected events: the rejected one is parked, nothing is applied twice", async () => {
+    const h = await boot(base());
+    await h.learner.loadLearnerStates("u1");
+    const s1 = sessionOf("n1", "n2");
+    const events = await h.telemetry.queueSessionSync(s1.session, s1.result);
+    const refused = events.find((e) => e.event_type === "problem_attempt") as { event_id: string };
+    h.apiPost.mockImplementation(async (path: string, body: { events: Array<Record<string, unknown>> }) => {
+      const ts = body.events.find((e) => e.event_type === "session_end") as { metadata: { technique_states?: Record<string, TechniqueState> } };
+      if (ts?.metadata.technique_states) h.server.states = { ...h.server.states, ...ts.metadata.technique_states };
+      return { accepted: body.events.length - 1, rejected: [{ event_id: refused.event_id, index: 0, reason: "client_timestamp: out of range" }] };
+    });
+    expect(await h.telemetry.sendSyncBatch(events)).toBe("synced");
+    const rows = await h.db.eventQueue.toArray();
+    expect(rows.map((r) => r.status)).toEqual(["parked"]);
+    const states = await h.learner.loadLearnerStates("u1");
+    expect(states?.Fractions.totalAttempts).toBe(5); // the snapshot already carried the session once; the parked event is not replayed on top
   });
 });

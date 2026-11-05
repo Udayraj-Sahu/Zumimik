@@ -7,6 +7,7 @@ import { flushImpressions } from "@/services/ads";
 import { checkServer } from "@/services/health";
 import { isOnline, onOnline, onOffline } from "@/services/device";
 import { OfflineBanner } from "@/components/shell/offline-banner";
+import { SyncIndicator } from "@/components/shell/sync-indicator";
 
 export function OnlineProvider({ children }: { children: React.ReactNode }) {
   const setOnline = useNetworkStore((s) => s.setOnline);
@@ -45,6 +46,7 @@ export function OnlineProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       <OfflineBanner />
+      <SyncIndicator />
       {children}
     </>
   );

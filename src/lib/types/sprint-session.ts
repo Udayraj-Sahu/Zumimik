@@ -16,6 +16,8 @@ export type Question = {
   techniqueId?: string;
   /** The canonical :Skill id (GET /practice/catalog vocabulary). Mastery and ability are keyed on this only; `techniqueId` may be a corpus label. */
   skillId?: string;
+  /** The subject the backend assigned to this item (quant or di). Absent when the backend did not name one: it is then unclassified, never assumed to be quant. */
+  subject?: "quant" | "di";
   /** The slot bucket the server served this item under (primary = consolidate, sinking = review, frontier = new). */
   bucket?: "primary" | "sinking" | "frontier";
   /** IRT item parameters the server attached (calibrated, or the seed a=1, b=difficulty-3). Absent: the client seeds from `difficulty`. */

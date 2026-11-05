@@ -1,8 +1,9 @@
-import { freshThetaState, rebuildStates, type CatalogSkill, type MasterySnapshot, type ThetaState } from "@vmsg/psychometrics";
+import { rebuildStates, type CatalogSkill, type MasterySnapshot } from "@vmsg/psychometrics";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { attemptsFromEvents } from "@/lib/learning/event-replay";
-import { flushEventQueue, pendingEvents } from "./offline/sync";
-import { PRACTICE_SUBJECT, restoreTheta } from "@/lib/learning/ability";
+import { ackGeneration, flushEventQueue, pendingEvents } from "./offline/sync";
+import { recallSnapshot, rememberSnapshot } from "@/lib/learning/snapshot-memory";
+import { mergeBook, remoteAbilityOf, restoreBook, type AbilityBook } from "@/lib/learning/ability-book";
 import type { SinkingBook } from "@/lib/learning/review";
 import { learnerKeys } from "@/lib/learning/storage-keys";
 import { IS_MOCK, safeLocalStorage } from "@/lib/platform";
@@ -19,8 +20,8 @@ import { ageFromDob, hydrateLearner, type LearnerStates } from "@/lib/learning/l
 const MASTERY_TTL_MS = 60_000;
 const CATALOG_TTL_MS = 5 * 60_000;
 
-let masteryCache: { at: number; userKey: string; promise: Promise<MasterySnapshot> } | null = null;
-let catalogCache: { at: number; promise: Promise<CatalogSkill[]> } | null = null;
+let masteryCache: { at: number; userKey: string; generation: number; promise: Promise<MasterySnapshot> } | null = null;
+let catalogCache: { at: number; promise: Promise<CatalogSkillWithSubject[]> } | null = null;
 
 export function invalidateLearnerCache(): void {
   masteryCache = null;
@@ -34,33 +35,15 @@ export function resetLearnerCaches(): void {
 /** Raw snapshot. Rejects when it cannot be read: callers must treat that as "unknown", never as "new learner". */
 export function loadMasterySnapshot(userKey = ""): Promise<MasterySnapshot> {
   const now = Date.now();
-  if (masteryCache && masteryCache.userKey === userKey && now - masteryCache.at < MASTERY_TTL_MS) return masteryCache.promise;
+  // A cached read is only good while nothing was acknowledged since it was taken: an acknowledgement means the server now holds
+  // something the cached copy does not, and the acknowledged events are no longer in the queue to make up the difference.
+  if (masteryCache && masteryCache.userKey === userKey && masteryCache.generation === ackGeneration() && now - masteryCache.at < MASTERY_TTL_MS) return masteryCache.promise;
   const promise = apiGet<MasterySnapshot>("/practice/mastery");
-  masteryCache = { at: now, userKey, promise };
+  masteryCache = { at: now, userKey, generation: ackGeneration(), promise };
   promise.catch(() => {
     if (masteryCache?.promise === promise) masteryCache = null; // do not cache a failure
   });
   return promise;
-}
-
-const SNAPSHOT_KEY = learnerKeys.snapshot;
-
-function rememberSnapshot(userKey: string, snapshot: MasterySnapshot): void {
-  try {
-    safeLocalStorage.setItem(SNAPSHOT_KEY(userKey), JSON.stringify(snapshot));
-  } catch {
-    /* storage full or unavailable: the next online read still works */
-  }
-}
-
-/** The last snapshot this device read for this learner, so an offline session still builds on real history. */
-function recallSnapshot(userKey: string): MasterySnapshot | null {
-  try {
-    const raw = safeLocalStorage.getItem(SNAPSHOT_KEY(userKey));
-    return raw ? (JSON.parse(raw) as MasterySnapshot) : null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -111,13 +94,22 @@ export function loadLearnerStates(userKey = "", now = Date.now()): Promise<Learn
   return withLearnerLock(() => reconcileLearnerStates(userKey, now));
 }
 
-export function loadCatalogSkills(): Promise<CatalogSkill[]> {
+/** A catalog skill, with the subject the backend named for it when it names one (never inferred). */
+export type CatalogSkillWithSubject = CatalogSkill & { subject?: "quant" | "di" };
+
+export function loadCatalogSkills(): Promise<CatalogSkillWithSubject[]> {
   const now = Date.now();
   if (catalogCache && now - catalogCache.at < CATALOG_TTL_MS) return catalogCache.promise;
-  const promise = apiGet<{ skills?: Array<{ skill?: string; parents?: string[]; servable?: number }> }>("/practice/catalog").then((res) =>
+  type Raw = { skill?: string; parents?: string[]; servable?: number; subject?: string | null };
+  const promise = apiGet<{ skills?: Raw[] }>("/practice/catalog").then((res) =>
     (res.skills ?? [])
-      .filter((s): s is { skill: string; parents?: string[]; servable?: number } => typeof s.skill === "string")
-      .map((s) => ({ skill: s.skill, parents: s.parents ?? [], ...(typeof s.servable === "number" ? { servable: s.servable } : {}) })),
+      .filter((s): s is Raw & { skill: string } => typeof s.skill === "string")
+      .map((s): CatalogSkillWithSubject => ({
+        skill: s.skill,
+        parents: s.parents ?? [],
+        ...(typeof s.servable === "number" ? { servable: s.servable } : {}),
+        ...(s.subject === "quant" || s.subject === "di" ? { subject: s.subject } : {}),
+      })),
   );
   catalogCache = { at: now, promise };
   promise.catch(() => {
@@ -132,20 +124,34 @@ export function loadCatalogSkills(): Promise<CatalogSkill[]> {
 // finished session also sends it on `session_end.metadata.theta`, where the server logs it.
 const THETA_KEY = learnerKeys.ability;
 
-export function loadAbility(userKey: string): ThetaState {
-  if (!userKey) return freshThetaState(PRACTICE_SUBJECT);
+/**
+ * The learner's ability per subject. The device keeps what it has computed; if the server's mastery response carries abilities
+ * (the contract is pending, see BACKEND_TEAM_HANDOFF.md) their evidence is merged in, so a new device recovers them. With no server
+ * abilities, or an unreadable server, this is exactly the local book.
+ */
+export async function loadAbilityBook(userKey: string): Promise<AbilityBook> {
+  if (!userKey) return {};
+  let local: AbilityBook = {};
   try {
     const raw = safeLocalStorage.getItem(THETA_KEY(userKey));
-    return restoreTheta(raw ? JSON.parse(raw) : null);
+    local = restoreBook(raw ? JSON.parse(raw) : null);
   } catch {
-    return freshThetaState(PRACTICE_SUBJECT);
+    local = {};
   }
+  if (IS_MOCK) return local;
+  let remote: AbilityBook = {};
+  try {
+    remote = remoteAbilityOf(await loadMasterySnapshot(userKey));
+  } catch {
+    remote = remoteAbilityOf(recallSnapshot(userKey)); // offline: whatever the last good snapshot carried
+  }
+  return mergeBook(local, remote);
 }
 
-export function commitAbility(userKey: string, state: ThetaState): void {
+export function commitAbilityBook(userKey: string, book: AbilityBook): void {
   if (!userKey) return;
   try {
-    safeLocalStorage.setItem(THETA_KEY(userKey), JSON.stringify(state));
+    safeLocalStorage.setItem(THETA_KEY(userKey), JSON.stringify(book));
   } catch {
     /* storage unavailable: the estimate is rebuilt from the next sessions */
   }

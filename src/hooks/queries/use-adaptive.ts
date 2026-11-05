@@ -25,9 +25,13 @@ export function useTodayPlan(domain?: string) {
   // Real mode: the plan comes from the shared learner model. If the learner's history cannot be read (offline with nothing remembered)
   // the earlier heuristic plan, built from the server's topic list, is the fallback so the screen is never empty.
   const engineReady = !IS_MOCK && !!view.data?.states;
+  // While the learner model is still loading, show nothing rather than the earlier heuristic plan, which would flash and then be replaced.
+  const engineLoading = !IS_MOCK && view.isLoading;
   return {
     ...query,
-    data: query.data
+    data: query.data && engineLoading
+      ? EMPTY_PLAN
+      : query.data
       ? engineReady
         ? enginePlan(query.data, view.data?.steps ?? [], dailyMinutes ?? 30, focusMode)
         : recommendPlan(query.data, dailyMinutes ?? 30, focusMode)

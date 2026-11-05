@@ -93,6 +93,7 @@ export async function purgeUserData(): Promise<void> {
     }
     try {
       await db.eventQueue.where("userId").equals(userId).delete();
+      await db.masteryHistory.where("userId").equals(userId).delete();
     } catch {
       /* ignore dexie failures */
     }

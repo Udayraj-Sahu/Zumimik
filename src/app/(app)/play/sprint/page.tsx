@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { Check, X, Clock, Zap, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWellbeing } from "@/hooks/use-wellbeing";
 import { useSprintSession } from "@/hooks/queries/use-sprint-session";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore, type ResumeSnapshot } from "@/stores/resume-store";
@@ -37,6 +38,9 @@ function SprintContent() {
 
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const feedback = useFeedback();
+  // Timed simulation: the engine's fatigue checkpoints are recorded for later analysis only. No break, hint or reordering is ever applied here.
+  const wellbeing = useWellbeing(true, { observeOnly: true });
+  const wellbeingEvents = wellbeing.events; // stable, so finishSprint stays stable
   const { data, isLoading, error, refetch } = useSprintSession(
     topic,
     length,
@@ -110,6 +114,7 @@ function SprintContent() {
   const finishSprint = useCallback(() => {
     if (activeQuestions.length > 0) {
       feedback.complete();
+      useSprintStore.getState().setPsychometricEvents(wellbeingEvents());
       completeSprint({
         questions: activeQuestions,
         topic: topic,
@@ -119,7 +124,7 @@ function SprintContent() {
       clearSnapshot();
       goToResults();
     }
-  }, [activeQuestions, activeTopicLabel, activeDifficulty, topic, difficulty, completeSprint, goToResults, feedback, clearSnapshot]);
+  }, [activeQuestions, activeTopicLabel, activeDifficulty, topic, difficulty, completeSprint, goToResults, feedback, clearSnapshot, wellbeingEvents]);
 
   useEffect(() => {
     if (isResume && snapshot && status === "idle") {
@@ -202,6 +207,21 @@ function SprintContent() {
     }
   }, [showFeedback]);
 
+  /** The engine's fatigue checkpoints are recorded for the sprint, never acted on: a timed simulation is not interrupted. */
+  const watchAnswer = (q: (typeof activeQuestions)[number], correct: boolean | null) => {
+    const state = useSprintStore.getState();
+    const now = Date.now();
+    wellbeing.onScored({
+      question: q,
+      questions: activeQuestions,
+      servedCount: currentIndex + 1,
+      correct,
+      timeSpentMs: Math.max(0, now - (state.questionStartTime ?? now)),
+      answersSoFar: state.getResult(activeQuestions).answers,
+      sessionStartedAt: state.sessionStartTime ?? now,
+    });
+  };
+
   const handleSelect = (optionIndex: number) => {
     if (showFeedback || status !== "active") return;
     const q = activeQuestions[currentIndex];
@@ -210,6 +230,7 @@ function SprintContent() {
     setSelectedIndex(optionIndex);
     setShowFeedback(true);
     answerCurrent(q.id, optionIndex);
+    watchAnswer(q, optionIndex === q.correctIndex);
     if (optionIndex === q.correctIndex) {
       feedback.correct();
     } else {
@@ -238,6 +259,7 @@ function SprintContent() {
     if (verdict === "unparsable") return;
 
     answerTextCurrent(q.id, textAnswer, verdict === "deferred" ? null : verdict === "correct");
+    watchAnswer(q, verdict === "deferred" ? null : verdict === "correct");
     setShowFeedback(true);
     if (verdict === "correct") feedback.correct();
     if (verdict === "incorrect") feedback.wrong();

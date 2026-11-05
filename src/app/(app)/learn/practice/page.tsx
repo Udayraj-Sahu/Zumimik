@@ -282,7 +282,7 @@ export default function PracticePage() {
       }
       // Acknowledged: refresh everything the attempts feed.
       setSyncState("saved");
-      for (const key of ["adaptive-state", "dashboard", "account-summary", "sprint", "profile"]) {
+      for (const key of ["adaptive-state", "dashboard", "account-summary", "sprint", "profile", "learner-view", "review-items", "mastery-history"]) {
         void queryClient.invalidateQueries({ queryKey: [key] });
       }
     } catch {

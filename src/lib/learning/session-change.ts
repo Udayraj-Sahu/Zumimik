@@ -11,6 +11,8 @@ export type SkillChange = {
   /** The mastery label before and after (undefined = the learner had no history with it before). */
   before: TechniqueStateName | undefined;
   after: TechniqueStateName | undefined;
+  /** The engine version that produced the after state. */
+  engineVersion?: number;
 };
 
 export type SessionChange = { skills: SkillChange[] };
@@ -24,7 +26,7 @@ export function summariseChange(log: ReadonlyArray<SessionLogEntry>, before: Lea
   if (!before || !after || log.length === 0) return null;
   const by = new Map<string, SkillChange>();
   for (const { skill, attempt } of log) {
-    const row = by.get(skill) ?? { skill, attempts: 0, correct: 0, before: before[skill]?.state, after: after[skill]?.state };
+    const row = by.get(skill) ?? { skill, attempts: 0, correct: 0, before: before[skill]?.state, after: after[skill]?.state, engineVersion: after[skill]?.engineVersion };
     row.attempts += 1;
     if (attempt.correct) row.correct += 1;
     by.set(skill, row);

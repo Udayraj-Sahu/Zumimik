@@ -83,17 +83,19 @@ describe("ability (IRT 2PL-lite)", () => {
   });
 });
 
-describe("ability is persisted and steers the next session", () => {
+describe("ability is kept per subject, persisted, and steers the next session", () => {
   beforeEach(() => {
     vi.resetModules();
     localStorage.clear();
   });
 
-  async function setup() {
+  async function setup(catalogSubject?: Record<string, "quant" | "di">) {
     vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     const apiGet = vi.fn(async (path: string) => {
       if (path === "/practice/mastery") return { technique_states: {}, as_of: null };
-      if (path === "/practice/catalog") return { skills: [{ skill: "Fractions", parents: [], servable: 9 }] };
+      if (path === "/practice/catalog") {
+        return { skills: ["Fractions", "Charts"].map((skill) => ({ skill, parents: [], servable: 9, ...(catalogSubject?.[skill] ? { subject: catalogSubject[skill] } : {}) })) };
+      }
       throw new Error("unexpected " + path);
     });
     const apiPost = vi.fn(async () => ({ items: [], summary: { requested: 5, served: 0 } }));
@@ -105,43 +107,79 @@ describe("ability is persisted and steers the next session", () => {
     return { telemetry, practice, apiPost };
   }
 
-  const session = { topic: "Fractions", questions: [q("n1"), q("n2"), q("n3")] };
-  const result = { answers: [a("n1", true), a("n2", true), a("n3", true)], score: 3, total: 3, accuracy: 100, totalTimeSpent: 15, xpEarned: 0 };
+  const named = (ids: string[], subject: "quant" | "di", skill = "Fractions") => ids.map((id) => q(id, { subject, skillId: skill }));
+  const result = (ids: string[]) => ({ answers: ids.map((i) => a(i, true)), score: ids.length, total: ids.length, accuracy: 100, totalTimeSpent: ids.length * 5, xpEarned: 0 });
+  const lastBody = (apiPost: { mock: { calls: unknown[][] } }) => apiPost.mock.calls[apiPost.mock.calls.length - 1][1] as { theta?: number };
 
-  it("sends theta on session_end, keeps it across a restart, and uses it in the next request", async () => {
-    const { telemetry, practice, apiPost } = await setup();
-    // First request: nothing scored yet, so no theta is sent.
+  it("items the backend names as quant: theta is sent under quant, survives a restart and steers the next request for that subject", async () => {
+    const { telemetry, practice, apiPost } = await setup({ Fractions: "quant" });
     await practice.getPracticeSession("Fractions", 5, "Adaptive");
-    expect((apiPost.mock.calls[0] as unknown[])[1]).not.toHaveProperty("theta");
+    expect(lastBody(apiPost)).not.toHaveProperty("theta"); // nothing scored yet
 
-    const events = await telemetry.buildSessionSyncEvents(session, result);
-    const end = events[events.length - 1] as { metadata: { theta?: { quant: ThetaState } } };
+    const ids = ["n1", "n2", "n3"];
+    const events = await telemetry.buildSessionSyncEvents({ topic: "Fractions", questions: named(ids, "quant") }, result(ids));
+    const end = events[events.length - 1] as { metadata: { theta?: { quant: ThetaState; di?: ThetaState } } };
     expect(end.metadata.theta?.quant.n).toBe(3);
-    expect(end.metadata.theta?.quant.theta).toBeGreaterThan(0);
+    expect(end.metadata.theta?.quant.subject).toBe("quant");
+    expect(end.metadata.theta?.di).toBeUndefined();
 
-    // "Restart": a fresh module graph reads the stored estimate back.
-    vi.resetModules();
-    const again = await setup();
+    vi.resetModules(); // "restart": a fresh module graph reads the stored estimate back
+    const again = await setup({ Fractions: "quant" });
     await again.practice.getPracticeSession("Fractions", 5, "Adaptive");
-    const body = (again.apiPost.mock.calls[0] as unknown[])[1] as { theta?: number };
-    expect(body.theta).toBeCloseTo(end.metadata.theta!.quant.theta, 3);
+    expect(lastBody(again.apiPost).theta).toBeCloseTo(end.metadata.theta!.quant.theta, 3);
+  });
+
+  it("items with NO named subject are not Quant: nothing is sent as a subject, but the local estimate still steers practice", async () => {
+    const { telemetry, practice, apiPost } = await setup(); // the catalog names no subject (the current backend)
+    const ids = ["n1", "n2", "n3"];
+    const events = await telemetry.buildSessionSyncEvents({ topic: "Fractions", questions: ids.map((id) => q(id)) }, result(ids));
+    const end = events[events.length - 1] as { metadata: Record<string, unknown> };
+    expect(end.metadata.theta).toBeUndefined(); // never reported to the server as quant or di
+    await practice.getPracticeSession("Fractions", 5, "Adaptive");
+    expect(lastBody(apiPost).theta).toBeGreaterThan(0); // sessions keep adapting from the learner's own practice
+  });
+
+  it("quant and di are independent estimates; one never moves the other", async () => {
+    const { telemetry } = await setup();
+    const both = [...named(["a1", "a2", "a3"], "quant"), ...named(["d1", "d2", "d3"], "di", "Charts")];
+    const answers = [...["a1", "a2", "a3"].map((i) => a(i, true)), ...["d1", "d2", "d3"].map((i) => a(i, false))];
+    const events = await telemetry.buildSessionSyncEvents({ topic: "Mixed", questions: both }, { answers, score: 3, total: 6, accuracy: 50, totalTimeSpent: 30, xpEarned: 0 });
+    const theta = (events[events.length - 1] as { metadata: { theta?: { quant: ThetaState; di: ThetaState } } }).metadata.theta!;
+    expect(theta.quant.theta).toBeGreaterThan(0);
+    expect(theta.di.theta).toBeLessThan(0);
+    expect(theta.quant.responses.every((r) => r.problemId.startsWith("a"))).toBe(true);
+    expect(theta.di.responses.every((r) => r.problemId.startsWith("d"))).toBe(true);
+  });
+
+  it("a request that mixes subjects gets no theta, and one for di uses the di estimate", async () => {
+    const { telemetry, practice, apiPost } = await setup({ Fractions: "quant", Charts: "di" });
+    const both = [...named(["a1", "a2", "a3"], "quant"), ...named(["d1", "d2", "d3"], "di", "Charts")];
+    const answers = [...["a1", "a2", "a3"].map((i) => a(i, true)), ...["d1", "d2", "d3"].map((i) => a(i, false))];
+    await telemetry.buildSessionSyncEvents({ topic: "Mixed", questions: both }, { answers, score: 3, total: 6, accuracy: 50, totalTimeSpent: 30, xpEarned: 0 });
+    await practice.getPracticeSession("Charts", 5, "Adaptive");
+    expect(lastBody(apiPost).theta!).toBeLessThan(0); // the di estimate, not quant
+    await practice.getPracticeSession(practice.ADAPTIVE_MIX_TOPIC, 5, "Adaptive"); // the plan draws on skills of both subjects
+    const slotSkills = new Set(((apiPost.mock.calls as unknown as unknown[][])[apiPost.mock.calls.length - 1][1] as { slots: Array<{ skill: string }> }).slots.map((x) => x.skill));
+    expect(slotSkills).toEqual(new Set(["Fractions", "Charts"])); // the mix really spans both subjects
+    expect(lastBody(apiPost).theta).toBeUndefined(); // so no single number stands for it
   });
 
   it("an explicit level wins over the learner's own estimate", async () => {
-    const { telemetry, practice, apiPost } = await setup();
-    await telemetry.buildSessionSyncEvents(session, result);
+    const { telemetry, practice, apiPost } = await setup({ Fractions: "quant" });
+    const ids = ["n1", "n2", "n3"];
+    await telemetry.buildSessionSyncEvents({ topic: "Fractions", questions: named(ids, "quant") }, result(ids));
     await practice.getPracticeSession("Fractions", 5, "Beginner", undefined, 2);
-    const body = (apiPost.mock.calls[0] as unknown[])[1] as { theta?: number };
-    expect(body.theta).toBe(practice.levelToTheta(2));
+    expect(lastBody(apiPost).theta).toBe(practice.levelToTheta(2));
   });
 
-  it("theta is still recorded when the mastery snapshot cannot be read", async () => {
+  it("ability is still recorded when the mastery snapshot cannot be read", async () => {
     vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     vi.doMock("@/services/api", () => ({ apiGet: vi.fn(async () => { throw new Error("offline"); }), apiPost: vi.fn() }));
     const telemetry = await import("@/services/telemetry");
     const { useAuthStore } = await import("@/stores/auth-store");
     useAuthStore.setState({ user: { id: "u1" } as never });
-    const events = await telemetry.buildSessionSyncEvents(session, result);
+    const ids = ["n1", "n2", "n3"];
+    const events = await telemetry.buildSessionSyncEvents({ topic: "Fractions", questions: named(ids, "quant") }, result(ids));
     const end = events[events.length - 1] as { metadata: Record<string, unknown> };
     expect(end.metadata.technique_states).toBeUndefined(); // history unknown: not overwritten
     expect(end.metadata.theta).toBeDefined(); // ability does not depend on it

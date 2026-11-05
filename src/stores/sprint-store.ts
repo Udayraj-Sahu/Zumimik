@@ -29,7 +29,10 @@ type SprintState = {
   timeLeft: number;
   lastResult: SprintResult | null;
   lastSession: SprintSessionMeta | null;
+  /** Psychometric events (fatigue checkpoints) gathered during the sprint, handed to the results screen to be logged with it. */
+  psychometricEvents: Array<{ event_type: string; metadata: Record<string, unknown> }>;
 
+  setPsychometricEvents: (events: Array<{ event_type: string; metadata: Record<string, unknown> }>) => void;
   initSprint: (totalTime: number) => void;
   resumeSprint: (point: ResumePoint) => void;
   answerCurrent: (questionId: string, optionIndex: number) => void;
@@ -51,6 +54,9 @@ export const useSprintStore = create<SprintState>((set, get) => ({
   timeLeft: 0,
   lastResult: null,
   lastSession: null,
+  psychometricEvents: [],
+
+  setPsychometricEvents: (events) => set({ psychometricEvents: events }),
 
   initSprint: (totalTime) =>
     set({
@@ -62,6 +68,7 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       timeLeft: totalTime,
       lastResult: null,
       lastSession: null,
+      psychometricEvents: [],
     }),
 
   resumeSprint: (point) =>
@@ -158,5 +165,6 @@ export const useSprintStore = create<SprintState>((set, get) => ({
       questionStartTime: null,
       sessionStartTime: null,
       timeLeft: 0,
+      psychometricEvents: [],
     }),
 }));

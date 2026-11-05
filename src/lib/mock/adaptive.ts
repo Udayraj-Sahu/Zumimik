@@ -1,5 +1,5 @@
 import type { AdaptiveDomainState, SessionOutcome } from "@/lib/types/adaptive";
-import { applyOutcome, initialDomainState } from "@/lib/adaptive/engine";
+import { initialDomainState } from "@/lib/adaptive/engine";
 
 export type AdaptiveTopicSeed = {
   id: string;
@@ -51,11 +51,4 @@ export function ensureAdaptiveState(domain: string): AdaptiveDomainState {
   const fresh = initialDomainState(domain);
   states[domain] = fresh;
   return fresh;
-}
-
-export function recordMockAdaptiveSession(outcome: SessionOutcome): AdaptiveDomainState {
-  const current = ensureAdaptiveState(outcome.domain);
-  const next = applyOutcome(current, outcome);
-  states[outcome.domain] = next;
-  return next;
 }

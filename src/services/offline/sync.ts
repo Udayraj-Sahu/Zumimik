@@ -1,5 +1,7 @@
 import { db } from "./db";
 import { syncDeviceId } from "./device-id";
+import { trackSync } from "./sync-activity";
+import { advanceSnapshot } from "@/lib/learning/snapshot-memory";
 import { useNetworkStore, type QueuedMutation } from "@/stores/network-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { apiUrl } from "@/lib/platform";
@@ -179,6 +181,13 @@ export async function removeEventBatch(id: string | null): Promise<void> {
   }
 }
 
+let acknowledgements = 0;
+
+/** Bumped every time the server acknowledges a batch. Anything cached from before that is behind the server. */
+export function ackGeneration(): number {
+  return acknowledgements;
+}
+
 /** One event the server will never store, as POST /sync reports it (HTTP 200 with the rest of the batch accepted). */
 export type SyncRejection = { event_id: string | null; index?: number; reason?: string };
 
@@ -204,6 +213,10 @@ export async function settleAcknowledged(batch: { id: string | null; userId?: st
   const userId = batch.userId ?? useAuthStore.getState().user?.id ?? "";
   const reasons = [...new Set(rejected.map((r) => r.reason).filter((x): x is string => typeof x === "string"))].join("; ");
   const batchId = batch.id;
+  // The session picture the server just accepted becomes this device's remembered base (see snapshot-memory.ts).
+  const refusedIds = new Set(refused.map((e) => e.event_id));
+  const ended = [...batch.events].reverse().find((e) => e.event_type === "session_end" && !refusedIds.has(e.event_id));
+  const pictured = (ended?.metadata as { technique_states?: unknown } | undefined)?.technique_states;
   try {
     await db.transaction("rw", db.eventQueue, async () => {
       if (refused.length > 0) {
@@ -221,6 +234,10 @@ export async function settleAcknowledged(batch: { id: string | null; userId?: st
     });
   } catch {
     return 0; // the batch stays queued and is sent again; the server deduplicates by event id
+  }
+  acknowledgements += 1;
+  if (userId && pictured && typeof pictured === "object" && typeof ended?.client_timestamp === "number") {
+    advanceSnapshot(userId, pictured as Record<string, unknown>, ended.client_timestamp);
   }
   return refused.length;
 }
@@ -247,7 +264,11 @@ export function isPermanentRejection(error: unknown): boolean {
 const REFRESH_KEYS = ["adaptive-state", "dashboard", "account-summary", "sprint", "profile"];
 
 /** Send every pending batch that belongs to the signed-in user. Acked batches are deleted; failures stay queued. */
-export async function flushEventQueue(): Promise<number> {
+export function flushEventQueue(): Promise<number> {
+  return trackSync(flushEventQueueNow);
+}
+
+async function flushEventQueueNow(): Promise<number> {
   const userId = useAuthStore.getState().user?.id;
   if (!userId || !useAuthStore.getState().token) return 0;
   let batches: QueuedEventBatch[];
@@ -296,7 +317,11 @@ export async function flushEventQueue(): Promise<number> {
  * follows, so the server receives them in the order they happened. Stops at the first network/server failure, keeps what it
  * could not deliver, and parks a rejected batch (never deletes it).
  */
-export async function flushQueuedBefore(batchId: string | null): Promise<number> {
+export function flushQueuedBefore(batchId: string | null): Promise<number> {
+  return trackSync(() => flushQueuedBeforeNow(batchId));
+}
+
+async function flushQueuedBeforeNow(batchId: string | null): Promise<number> {
   const userId = useAuthStore.getState().user?.id;
   if (!batchId || !userId || !useAuthStore.getState().token) return 0;
   let batches: QueuedEventBatch[];

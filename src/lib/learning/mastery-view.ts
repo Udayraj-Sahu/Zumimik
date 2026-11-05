@@ -46,3 +46,20 @@ export function recommendSteps(states: LearnerStates, catalog: ReadonlyArray<Cat
 export function recommendNext(states: LearnerStates, catalog: ReadonlyArray<CatalogSkill>, book: SinkingBook, now: number, daysRemaining?: number): NextStep | null {
   return recommendSteps(states, catalog, book, now, daysRemaining, 1)[0] ?? null;
 }
+
+/** How each label reads to the learner. The label is the engine's state; this is only the plain-language line beside it. */
+export const STATE_DESCRIPTION: Record<TechniqueStateName, string> = { fractured: "Needs practice", fragile: "Improving", fluid: "Mastered" };
+
+export type TechniqueAdvice = { action: "start" | "revise" | "practise" | "keep_fresh"; text: string };
+
+/**
+ * What to do about one technique, from its engine state and whether the scheduler has it due for review. No score is calculated here;
+ * the sentence only follows the state and the review queue.
+ */
+export function adviceFor(state: TechniqueStateName | undefined, inReview: boolean): TechniqueAdvice {
+  if (!state) return { action: "start", text: "You have not practised this yet. A short session is a good way to start." };
+  if (inReview) return { action: "revise", text: "This is due for revision. A short refresher will keep it from slipping." };
+  if (state === "fractured") return { action: "practise", text: "A focused session on this technique will help the most." };
+  if (state === "fragile") return { action: "practise", text: "You are getting there. A few more correct answers will settle it." };
+  return { action: "keep_fresh", text: "You know this well. Come back to it now and then to keep it fresh." };
+}

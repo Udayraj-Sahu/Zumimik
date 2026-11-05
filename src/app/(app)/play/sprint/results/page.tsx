@@ -61,13 +61,13 @@ function SprintResultsContent() {
       result: SprintResult;
       domain?: string;
       sessionType: string;
-    }) => syncSprintResult(input.session, input.result, input.domain, input.sessionType),
+    }) => syncSprintResult(input.session, input.result, input.domain, input.sessionType, useSprintStore.getState().psychometricEvents),
     onSuccess: (_data, input) => {
       if (input.sessionType === "adaptive" && input.domain) {
         queryClient.invalidateQueries({ queryKey: ["adaptive-state", input.domain] });
       }
       // The learner model just changed: everything derived from it is read again.
-      for (const key of ["learner-view", "review-items", "adaptive-state"]) void queryClient.invalidateQueries({ queryKey: [key] });
+      for (const key of ["learner-view", "review-items", "adaptive-state", "mastery-history"]) void queryClient.invalidateQueries({ queryKey: [key] });
     },
   });
 

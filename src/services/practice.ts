@@ -8,8 +8,8 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { ageFromDob, DEFAULT_AGE, type LearnerStates } from "@/lib/learning/learner-state";
 import { WARMUP_SIZE } from "@/lib/learning/calibration";
 import { planAdaptiveSession, type PracticeSlot } from "@/lib/learning/session-plan";
-import { thetaForRequest } from "@/lib/learning/ability";
-import { loadAbility, loadCatalogSkills, loadLearnerStates, loadSinkingBook } from "./learner";
+import { abilityForRequest, subjectOfItem, type AbilitySubject } from "@/lib/learning/ability-book";
+import { loadAbilityBook, loadCatalogSkills, loadLearnerStates, loadSinkingBook } from "./learner";
 
 export type PracticeLevel = 1 | 2 | 3 | 4 | 5;
 
@@ -76,9 +76,18 @@ async function planSlots(skill: string | null, n: number, knownStates?: LearnerS
  * otherwise the learner's own ability estimate steers the difficulty window; before anything has been scored there is none
  * and the server uses its cold start.
  */
-function requestTheta(level?: PracticeLevel): number | undefined {
+async function requestTheta(level: PracticeLevel | undefined, skills: ReadonlyArray<string>): Promise<number | undefined> {
   if (level) return levelToTheta(level);
-  return thetaForRequest(loadAbility(useAuthStore.getState().user?.id ?? ""));
+  // The ability of the subject the requested techniques belong to, as the catalog names it. Skills the catalog gives no subject for are
+  // unclassified (the learner's general practice estimate); a mix of subjects gets no theta rather than a guessed one.
+  let catalog: Awaited<ReturnType<typeof loadCatalogSkills>> = [];
+  try {
+    catalog = await loadCatalogSkills();
+  } catch {
+    catalog = [];
+  }
+  const subjects: AbilitySubject[] = skills.map((s) => subjectOfItem(catalog.find((c) => c.skill === s)?.subject));
+  return abilityForRequest(await loadAbilityBook(useAuthStore.getState().user?.id ?? ""), subjects);
 }
 
 /** Prefix marking a problem-bank topic label (GET /api/topics) in the `topic` slot, as opposed to a :Skill name. */
@@ -120,9 +129,11 @@ export async function getPracticeSession(
     planned = null; // catalog unreadable: fall through to the plain request
   }
   if ((isMix || isWarmup) && !planned) throw new Error("Your learning profile could not be loaded, so a personalised mix cannot be built right now. Pick a topic or try again.");
+  const slots = planned ?? [{ skill: topic, bucket: "primary" as const, n }];
+  const theta = isWarmup ? undefined : await requestTheta(level, slots.map((s) => s.skill)); // a warm-up is the cold start: no theta yet
   const response = await apiPost<BackendPracticeSessionResponse>("/practice/session", {
-    slots: planned ?? [{ skill: topic, bucket: "primary", n }],
-    ...(requestTheta(level) !== undefined ? { theta: requestTheta(level) } : {}),
+    slots,
+    ...(theta !== undefined ? { theta } : {}),
   });
   // One question is never shown twice in a session, even when two slots (e.g. a review slot and a practice slot) return the same item.
   if (response.items) response.items = uniqueItems(response.items);

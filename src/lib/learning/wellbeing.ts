@@ -1,5 +1,7 @@
 import {
   ageGroup,
+  baseCognitiveLoad,
+  bclFeatures,
   clrGoal,
   clrQueue,
   fatigueCheckpoint,
@@ -57,6 +59,24 @@ export type CheckpointResult = {
   triggered: boolean;
 };
 
+/**
+ * Run the engine's fatigue checkpoint and keep its event, WITHOUT the controller: no intervention state, no actions, no clr event.
+ * For a timed simulation that must not be interrupted. The checkpoint's gates and thresholds are the engine's, and the event is
+ * logged for later analysis only; nothing is shown to the learner.
+ */
+export function observeCheckpoint(watch: SessionWatch, ctx: CheckpointContext): SessionWatch {
+  const checkpoint = fatigueCheckpoint({
+    attempts: watch.attempts,
+    baselineMs: ctx.baselineMs ?? null,
+    ageGroup: ageGroup(ctx.age ?? null),
+    techniqueState: ctx.techniqueState,
+    sessionElapsedS: ctx.sessionElapsedMs / 1000,
+    sessionCapMin: ctx.sessionCapMin ?? null,
+    scoredCount: watch.attempts.length,
+  });
+  return checkpoint.event === null ? watch : { ...watch, fatigueEvents: [...watch.fatigueEvents, checkpoint.event] };
+}
+
 /** Record one scored answer. Only a boolean verdict counts. */
 export function observe(watch: SessionWatch, attempt: { correct: boolean | null; timeSpentMs: number }): SessionWatch {
   if (attempt.correct === null || !Number.isFinite(attempt.timeSpentMs) || attempt.timeSpentMs < 0) return watch;
@@ -93,6 +113,21 @@ export function evaluate(watch: SessionWatch, ctx: CheckpointContext): Checkpoin
 }
 
 /**
+ * The base cognitive load of a question (1 to 5), counted by the engine from the question text (operators, digits, carries, length,
+ * special symbols; its own rules, COG-01). It is separate from IRT difficulty and never touches mastery or ability: it is only the
+ * tiebreak the controller uses between questions of the same difficulty, and it is logged with the attempt. Undefined when the engine
+ * cannot count it (no text), so ordering then falls back to difficulty alone.
+ */
+export function cognitiveLoadOf(text: string | null | undefined): number | undefined {
+  if (typeof text !== "string" || text.trim() === "") return undefined;
+  try {
+    return baseCognitiveLoad(bclFeatures(text));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * The questions still to come, as the engine wants them under CLR: easiest first, new material capped, review-only after a forced
  * break. The served prefix (everything up to and including the current question) is kept as is. Inactive CLR returns the list
  * unchanged. Questions the engine drops are not served this session; they stay unseen on the server for the next one.
@@ -100,7 +135,9 @@ export function evaluate(watch: SessionWatch, ctx: CheckpointContext): Checkpoin
 export function reorderRemaining(questions: ReadonlyArray<Question>, servedCount: number, clr: ClrState): Question[] {
   if (!clr.active) return [...questions];
   const served = questions.slice(0, servedCount);
-  const remaining = clrQueue(questions.slice(servedCount), clr);
+  // Easiest first by difficulty; for equal difficulty the engine breaks the tie by the lighter cognitive load.
+  const wrapped = questions.slice(servedCount).map((question) => ({ question, bucket: question.bucket, difficulty: question.difficulty, bcl: cognitiveLoadOf(question.text) }));
+  const remaining = clrQueue(wrapped, clr).map((w) => w.question);
   return [...served, ...remaining];
 }
 

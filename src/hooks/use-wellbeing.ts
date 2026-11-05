@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { IS_MOCK } from "@/lib/platform";
 import { ageFromDob, applySession, buildSessionLog, type LearnerStates } from "@/lib/learning/learner-state";
-import { evaluate, markServed, newWatch, observe, reorderRemaining, type SessionWatch } from "@/lib/learning/wellbeing";
+import { evaluate, markServed, newWatch, observe, observeCheckpoint, reorderRemaining, type SessionWatch } from "@/lib/learning/wellbeing";
 import { loadCalibration } from "@/services/calibration";
 import { loadLearnerStates } from "@/services/learner";
 import type { BreakKind } from "@/components/learn/break-overlay";
@@ -37,7 +37,7 @@ export type ScoredInput = {
  *   - override: the questions still to come, reordered or trimmed by the controller (null = as served).
  * Real backend only. The state is the session's: the controller's window is the session, so nothing is carried over.
  */
-export function useWellbeing(enabled: boolean) {
+export function useWellbeing(enabled: boolean, options: { observeOnly?: boolean } = {}) {
   const active = enabled && !IS_MOCK;
   const watchRef = useRef<SessionWatch>(newWatch());
   const baseRef = useRef<LearnerStates | null>(null);
@@ -84,6 +84,20 @@ export function useWellbeing(enabled: boolean) {
         techniqueState = stateName(applySession(baseRef.current, log, now) ?? baseRef.current, skill);
       }
 
+      if (options.observeOnly) {
+        // A timed simulation is never interrupted: the checkpoint is logged, nothing is applied or shown.
+        watchRef.current = observeCheckpoint(watch, {
+          age,
+          baselineMs: loadCalibration(userId)?.ansBaselineMs ?? null,
+          techniqueState,
+          sessionElapsedMs: Math.max(0, now - input.sessionStartedAt),
+          sessionCapMin: input.sessionCapMin ?? null,
+          activePath: onboarding.activePath,
+          uiMode: "quick",
+        });
+        return;
+      }
+
       const result = evaluate(watch, {
         age,
         baselineMs: loadCalibration(userId)?.ansBaselineMs ?? null,
@@ -100,7 +114,7 @@ export function useWellbeing(enabled: boolean) {
     },
     // applyActions is defined below from stable setters
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [active],
+    [active, options.observeOnly],
   );
 
   function applyActions(actions: ClrAction[], input: ScoredInput) {

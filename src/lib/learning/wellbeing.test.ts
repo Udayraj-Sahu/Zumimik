@@ -149,3 +149,47 @@ describe("what is left of the session is reordered by the engine", () => {
     expect(out.slice(1).map((x) => x.id)).toEqual(["d"]);
   });
 });
+
+describe("per-question cognitive load (the engine's own count from the question text)", () => {
+  const mk = (id: string, text: string, difficulty: number | undefined, bucket: Question["bucket"] = "primary"): Question => ({ id, text, options: [], correctIndex: 0, timeLimit: 30, bucket, difficulty });
+
+  it("is the engine's value, between 1 and 5, higher for heavier arithmetic", async () => {
+    const { cognitiveLoadOf } = await import("./wellbeing");
+    const light = cognitiveLoadOf("12 + 13 = ?")!;
+    const heavy = cognitiveLoadOf("98 × 97 = ?")!;
+    expect(light).toBeGreaterThanOrEqual(1);
+    expect(heavy).toBeLessThanOrEqual(5);
+    expect(heavy).toBeGreaterThan(light);
+    expect(heavy).toBe(5); // many column carries clamp at the engine's maximum
+    expect(cognitiveLoadOf("1 + 1")!).toBeGreaterThanOrEqual(1); // never below the minimum
+  });
+
+  it("is undefined when there is nothing to count", async () => {
+    const { cognitiveLoadOf } = await import("./wellbeing");
+    for (const t of [undefined, null, "", "   "]) expect(cognitiveLoadOf(t)).toBeUndefined();
+  });
+
+  it("breaks a tie between questions of the same difficulty: the lighter one comes first", () => {
+    const clr = evaluate(tiring(10), base).watch.clr;
+    const list = [mk("done", "1 + 1", 2), mk("heavy", "98 × 97 = ?", 2), mk("light", "12 + 13 = ?", 2), mk("harder", "1 + 1", 3)];
+    const out = reorderRemaining(list, 1, clr).map((x) => x.id);
+    expect(out).toEqual(["done", "light", "heavy", "harder"]); // difficulty first, then load, never the other way round
+  });
+
+  it("difficulty still decides before load, so a light hard question does not jump an easier heavy one", () => {
+    const clr = evaluate(tiring(10), base).watch.clr;
+    const list = [mk("done", "1 + 1", 2), mk("easyHeavy", "98 × 97 = ?", 1), mk("hardLight", "1 + 1", 4)];
+    expect(reorderRemaining(list, 1, clr).map((x) => x.id)).toEqual(["done", "easyHeavy", "hardLight"]);
+  });
+
+  it("without text or without difficulty it falls back to difficulty and then to the original order", () => {
+    const clr = evaluate(tiring(10), base).watch.clr;
+    const list = [mk("done", "x", 2), mk("b", "", 2), mk("a", "", 2), mk("noDiff", "", undefined)];
+    expect(reorderRemaining(list, 1, clr).map((x) => x.id)).toEqual(["done", "b", "a", "noDiff"]); // unknown difficulty sorts last
+  });
+
+  it("does not change the order when CLR is not active", () => {
+    const list = [mk("a", "98 × 97", 2), mk("b", "1 + 1", 2)];
+    expect(reorderRemaining(list, 0, newWatch().clr).map((x) => x.id)).toEqual(["a", "b"]);
+  });
+});
