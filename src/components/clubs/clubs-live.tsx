@@ -11,6 +11,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
 import { useClubSearch, useCreateClub, useJoinClub, useLeaveClub, useMyClubs } from "@/hooks/queries/use-clubs";
 import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
+import { ClubDetailDialog } from "@/components/clubs/club-detail-dialog";
 import { HUB_TYPES, type Club, type HubType } from "@/services/clubs";
 
 type Tab = "find" | "yours";
@@ -20,7 +21,7 @@ const TYPE_LABEL: Record<string, string> = { city: "City", society: "Society", s
 const label = (t: string) => TYPE_LABEL[t] ?? t;
 const errorText = (err: unknown, fallback: string) => gatedFeatureMessage(err, "Clubs") ?? (err instanceof Error && err.message ? err.message : fallback);
 
-/** Clubs against the backend's virtual hubs (GET /clubs/search, /clubs/mine, POST /clubs/create|join|leave). Real mode only. */
+/** Clubs against the backend's virtual hubs (GET /clubs, /clubs/mine, POST /clubs/create|join|leave). Real mode only. */
 export function ClubsLive() {
   usePageMeta("Clubs — Zuzumik");
   const { data: flags, isLoading: flagsLoading } = useFeatureFlags();
@@ -34,6 +35,7 @@ export function ClubsLive() {
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   // Search as you type, but not on every keystroke.
   useEffect(() => {
@@ -147,7 +149,7 @@ export function ClubsLive() {
                 {clubs.map((club) => {
                   const joined = joinedIds.has(club.hub_id);
                   return (
-                    <ClubRow key={club.hub_id} club={club} joined={joined} busy={busyId === club.hub_id} onToggle={() => act(club, joined)} />
+                    <ClubRow key={club.hub_id} club={club} joined={joined} busy={busyId === club.hub_id} onToggle={() => act(club, joined)} onOpen={() => setOpenId(club.hub_id)} />
                   );
                 })}
               </div>
@@ -167,14 +169,16 @@ export function ClubsLive() {
         )}
       </div>
 
+      <ClubDetailDialog hubId={openId} onClose={() => setOpenId(null)} />
       <CreateClubDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => setTab("yours")} />
     </PageContainer>
   );
 }
 
-function ClubRow({ club, joined, busy, onToggle }: { club: Club; joined: boolean; busy: boolean; onToggle: () => void }) {
+function ClubRow({ club, joined, busy, onToggle, onOpen }: { club: Club; joined: boolean; busy: boolean; onToggle: () => void; onOpen: () => void }) {
   return (
     <GlassCard data-club-item className="flex items-center gap-3.5 p-4 max-[359px]:gap-2.5 max-[359px]:p-3">
+      <button type="button" onClick={onOpen} aria-label={`Open ${club.name}`} className="flex min-w-0 flex-1 items-center gap-3.5 rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-ring max-[359px]:gap-2.5">
       <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-[13px] font-black text-primary" aria-hidden>
         {club.name.trim().slice(0, 2).toUpperCase()}
       </div>
@@ -189,6 +193,7 @@ function ClubRow({ club, joined, busy, onToggle }: { club: Club; joined: boolean
           <Users size={10} /> {club.members} {club.members === 1 ? "member" : "members"}
         </span>
       </div>
+      </button>
       <button
         type="button"
         onClick={onToggle}
