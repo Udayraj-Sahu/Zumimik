@@ -1,6 +1,6 @@
 "use client";
 import { IS_MOCK } from "@/lib/platform";
-import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
+import { ClubsLive } from "@/components/clubs/clubs-live";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -162,7 +162,7 @@ function ClubCard({ club }: { club: Club }) {
 }
 
 export default function ClubsPage() {
-  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
-  if (!IS_MOCK) return <FeatureUnavailable title="Clubs" description="Clubs aren't available yet. The server doesn't support them, so no club data is shown." />;
+  // Real mode: clubs are the backend's virtual hubs (/clubs/*); never fixtures.
+  if (!IS_MOCK) return <ClubsLive />;
   return <ClubsPageContent />;
 }

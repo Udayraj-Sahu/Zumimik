@@ -15,7 +15,6 @@ function wrap(ui: ReactNode) {
 }
 
 const PAGES: Array<[string, () => Promise<{ default: () => JSX.Element }>]> = [
-  ["Clubs", () => import("@/app/(app)/dashboard/clubs/page")],
   ["Feed", () => import("@/app/(app)/dashboard/feed/page")],
   ["Duel", () => import("@/app/(app)/play/duel/page")],
   ["Class Calendar", () => import("@/app/(app)/settings/planner/page")],
