@@ -1,5 +1,6 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
+import { MathText } from "@/components/ui/math-text";
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -466,7 +467,7 @@ function SprintContent() {
         {question && (
           <div key={question.id} ref={questionRef}>
             <p className="text-[16px] font-bold leading-snug text-foreground mb-5 max-[359px]:mb-4">
-              {question.text}
+              <MathText text={question.text} />
             </p>
 
             {question.answerType === "text" ? (

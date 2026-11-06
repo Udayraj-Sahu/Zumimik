@@ -1,5 +1,6 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
+import { MathText } from "@/components/ui/math-text";
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -117,7 +118,7 @@ export default function AnalysisPage() {
                 </span>
               </div>
               <p className="mt-1.5 text-[12px] font-semibold text-foreground/80 leading-relaxed">
-                {question.text}
+                <MathText text={question.text} />
               </p>
             </div>
 
@@ -148,7 +149,7 @@ export default function AnalysisPage() {
                   <p className="flex items-center gap-1.5 text-micro font-bold uppercase tracking-[0.18em] text-primary/80 mb-2">
                     <Lightbulb size={12} /> Why the answer is correct
                   </p>
-                  <p className="text-[13px] leading-relaxed text-foreground/80">{question.explanation}</p>
+                  <p className="text-[13px] leading-relaxed text-foreground/80"><MathText text={question.explanation} /></p>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 rounded-2xl border border-dashed border-white/[0.06] backdrop-blur-xl p-4" style={{ background: GLASS_BG }}>

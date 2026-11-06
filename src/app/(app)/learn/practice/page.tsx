@@ -1,5 +1,6 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
+import { MathText } from "@/components/ui/math-text";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { ExamShell } from "@/components/exam/exam-shell";
@@ -1047,7 +1048,7 @@ export default function PracticePage() {
       >
         {question && (
           <div key={question.id} ref={questionRef}>
-            <p className="text-[16px] font-bold leading-snug text-foreground mb-5 tracking-[-0.01em]">{question.text}</p>
+            <p className="text-[16px] font-bold leading-snug text-foreground mb-5 tracking-[-0.01em]"><MathText text={question.text} /></p>
             {!question.hint && <ServerHintPanel key={question.id} templateId={question.id} disabled={revealed} />}
             {!revealed && question.hint && (
               <div className="mb-5">
