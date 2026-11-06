@@ -8,7 +8,7 @@ vi.mock("@/hooks/queries/use-plans", async () => {
   return { usePricedPlans: () => ({ ...STATIC_PRICING, cycle: (requested: "annual" | "monthly") => requested }) };
 });
 // The carousel reads live dashboard data for the "up next" slide; a non-empty
-// list keeps every Arena slide in the flow (Arena 7, Pitch 6: sponsor + 5 Pitch-only).
+// list keeps every Arena slide in the flow (Arena 10, Pitch 5).
 vi.mock("@/hooks/queries/use-dashboard", () => ({
   useDashboardData: () => ({ data: { upcoming: [{ id: "next-1" }] } }),
 }));
@@ -36,17 +36,20 @@ const slideLabels = () =>
     .filter((label): label is string => /^\d+ of \d+:/.test(label ?? ""));
 
 describe("ArenaIntro", () => {
-  it("keeps its seven slides in order", () => {
+  it("keeps its ten slides in order", () => {
     render(<ArenaIntro onClose={() => {}} />);
 
     expect(slideLabels()).toEqual([
-      "1 of 7: FIRST 3 SECONDS",
-      "2 of 7: FIRST MOVE",
-      "3 of 7: SPONSOR REEL",
-      "4 of 7: THE TRAP",
-      "5 of 7: THE STALL",
-      "6 of 7: REVIEWS",
-      "7 of 7: HOW IT WORKS",
+      "1 of 10: FIRST 3 SECONDS",
+      "2 of 10: FIGHT 1/2",
+      "3 of 10: FIGHT 2/2",
+      "4 of 10: RANK 1/2",
+      "5 of 10: RANK 2/2",
+      "6 of 10: RISE 1/2",
+      "7 of 10: RISE 2/2",
+      "8 of 10: JOIN",
+      "9 of 10: REVIEWS",
+      "10 of 10: HOW IT WORKS",
     ]);
   });
 
@@ -61,11 +64,12 @@ describe("ArenaIntro", () => {
     expect(screen.queryByText("Race your first ghost")).toBeNull();
   });
 
-  it("keeps the Arena badge and hero heading", () => {
+  it("tells its story through the Fight, Rank and Rise slides, which the Pitch flow does not have", () => {
     render(<ArenaIntro onClose={() => {}} />);
 
-    expect(screen.getByText("ARENA")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "The arena is live." })).toBeInTheDocument();
+    const labels = slideLabels().join("|");
+    for (const part of ["FIGHT 1/2", "RANK 2/2", "RISE 1/2", "JOIN"]) expect(labels).toContain(part);
+    expect(screen.queryByText("TACTICAL FOCUS")).toBeNull();
   });
 });
 
@@ -74,12 +78,11 @@ describe("PitchIntro", () => {
     render(<PitchIntro onClose={() => {}} />);
 
     expect(slideLabels()).toEqual([
-      "1 of 6: TACTICAL EFFICIENCY",
-      "2 of 6: FIRST MOVE",
-      "3 of 6: SPONSOR REEL",
-      "4 of 6: THE TRAP",
-      "5 of 6: THE STALL",
-      "6 of 6: TRIAL",
+      "1 of 5: TACTICAL EFFICIENCY",
+      "2 of 5: FIRST MOVE",
+      "3 of 5: THE TRAP",
+      "4 of 5: THE STALL",
+      "5 of 5: TRIAL",
     ]);
 
     expect(screen.getByText("Stop feeding the algorithm.")).toBeInTheDocument();
@@ -102,19 +105,16 @@ describe("PitchIntro", () => {
     expect(within(card).queryByText("9")).toBeNull();
   });
 
-  it("shows the Pitch badge and hero heading instead of the Arena ones", () => {
+  it("opens on its own hook, not the Arena one", () => {
     render(<PitchIntro onClose={() => {}} />);
 
-    expect(screen.getByText("TACTICAL FOCUS")).toBeInTheDocument();
-    expect(screen.queryByText("ARENA")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Your focus compounds." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stop feeding the algorithm.", hidden: true })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Win the first 3 seconds.", hidden: true })).toBeNull();
   });
 
-  it("renders one indicator per slide", () => {
+  it("has exactly five slides, one per label", () => {
     render(<PitchIntro onClose={() => {}} />);
 
-    expect(screen.getAllByRole("button", { name: /Go to slide/ })).toHaveLength(6);
-    expect(screen.getByRole("button", { name: /Go to slide 1 of 6/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Go to slide 6 of 6/ })).toBeInTheDocument();
+    expect(slideLabels()).toHaveLength(5);
   });
 });

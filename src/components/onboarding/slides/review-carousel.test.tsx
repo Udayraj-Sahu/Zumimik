@@ -26,7 +26,7 @@ describe("ReviewCarousel", () => {
     const { container, rerender } = render(<ReviewCarousel />);
     const wrap = container.firstElementChild as HTMLElement;
 
-    expect(wrap.style.getPropertyValue("--loop")).toBe("28s");
+    expect(wrap.style.getPropertyValue("--loop")).toBe("24s");
 
     rerender(<ReviewCarousel seconds={12} />);
     expect(wrap.style.getPropertyValue("--loop")).toBe("12s");

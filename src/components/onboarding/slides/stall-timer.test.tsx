@@ -45,7 +45,7 @@ describe("StallTimer", () => {
       "aria-pressed",
       "true",
     );
-    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "With Zuzumik" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
@@ -59,9 +59,9 @@ describe("StallTimer", () => {
     withReducedMotion();
     const { container } = render(<StallTimer />);
 
-    await userEvent.click(screen.getByRole("button", { name: "With zuzumik" }));
+    await userEvent.click(screen.getByRole("button", { name: "With Zuzumik" }));
 
-    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "With Zuzumik" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -174,7 +174,7 @@ describe("StallTimer", () => {
       vi.advanceTimersByTime(1);
     });
 
-    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "With Zuzumik" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -197,13 +197,13 @@ describe("StallTimer", () => {
     withReducedMotion();
     const { container } = render(<StallTimer />);
 
-    fireEvent.click(screen.getByRole("button", { name: "With zuzumik" }));
+    fireEvent.click(screen.getByRole("button", { name: "With Zuzumik" }));
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "With Zuzumik" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -251,7 +251,7 @@ describe("StallTimer", () => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(screen.getByRole("button", { name: "With zuzumik" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "With Zuzumik" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -260,7 +260,7 @@ describe("StallTimer", () => {
   it("survives rapid mode changes", async () => {
     const { container } = render(<StallTimer />);
 
-    await userEvent.click(screen.getByRole("button", { name: "With zuzumik" }));
+    await userEvent.click(screen.getByRole("button", { name: "With Zuzumik" }));
     await userEvent.click(screen.getByRole("button", { name: "Today" }));
 
     await waitFor(() => expect(readout(container)).toHaveTextContent("9"), {
