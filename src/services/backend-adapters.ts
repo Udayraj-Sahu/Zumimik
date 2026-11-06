@@ -129,9 +129,17 @@ export function mapDashboardEventsToNotifications(
   }));
 }
 
+/** One sub-topic of GET /api/topics?domain= (and /api/topics/{topic}/subtopics). `skills[].id` is the canonical :Skill name; both lists are empty, never absent, when the backend has no mapping. */
+export type BackendSubtopicItem = {
+  name: string;
+  slug?: string;
+  skills?: Array<{ id: string; name?: string }>;
+  reference_ids?: string[];
+};
+
 export type BackendTopicCatalogResponse = {
   /** subtopic_list: the sub-topic NAMES behind the `subtopics` count (GET /api/topics, with or without ?domain=). */
-  topics: Array<{ topic: string; problems: number; subtopics: number; subtopic_list?: string[] }>;
+  topics: Array<{ topic: string; problems: number; subtopics: number; subtopic_list?: string[]; subtopic_items?: BackendSubtopicItem[] }>;
 };
 
 export function mapBackendTopicCatalog(response: BackendTopicCatalogResponse): TopicNode[] {

@@ -148,6 +148,21 @@ describe("/learn/technique/[id] in real mode (Reference Library)", () => {
     expect(screen.queryByTestId("technique-quick-reference")).not.toBeInTheDocument();
   });
 
+  it("an id with no study card but a catalog skill of that name is the skill's own page, with Practice", async () => {
+    await renderPage(new Error("404"), [{ id: "nikhilam_sutra", label: "Nikhilam Sutra" }]);
+    expect(await screen.findByTestId("technique-skill")).toHaveTextContent("Nikhilam Sutra");
+    expect(screen.getByTestId("technique-skill-note")).toHaveTextContent("no study card");
+    expect(screen.getByTestId("technique-practice")).toHaveAttribute("href", "/learn/practice?skill=nikhilam_sutra&start=1");
+    expect(screen.queryByTestId("technique-error")).not.toBeInTheDocument();
+  });
+
+  it("a skill's URL slug finds the skill by its name", async () => {
+    const { skillSlug } = await import("@/lib/reference-ids");
+    expect(skillSlug("Fractions and Decimals")).toBe("fractions-and-decimals");
+    expect(skillSlug("Basic Operations (+, -, ×, ÷)")).toBe("basic-operations");
+    expect(skillSlug("×÷")).toBe("");
+  });
+
   it("a failed load shows 'Technique not found' with Retry", async () => {
     await renderPage(new Error("down"));
     expect(await screen.findByTestId("technique-error")).toHaveTextContent("Technique not found");

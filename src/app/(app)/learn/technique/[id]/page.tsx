@@ -1,5 +1,5 @@
 import { getAllTechniques } from "@/lib/mock/techniques";
-import { REFERENCE_PAGE_IDS_SNAPSHOT } from "@/lib/reference-ids";
+import { REFERENCE_PAGE_IDS_SNAPSHOT, hasTechniquePage, skillSlug } from "@/lib/reference-ids";
 import { ClientTechniquePage } from "./client-page";
 
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -22,9 +22,27 @@ async function fetchReferenceIds(): Promise<string[]> {
   }
 }
 
+/** The Explorer opens a technique node here with its skill id (a :Skill name, e.g. "Fractions and Decimals"), so those need a page too. */
+async function fetchSkillIds(): Promise<string[]> {
+  const base = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  if (!base) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(`${base}/api/practice/techniques?limit=500`, { signal: controller.signal });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { techniques?: Array<{ name?: unknown }> };
+    return (data.techniques ?? []).map((t) => t.name).filter((n): n is string => typeof n === "string" && hasTechniquePage(n)).map(skillSlug);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function generateStaticParams() {
-  const live = await fetchReferenceIds();
-  const ids = new Set<string>([...getAllTechniques().map((t) => t.id), ...REFERENCE_PAGE_IDS_SNAPSHOT, ...live]);
+  const [live, skills] = await Promise.all([fetchReferenceIds(), fetchSkillIds()]);
+  const ids = new Set<string>([...getAllTechniques().map((t) => t.id), ...REFERENCE_PAGE_IDS_SNAPSHOT, ...live, ...skills]);
   return [...ids].map((id) => ({ id }));
 }
 

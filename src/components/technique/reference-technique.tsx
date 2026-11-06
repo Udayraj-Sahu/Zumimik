@@ -13,6 +13,7 @@ import { useCorpusTopicNames, useReferenceCard } from "@/hooks/queries/use-explo
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
 import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 import { findCorpusTopic, findPracticeSkill, isReadyPage, type ReferenceCard, type ReferenceTechnique } from "@/services/reference";
+import { skillSlug } from "@/lib/reference-ids";
 import { parseLevel } from "@/services/practice";
 
 /**
@@ -29,8 +30,11 @@ export function ReferenceTechniquePage() {
   usePageMeta(card ? `${card.name} — Zuzumik` : "Technique — Zuzumik");
 
   // Practice needs a skill the practice catalog serves; the only link from a reference page is its name (see findPracticeSkill).
-  const catalog = useSprintTopics(undefined, !!card);
+  const catalog = useSprintTopics(undefined, !!card || isError);
   const skill = card ? findPracticeSkill(card, catalog.data?.topics ?? []) : undefined;
+  // The Explorer sends a technique node here with its skill id. When no study card has that id, the page is the skill's own page.
+  const skillId = safeDecode(params.id);
+  const ownSkill = !card ? catalog.data?.topics.find((t) => t.id === skillId || skillSlug(t.id) === skillId) : undefined;
   // No specific skill: fall back to practising the page's whole topic in the problem bank, when the corpus has a matching topic.
   const corpus = useCorpusTopicNames(!!card && !skill && catalog.isFetched);
   const bankTopic = card && !skill ? findCorpusTopic(card.topic, corpus.data ?? []) : undefined;
@@ -41,6 +45,41 @@ export function ReferenceTechniquePage() {
         <div className="mb-4 h-10 w-32 rounded-xl" style={{ background: GLASS_BG }} />
         <div className="mb-4 h-32 rounded-3xl" style={{ background: GLASS_BG }} />
         <div className="h-64 rounded-3xl" style={{ background: GLASS_BG }} />
+      </PageContainer>
+    );
+  }
+
+  if (!card && isError && catalog.isLoading) {
+    return (
+      <PageContainer className="pb-6 animate-pulse">
+        <div className="mb-4 h-32 rounded-3xl" style={{ background: GLASS_BG }} />
+      </PageContainer>
+    );
+  }
+
+  if (!card && ownSkill) {
+    return (
+      <PageContainer className="pb-6">
+        <div className="mx-auto w-full md:max-w-3xl" data-testid="technique-skill">
+          <div ref={headerRef} className="text-center">
+            <div className="pill mb-2 inline-flex items-center gap-2 px-4 py-1.5">
+              <Lightbulb size={12} className="text-primary" />
+              <span className="text-micro font-semibold tracking-[0.22em] text-primary/80">TECHNIQUE</span>
+            </div>
+            <h1 className="text-[20px] font-bold leading-tight tracking-[-0.02em] text-foreground">{ownSkill.label}</h1>
+          </div>
+          <TechniqueMasteryPanel skillId={ownSkill.id} skillLabel={ownSkill.label} />
+          <p data-testid="technique-skill-note" className="mt-6 text-center text-[13px] text-muted-foreground/60">
+            There is no study card for this technique yet. You can still practise it.
+          </p>
+          <Link
+            href={`/learn/practice?skill=${encodeURIComponent(ownSkill.id)}&start=1`}
+            data-testid="technique-practice"
+            className="mt-6 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-primary px-5 text-[13px] font-bold uppercase tracking-wider text-primary-foreground outline-none transition-transform active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Practise {ownSkill.label} <ArrowRight size={16} />
+          </Link>
+        </div>
       </PageContainer>
     );
   }
@@ -129,6 +168,10 @@ export function ReferenceTechniquePage() {
       </div>
     </PageContainer>
   );
+}
+
+function safeDecode(v: string): string {
+  try { return decodeURIComponent(v); } catch { return v; }
 }
 
 function SectionPill({ children }: { children: React.ReactNode }) {

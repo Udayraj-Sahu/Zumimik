@@ -1,18 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubjectTree, getLeafTechniques } from "@/services/explorer";
-import { getTopicMastery } from "@/services/dashboard";
 import { getCorpusTopicNames, getReferencePages, getReferenceCard, type ReferencePageSummary, type ReferenceCard } from "@/services/reference";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { IS_MOCK } from "@/lib/platform";
 import { explorerScopeKey } from "@/lib/exam-scope";
 import type { TopicNode } from "@/lib/types/technique";
-import type { Topic } from "@/lib/types/dashboard";
 
 export const explorerKeys = {
   tree: (exam?: string | null) => ["explorer", "tree", explorerScopeKey(exam, IS_MOCK)] as const,
   techniques: (exam?: string | null) => ["explorer", "techniques", explorerScopeKey(exam, IS_MOCK)] as const,
-  // The learner's mastery is not part of the topic catalog and has its own key (it is per exam: GET /dashboard/topics?domain=).
-  mastery: (exam?: string | null) => ["explorer", "mastery", exam ?? ""] as const,
 };
 
 export function useSubjectTree(domain?: string) {
@@ -32,17 +28,6 @@ export function useLeafTechniques(domain?: string) {
     queryKey: explorerKeys.techniques(activeDomain),
     queryFn: () => getLeafTechniques(activeDomain),
     enabled: !!activeDomain,
-  });
-}
-
-/** The learner's mastery for the active exam (GET /dashboard/topics?domain=). Separate from the catalog. */
-export function useExplorerMastery(domain?: string) {
-  const targetExam = useOnboardingStore((s) => s.targetExam);
-  const activeDomain = domain || targetExam;
-  return useQuery<Topic[]>({
-    queryKey: explorerKeys.mastery(activeDomain),
-    queryFn: () => getTopicMastery(activeDomain || undefined),
-    staleTime: 60 * 1000,
   });
 }
 

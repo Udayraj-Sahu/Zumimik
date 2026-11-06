@@ -50,3 +50,11 @@ export const REFERENCE_PAGE_IDS_SNAPSHOT: readonly string[] = [
   "yavadunam",
   "yavadunam_tavadunam"
 ];
+
+/**
+ * The URL segment of a skill's technique page: "Fractions and Decimals" -> "fractions-and-decimals". Skill names carry spaces, commas
+ * and colons, which break dev routing and Windows file names, so the page is addressed by this slug and the client maps it back to the
+ * skill through the practice catalog. Empty (no letters or digits) means the skill has no technique page and opens Practice instead.
+ */
+export const skillSlug = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 64);
+export const hasTechniquePage = (id: string) => skillSlug(id).length > 0;

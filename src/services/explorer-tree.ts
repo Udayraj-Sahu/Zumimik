@@ -3,7 +3,7 @@ import type { BackendTechniqueSummaryResponse, BackendTopicCatalogResponse } fro
 import { matchReferencePage, type ReferencePageSummary } from "./reference";
 
 // ── Explorer: the GLOBAL catalog as a tree ──────────────────────────────────
-// Sources (both unfiltered; neither carries an exam):
+// The "Topics" subject is listed first. Sources (both unfiltered; neither carries an exam):
 //   GET /api/practice/techniques → :Skill nodes {name, topic, sub_topic, is_root, problem_count}
 //     (`name` is the same vocabulary as /practice/catalog `skill`, so a match is a practicable skill)
 //   GET /api/topics              → problem-bank topics {topic, problems, subtopics}
@@ -103,24 +103,45 @@ export function buildGlobalExplorerTree(
   }
 
   if (topics.topics.length > 0) {
-    subjects.push({
+    subjects.unshift({
       id: EXPLORER_PROBLEM_BANK_ID,
       type: "subject",
       title: "Topics",
       slug: "topics",
       description: linkBankTopics ? "All topics and subtopics in the problem bank" : "Topics and subtopics for this exam",
-      children: topics.topics.map(({ topic, problems, subtopics, subtopic_list }) => {
+      children: topics.topics.map(({ topic, problems, subtopics, subtopic_list, subtopic_items }) => {
         // A topic opens into its sub-topics. Practice filters on the topic label only (the sub-topic is not a filter on the
         // fixed bank), so the sub-topics are display-only and a global topic gets one explicit "practise the whole topic" leaf.
         const practise: TopicNode[] = linkBankTopics
           ? [{ id: `topic:${topic}::practise`, type: "subtopic" as const, title: `Practise all ${titleOf(topic)}`, slug: slugOf(`topic-${topic}-practise`), bankTopic: topic }]
           : [];
-        const subs: TopicNode[] = (subtopic_list ?? []).map((sub) => ({
-          id: `topic:${topic}::${sub}`,
-          type: "subtopic" as const,
-          title: titleOf(sub),
-          slug: slugOf(`${topic}-${sub}`),
-        }));
+        // subtopic_items (the backend's own mapping) puts a sub-topic's techniques under it; a sub-topic it maps to nothing, or an
+        // older backend that sends only subtopic_list, stays a display-only node. Nothing is matched by name here.
+        const items = new Map((subtopic_items ?? []).map((it) => [it.name, it]));
+        const names = subtopic_list?.length ? subtopic_list : (subtopic_items ?? []).map((it) => it.name);
+        const subs: TopicNode[] = names.map((sub) => {
+          const item = items.get(sub);
+          const skills = item?.skills ?? [];
+          const refs = item?.reference_ids ?? [];
+          const node: TopicNode = {
+            id: `topic:${topic}::${sub}`,
+            type: "subtopic" as const,
+            title: titleOf(sub),
+            slug: slugOf(`${topic}-${sub}`),
+          };
+          if (skills.length > 0) {
+            node.children = skills.map((k) => ({
+              id: `topic:${topic}::${sub}::${k.id}`,
+              type: "technique" as const,
+              title: titleOf(k.name || k.id),
+              slug: slugOf(`${topic}-${sub}-${k.id}`),
+              techniqueId: k.id,
+            }));
+          } else if (refs.length === 1) {
+            node.referenceId = refs[0];
+          }
+          return node;
+        });
         return {
           id: `topic:${topic}`,
           type: "topic" as const,

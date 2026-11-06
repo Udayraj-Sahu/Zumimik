@@ -56,7 +56,7 @@ describe("Explorer with the learner's real history", () => {
   it("when the history cannot be read there are no labels, and the Explorer still works", async () => {
     localStorage.clear();
     await open(false);
-    await screen.findByTestId("mastery-panel");
+    await screen.findByText("Arithmetic");
     expect(screen.queryByTestId("mastery-state")).not.toBeInTheDocument();
   });
 });
