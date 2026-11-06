@@ -1,6 +1,28 @@
 import type { Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
 
+/**
+ * Theme colours are CSS variables holding hex values, which Tailwind cannot apply an opacity modifier to: `bg-primary/10`,
+ * `border-border/60`, `bg-destructive/10` and the like generated NO css, so tinted surfaces, rings and borders were missing (several
+ * hundred uses). `tok` returns the variable as is, and a color-mix() of it when a modifier is present.
+ *
+ * TEXT colours are left as they were (`FIXED`): `text-muted-foreground/40` and its relatives (about 600 uses) are written as very dim
+ * text. Measured across every screen and theme, honouring them takes axe colour-contrast failures from about 50 to about 380 (dark 2 to
+ * 113, light 43 to 151, study 7 to 117), so they stay inert until those labels are reviewed one by one.
+ */
+const FIXED = new Set([
+  "--foreground", "--muted-foreground", "--card-foreground", "--popover-foreground", "--primary-foreground", "--secondary-foreground",
+  "--accent-foreground", "--destructive-foreground", "--sidebar-foreground", "--sidebar-primary-foreground", "--sidebar-accent-foreground",
+  "--chrome-muted", "--chrome-hover", "--chrome-foreground",
+]);
+const tok = (name: string) =>
+  (({ opacityValue }: { opacityValue?: string }) => {
+    if (opacityValue === undefined || FIXED.has(name)) return `var(${name})`;
+    const alpha = Number.parseFloat(opacityValue);
+    if (!Number.isFinite(alpha) || alpha >= 1) return `var(${name})`;
+    return `color-mix(in srgb, var(${name}) ${Math.round(alpha * 1000) / 10}%, transparent)`;
+  }) as unknown as string; // Tailwind accepts a function here; its published type only lists strings
+
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   // The app themes via a `.dark`/`.light` class toggled by the theme store, NOT via
@@ -16,50 +38,50 @@ const config: Config = {
       },
       colors: {
         white: "rgb(var(--color-white-rgb) / <alpha-value>)",
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: "var(--card)",
-        "card-foreground": "var(--card-foreground)",
-        popover: "var(--popover)",
-        "popover-foreground": "var(--popover-foreground)",
-        primary: "var(--primary)",
-        "primary-foreground": "var(--primary-foreground)",
-        secondary: "var(--secondary)",
-        "secondary-foreground": "var(--secondary-foreground)",
-        muted: "var(--muted)",
-        "muted-foreground": "var(--muted-foreground)",
-        accent: "var(--accent)",
-        "accent-foreground": "var(--accent-foreground)",
-        destructive: "var(--destructive)",
-        "destructive-foreground": "var(--destructive-foreground)",
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
-        "chart-1": "var(--chart-1)",
-        "chart-2": "var(--chart-2)",
-        "chart-3": "var(--chart-3)",
-        "chart-4": "var(--chart-4)",
-        "chart-5": "var(--chart-5)",
-        surface: "var(--surface)",
+        background: tok("--background"),
+        foreground: tok("--foreground"),
+        card: tok("--card"),
+        "card-foreground": tok("--card-foreground"),
+        popover: tok("--popover"),
+        "popover-foreground": tok("--popover-foreground"),
+        primary: tok("--primary"),
+        "primary-foreground": tok("--primary-foreground"),
+        secondary: tok("--secondary"),
+        "secondary-foreground": tok("--secondary-foreground"),
+        muted: tok("--muted"),
+        "muted-foreground": tok("--muted-foreground"),
+        accent: tok("--accent"),
+        "accent-foreground": tok("--accent-foreground"),
+        destructive: tok("--destructive"),
+        "destructive-foreground": tok("--destructive-foreground"),
+        border: tok("--border"),
+        input: tok("--input"),
+        ring: tok("--ring"),
+        "chart-1": tok("--chart-1"),
+        "chart-2": tok("--chart-2"),
+        "chart-3": tok("--chart-3"),
+        "chart-4": tok("--chart-4"),
+        "chart-5": tok("--chart-5"),
+        surface: tok("--surface"),
         sidebar: {
-          DEFAULT: "var(--sidebar)",
-          foreground: "var(--sidebar-foreground)",
-          primary: "var(--sidebar-primary)",
-          "primary-foreground": "var(--sidebar-primary-foreground)",
-          accent: "var(--sidebar-accent)",
-          "accent-foreground": "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-border)",
-          ring: "var(--sidebar-ring)",
+          DEFAULT: tok("--sidebar"),
+          foreground: tok("--sidebar-foreground"),
+          primary: tok("--sidebar-primary"),
+          "primary-foreground": tok("--sidebar-primary-foreground"),
+          accent: tok("--sidebar-accent"),
+          "accent-foreground": tok("--sidebar-accent-foreground"),
+          border: tok("--sidebar-border"),
+          ring: tok("--sidebar-ring"),
         },
         chrome: {
-          DEFAULT: "var(--chrome)",
-          raised: "var(--chrome-raised)",
-          border: "var(--chrome-border)",
-          muted: "var(--chrome-muted)",
-          hover: "var(--chrome-hover)",
-          foreground: "var(--chrome-foreground)",
-          active: "var(--chrome-active)",
-          avatar: "var(--chrome-avatar)",
+          DEFAULT: tok("--chrome"),
+          raised: tok("--chrome-raised"),
+          border: tok("--chrome-border"),
+          muted: tok("--chrome-muted"),
+          hover: tok("--chrome-hover"),
+          foreground: tok("--chrome-foreground"),
+          active: tok("--chrome-active"),
+          avatar: tok("--chrome-avatar"),
         },
       },
       fontSize: {

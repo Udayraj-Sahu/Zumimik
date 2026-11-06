@@ -427,7 +427,7 @@ function LearnPageContent() {
                                 className="h-9 w-9 rounded-xl flex items-center justify-center"
                                 style={{ background: `${color}15` }}
                               >
-                                <Icon size={16} style={{ color }} />
+                                <Icon size={16} style={{ color: hueText(color) }} />
                               </div>
                               <h2 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">
                                 {topic.name}
@@ -436,7 +436,7 @@ function LearnPageContent() {
                             <div className="flex items-baseline gap-1">
                               <span
                                 className="text-[13px] font-bold tracking-[-0.02em]"
-                                style={{ color }}
+                                style={{ color: hueText(color) }}
                               >
                                 {topic.value}%
                               </span>

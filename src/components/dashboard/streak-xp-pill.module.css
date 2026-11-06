@@ -72,9 +72,9 @@
   background: var(--muted-foreground);
   opacity: 0.45;
 }
-.xp { color: var(--primary); transition: color 0.9s; }
+.xp { color: var(--primary-text, var(--primary)); transition: color 0.9s; }
 .gold { color: var(--amber); }
-.unit { color: var(--primary); font-weight: 500; font-size: 11px; }
+.unit { color: var(--primary-text, var(--primary)); font-weight: 500; font-size: 11px; }
 
 /* odometer columns */
 .odo {

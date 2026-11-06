@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { AMBER, AMBER_14, CTA_14, CTA_LIME, CYAN, CYAN_14, GLASS_025, GLASS_14, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14 } from "@/lib/theme";
+import { AMBER, AMBER_14, CTA_14, CTA_LIME, CYAN, CYAN_14, GLASS_025, GLASS_14, GLASS_BORDER, VIOLET_DEEP, VIOLET_DEEP_14, hueText } from "@/lib/theme";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { BookOpen, ChevronDown, Layers, Lock } from "lucide-react";
@@ -286,7 +286,7 @@ function BranchNode({
             "flex size-8 shrink-0 items-center justify-center rounded-xl",
             depth === 0 ? "bg-[var(--bg-10)]" : "",
           )}
-          style={depth === 0 ? undefined : { background: meta.softBg, color: meta.color }}
+          style={depth === 0 ? undefined : { background: meta.softBg, color: hueText(meta.color) }}
           aria-hidden
         >
           {unavailable ? (
@@ -311,7 +311,7 @@ function BranchNode({
               "block text-[9px] font-medium uppercase tracking-wider",
               depth === 0 ? "text-[var(--bg-60)]" : "",
             )}
-            style={depth === 0 ? undefined : { color: meta.color }}
+            style={depth === 0 ? undefined : { color: hueText(meta.color) }}
           >
             {meta.label}
             {hasChildren ? ` · ${node.children!.length}` : ""}

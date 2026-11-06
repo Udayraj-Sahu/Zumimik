@@ -105,6 +105,9 @@
 /* Design palette (single source of truth; mirrors src/lib/theme/theme-tokens.ts) */
 :root {
   --on-accent: #0A0C0A;
+  /* Brand text on tinted surfaces. Equal to --primary except in light mode, where --primary (#4D7C0F) is a fill colour and reads
+     3.9-4.4:1 as text on the tinted pills; --primary-text is the darker shade that clears 4.5:1. */
+  --primary-text: var(--primary);
   /* Appearance-menu swatch hues (Coral / Azure / Mint / Gold). Constant across
      themes: the selected dot is ringed with the panel's own text token, so one
      hue stays legible on light, dark and study panels alike. */
@@ -592,14 +595,15 @@
   --emerald: #047857;
   --amber: #9C5707;
   --red-soft: #B91C1C;
-  --cyan: #0E7490;
+  --cyan: #0B6178;
   --mint: #15803D;
   --fuchsia: #A21CAF;
   --violet: #6D28D9;
   --violet-deep: #5B21B6;
   --blue: #1D4ED8;
   --gold: #9C5707;
-  --orange: #C2410C;
+  --orange: #B03A0B;
+  --primary-text: #3F6212;
   --rose: #BE123C;
   --rose-pink: #BE123C;
   --bronze: #8A4B12;
@@ -1764,3 +1768,7 @@ table { width: 100%; }
 @media (max-width: 359px) { :root { --page-padding: 12px; } }
 @media (max-height: 640px) { :root { --header-height: 48px; } }
 
+
+/* Light mode: brand-coloured TEXT uses the darker shade (fills keep --primary). */
+.light .text-primary,
+.light [class*="text-primary/"] { color: var(--primary-text); }
