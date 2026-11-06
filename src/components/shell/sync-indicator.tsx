@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, CloudOff, Loader2, UploadCloud } from "lucide-react";
 import { IS_MOCK } from "@/lib/platform";
 import { useAuthStore } from "@/stores/auth-store";
@@ -15,6 +15,8 @@ const COPY: Record<SyncStatusKind, string> = {
   attention: "Needs attention",
 };
 
+const FLASH_MS = 2000;
+
 const ICON = { synced: CheckCircle2, syncing: Loader2, offline: CloudOff, pending: UploadCloud, attention: AlertTriangle } as const;
 
 /**
@@ -26,7 +28,22 @@ export function SyncIndicator() {
   const signedIn = useAuthStore((s) => !!s.user?.id);
   const { kind, counts, refresh } = useSyncStatus();
   const [open, setOpen] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const prevKind = useRef<SyncStatusKind | null>(null);
+  // Offline and Needs attention stay up until resolved. Synced, Syncing and Waiting only flash for a moment when the status
+  // changes, then hide; the first status read on load stays silent.
+  const sticky = kind === "offline" || kind === "attention";
+  useEffect(() => {
+    const first = prevKind.current === null;
+    const changed = prevKind.current !== kind;
+    prevKind.current = kind;
+    if (!changed || (first && kind === "synced")) return;
+    setFlash(true);
+    const t = setTimeout(() => setFlash(false), FLASH_MS);
+    return () => clearTimeout(t);
+  }, [kind]);
   if (IS_MOCK || !signedIn) return null;
+  const showBadge = sticky || flash || open;
   const Icon = ICON[kind];
   const waiting = counts.pendingEvents;
   const detail = [
@@ -35,7 +52,7 @@ export function SyncIndicator() {
   ].filter(Boolean).join(" · ");
   return (
     <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] left-3 z-[60] md:bottom-4" data-testid="sync-indicator" data-kind={kind}>
-      <button
+      {showBadge && <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
@@ -45,7 +62,7 @@ export function SyncIndicator() {
         <Icon size={13} className={kind === "syncing" ? "animate-spin" : kind === "attention" ? "text-[var(--amber)]" : undefined} aria-hidden />
         <span data-testid="sync-label">{COPY[kind]}</span>
         {waiting > 0 && kind !== "synced" && <span data-testid="sync-count">{waiting}</span>}
-      </button>
+      </button>}
       {open && (
         <div role="status" data-testid="sync-details" className="mt-2 w-64 rounded-2xl border border-border/60 bg-card p-3 text-[12px] text-muted-foreground shadow-lg">
           <p className="font-semibold text-foreground">{COPY[kind]}</p>

@@ -75,7 +75,7 @@ describe("the indicator", () => {
   it("goes through every status as the queue and the network change", async () => {
     await mount();
     expect(kind()).toBe("synced");
-    expect(screen.getByTestId("sync-label")).toHaveTextContent("Synced");
+    expect(screen.queryByTestId("sync-label")).not.toBeInTheDocument(); // silent when all is well on load
 
     await db.eventQueue.put(pending("p1", 4));
     await refreshNow();
@@ -117,15 +117,31 @@ describe("the indicator", () => {
 
   it("Try again sends what is waiting, and is not offered when nothing is", async () => {
     await mount();
-    fireEvent.click(screen.getByRole("button", { name: /Sync status/ }));
-    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
-    expect(screen.getByTestId("sync-details")).toHaveTextContent("saved on the server");
+    expect(screen.queryByRole("button", { name: /Sync status/ })).not.toBeInTheDocument();
 
     await db.eventQueue.put(pending("p1", 2));
     await refreshNow();
+    fireEvent.click(await screen.findByRole("button", { name: /Sync status/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     expect(syncAll).toHaveBeenCalledOnce();
     expect(await db.eventQueue.count()).toBe(1); // sending is the sync code's job; the button deletes nothing
+
+    await db.eventQueue.clear();
+    await refreshNow();
+    await waitFor(() => expect(kind()).toBe("synced"));
+    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("sync-details")).toHaveTextContent("saved on the server");
+  });
+
+  it("a status flashes for a moment when it changes, then hides; offline stays", async () => {
+    await mount();
+    await db.eventQueue.put(pending("p1", 2));
+    await refreshNow();
+    expect(await screen.findByTestId("sync-label")).toHaveTextContent("Waiting to sync");
+    await waitFor(() => expect(screen.queryByTestId("sync-label")).not.toBeInTheDocument(), { timeout: 4000 });
+    await act(async () => { useNetworkStore.setState({ isOnline: false }); });
+    await new Promise((r) => setTimeout(r, 2500));
+    expect(screen.getByTestId("sync-label")).toHaveTextContent("Offline");
   });
 
   it("says offline progress is kept on the device", async () => {
