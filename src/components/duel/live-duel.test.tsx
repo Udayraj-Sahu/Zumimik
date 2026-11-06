@@ -256,7 +256,7 @@ describe("a live duel", () => {
     expect(screen.getByTestId("duel-away")).toHaveTextContent("15 seconds");
     game.fire("match_ended", { ...ENDED, elimination_reason: "forfeit" });
     expect(screen.queryByTestId("duel-away")).not.toBeInTheDocument();
-    expect(screen.getByTestId("duel-reason")).toHaveTextContent("forfeit");
+    expect(screen.getByTestId("duel-reason")).toHaveTextContent("lost the connection"); // the loser in ENDED is the learner
   });
 
   it("sends a heartbeat every few seconds while in a match, because the server forfeits a silent player after 10 s", async () => {
