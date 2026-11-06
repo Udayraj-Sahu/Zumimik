@@ -147,7 +147,7 @@ export default function LeaderboardPage() {
           <>
             <div className="rounded-3xl border border-white/[0.06] backdrop-blur-xl divide-y divide-white/[0.06] overflow-hidden" style={{ background: GLASS_BG }}>
               {entries.map((entry, i) => (
-                <LeaderboardRow key={entry.rank} entry={entry} index={i} />
+                <LeaderboardRow key={`${entry.rank}-${i}`} entry={entry} index={i} />
               ))}
             </div>
 

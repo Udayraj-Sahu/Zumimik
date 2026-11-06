@@ -131,9 +131,9 @@ function DailyContent() {
   return (
     <PageContainer>
       <div className="mx-auto w-full space-y-4 md:max-w-xl">
-        <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+        <h1 className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-muted-foreground/60">
           <CalendarCheck size={14} aria-hidden /> Daily challenge · {index + 1} / {problems.length}
-        </div>
+        </h1>
         <GlassCard className="p-6">
           <p className="text-[16px] font-semibold leading-relaxed text-foreground" data-testid="daily-question">{current.text}</p>
           <label className="mt-4 block text-[12px] text-muted-foreground/60" htmlFor="daily-answer">Your answer</label>

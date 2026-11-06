@@ -41,8 +41,8 @@ const MATH_MODES: ModeCard[] = [
   {
     id: "fast",
     category: "MATH",
-    title: "FAST & FIRST DUELS",
-    desc: "Be the first to answer each question.",
+    title: "ACCURACY DUEL",
+    desc: "Take turns against another player. One miss ends it.",
     color: CTA_LIME,
     icon: Flame,
     badge: "2P",

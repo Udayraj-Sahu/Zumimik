@@ -68,11 +68,11 @@ export default function ProfilePage() {
         </header>
 
         <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 max-[359px]:gap-2 md:items-stretch">
-          {stats.map((s) => {
+          {stats.map((s, si) => {
             const Icon = s.label === "Sessions" ? Target : s.label === "Streak" ? Flame : Trophy;
             return (
               <div
-                key={s.label}
+                key={`${s.label}-${si}`}
                 className="relative overflow-hidden rounded-2xl border border-border/40 bg-card px-3 py-4 text-center transition-all active:scale-95 sm:p-5 max-[359px]:p-2.5"
               >
                 <Icon className="mx-auto size-3.5 text-muted-foreground/30 sm:size-4" aria-hidden="true" />
@@ -92,11 +92,11 @@ export default function ProfilePage() {
             Achievements
           </h2>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-6 max-[359px]:gap-2 md:items-stretch">
-            {achievements.map((a) => {
+            {achievements.map((a, ai) => {
               const Icon = ICON_MAP[a.icon] || Star;
               return (
                 <div
-                  key={a.label}
+                  key={`${a.label}-${ai}`}
                   className={`rounded-2xl border px-3 py-4 text-center transition-all sm:p-5 max-[359px]:p-2.5 ${
                     a.unlocked
                       ? "border-border/40 bg-card"

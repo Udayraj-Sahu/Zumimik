@@ -1,5 +1,5 @@
 import type { AchievementCategory, AchievementItem, AchievementTier } from "@/lib/types/achievements";
-import type { Friend } from "@/lib/types/friends";
+import type { Friend, SentRequest } from "@/lib/types/friends";
 import type { MockPaper } from "@/lib/types/mock-exam";
 import type { RecentActivityItem } from "@/lib/types/analytics";
 import type { TopicEdge, TopicNode } from "@/lib/types/technique";
@@ -79,7 +79,7 @@ type BackendFriend = {
 export type BackendFriendsResponse = {
   friends: BackendFriend[];
   incoming: BackendFriend[];
-  outgoing: Array<{ friendship_id: string; status: string }>;
+  outgoing: Array<{ friendship_id: string; status: string; requested_at?: string | null }>;
 };
 
 function initialsFor(name: string): string {
@@ -97,16 +97,19 @@ function mapFriend(friend: BackendFriend): Friend {
     ...(friend.friendship_id ? { friendshipId: friend.friendship_id } : {}),
     name: friend.name,
     initials: initialsFor(friend.name),
+    ...(friend.since ? { since: friend.since } : {}),
   };
 }
 
 export function mapBackendFriends(response: BackendFriendsResponse): {
   friends: Friend[];
   requests: Friend[];
+  sent: SentRequest[];
 } {
   return {
     friends: response.friends.map(mapFriend),
     requests: response.incoming.map(mapFriend),
+    sent: (response.outgoing ?? []).map((o) => ({ friendshipId: o.friendship_id, ...(o.requested_at ? { requestedAt: o.requested_at } : {}) })),
   };
 }
 

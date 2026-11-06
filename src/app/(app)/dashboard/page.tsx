@@ -64,6 +64,7 @@ const EMPTY_RADAR: { label: string; value: number }[] = [];
 const EMPTY_STATS = { accuracy: 0, questions: 0, percentile: 0, speed: 0 };
 const EMPTY_STREAK = { current: 0, xp: 0, days: [false, false, false, false, false, false, false], labels: ["M", "T", "W", "T", "F", "S", "S"] };
 const EMPTY_UPCOMING: { title: string; time: string; tag: string }[] = [];
+const EMPTY_METRICS: { label: string; value: string; icon: string }[] = [];
 const EMPTY_LEADERBOARD: { rank: number; name: string; xp: number; me?: boolean }[] = [];
 const EMPTY_RECENT: { label: string; score: string; time: string }[] = [];
 
@@ -96,7 +97,7 @@ function RadarChart({ axes, values, size = 280 }: { axes: string[]; values: numb
   const dataPath = dataPoints.map((p) => `${p.x},${p.y}`).join(" ") + ` ${dataPoints[0].x},${dataPoints[0].y}`;
 
   return (
-    <svg viewBox={`-40 -30 ${size + 80} ${size + 60}`} width="100%" height="auto" className="mx-auto block" style={{ maxWidth: size + 80 }}>
+    <svg viewBox={`-40 -30 ${size + 80} ${size + 60}`} width="100%" className="mx-auto block h-auto" style={{ maxWidth: size + 80 }}>
       <defs>
         <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={ACCENT} stopOpacity={0.3} />
@@ -292,6 +293,7 @@ export default function DashboardPage() {
   const todayIndex = (new Date().getDay() + 6) % 7;
   const goalDoneToday = streak.days[todayIndex] ?? false;
   const upcoming = data?.upcoming ?? EMPTY_UPCOMING;
+  const metrics = data?.metrics ?? EMPTY_METRICS;
   const leaderboard = data?.leaderboard ?? EMPTY_LEADERBOARD;
   const recent = data?.recent ?? EMPTY_RECENT;
 
@@ -975,22 +977,23 @@ export default function DashboardPage() {
           <GlassCard className="p-4">
             <SectionHeading className="mb-2">Cognitive radar</SectionHeading>
             <RadarChart axes={radarLabels} values={radarValues} size={220} />
-            <div className="flex flex-col gap-2 mt-2.5">
-              <div className="flex items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2">
-                <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground/55 font-normal">
-                  <Zap size={12} className="text-primary" />
-                  Action Delay
-                </span>
-                <span className="text-[12px] font-bold text-primary tracking-[-0.01em]">142ms</span>
+            {/* The learner's own numbers from GET /dashboard/metrics (0ms / 0% until they have answered something): never placeholder values. */}
+            {metrics.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2.5" data-testid="dashboard-metrics">
+                {metrics.map((m) => {
+                  const Icon = m.icon === "Zap" ? Zap : ArrowUpRight;
+                  return (
+                    <div key={m.label} className="flex items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2">
+                      <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground/55 font-normal">
+                        <Icon size={12} className="text-primary" />
+                        {m.label}
+                      </span>
+                      <span className="text-[12px] font-bold text-primary tracking-[-0.01em]">{m.value}</span>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="flex items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2">
-                <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground/55 font-normal">
-                  <ArrowUpRight size={12} className="text-primary" />
-                  Focus Density
-                </span>
-                <span className="text-[12px] font-bold text-primary tracking-[-0.01em]">89%</span>
-              </div>
-            </div>
+            )}
           </GlassCard>
         </div>
 
@@ -1033,7 +1036,7 @@ export default function DashboardPage() {
           <div className="flex flex-col">
             {leaderboard.map((l, i) => (
               <div
-                key={l.rank}
+                key={`${l.rank}-${i}`} /* ties share a rank */
                 className={cn(
                   "flex items-center justify-between py-3.5",
                   i !== leaderboard.length - 1 && "border-b border-white/[0.05]",

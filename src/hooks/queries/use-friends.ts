@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFriendsSummary, getFriendActivity, respondToFriendRequest, sendFriendRequest, removeFriend, generateFriendQr, redeemFriendQr, type FriendRequestAction } from "@/services/friends";
-import type { Friend, FriendActivity } from "@/lib/types/friends";
+import type { Friend, FriendActivity, SentRequest } from "@/lib/types/friends";
 
 type FriendsData = {
   friends: Friend[];
   activity: FriendActivity[];
   requests: Friend[];
+  sent: SentRequest[];
 };
 
 async function fetchFriendsData(): Promise<FriendsData> {

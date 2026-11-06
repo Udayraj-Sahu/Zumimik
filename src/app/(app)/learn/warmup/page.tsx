@@ -182,9 +182,9 @@ function WarmupContent() {
   return (
     <PageContainer>
       <div className="mx-auto w-full space-y-4 md:max-w-xl">
-        <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+        <h1 className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-muted-foreground/60">
           <Sparkles size={14} aria-hidden /> Quick warm-up · {Math.min(draft.attempts.length + 1, draft.questions.length)} / {draft.questions.length}
-        </div>
+        </h1>
         {current && (
           <GlassCard className="p-6">
             <p className="text-[16px] font-semibold leading-relaxed text-foreground" data-testid="warmup-question">{current.text}</p>

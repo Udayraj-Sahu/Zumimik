@@ -8,7 +8,12 @@ export type Friend = {
   streak?: number;
   lastActive?: string;
   xp?: number;
+  /** ISO time the friendship began (GET /social/friends `since`). */
+  since?: string;
 };
+
+/** A request this learner sent that has not been answered. The server gives an id, a status and a time, and no name. */
+export type SentRequest = { friendshipId: string; requestedAt?: string };
 
 export type FriendActivity = {
   id: string;

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Users, UserPlus, Swords, Zap, Award, Check, X, Camera } from "lucide-react";
+import { Users, UserPlus, Swords, Zap, Award, Check, X, Camera, Clock } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import Link from "next/link";
 import { IS_MOCK } from "@/lib/platform";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { FriendQrScanner } from "@/components/friends/friend-qr-scanner";
 import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
+
+const TABS = [
+  { id: "friends", label: "Friends" },
+  { id: "requests", label: "Requests" },
+  { id: "activity", label: "Activity" },
+] as const;
+
+const sinceLabel = (iso?: string) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+};
 
 export default function FriendsPage() {
   usePageMeta("Friends — Zuzumik");
@@ -86,6 +99,12 @@ export default function FriendsPage() {
   }, [data, tab, staggerIn]);
 
   const requestCount = data?.requests.length ?? 0;
+  const sentCount = data?.sent.length ?? 0;
+  const openAdd = () => {
+    setAddOpen(true);
+    setAddMessage(null);
+    setQrMessage(null);
+  };
 
   return (
     <PageContainer>
@@ -98,47 +117,33 @@ export default function FriendsPage() {
         <p className="text-[12px] text-muted-foreground/45 font-normal">Compete and stay motivated together</p>
       </div>
 
-      <div ref={animateSection} data-section-index="0" className="mt-5 flex gap-2 overflow-x-auto max-[359px]:gap-1.5">
-        <button
-          type="button"
-          onClick={() => setTab("friends")}
-          className={cn(
-            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
-            tab === "friends"
-              ? "bg-primary text-primary-foreground"
-              : "border border-white/[0.06] text-muted-foreground hover:text-foreground",
-            tab !== "friends" && GLASS_BG && { background: GLASS_BG }
-          )}
-          style={tab !== "friends" ? { background: GLASS_BG, borderColor: GLASS_06 } : undefined}
-        >
-          Friends
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("activity")}
-          className={cn(
-            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
-            tab === "activity"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-          style={tab !== "activity" ? { background: GLASS_BG, border: "1px solid var(--glass-06)" } : undefined}
-        >
-          Activity
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("requests")}
-          className={cn(
-            "rounded-full px-3.5 py-3 text-[10px] font-bold uppercase tracking-wide outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] max-[359px]:px-3 max-[359px]:py-2.5 whitespace-nowrap",
-            tab === "requests"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-          style={tab !== "requests" ? { background: GLASS_BG, border: "1px solid var(--glass-06)" } : undefined}
-        >
-          Requests {requestCount > 0 && <span className="ml-1 text-primary">({requestCount})</span>}
-        </button>
+      <div ref={animateSection} data-section-index="0" className="mt-5 flex items-center gap-2 max-[359px]:gap-1.5">
+        <div role="tablist" aria-label="Friends sections" className="flex min-w-0 flex-1 gap-2 overflow-x-auto max-[359px]:gap-1.5">
+          {TABS.filter((t) => t.id !== "activity" || IS_MOCK).map((t) => {
+            const count = t.id === "friends" ? data?.friends.length : t.id === "requests" ? requestCount + sentCount : undefined;
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  "min-h-[44px] whitespace-nowrap rounded-full px-4 text-[11px] font-bold uppercase tracking-wide outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring max-[359px]:px-3",
+                  active ? "bg-primary text-primary-foreground" : "border text-muted-foreground hover:text-foreground",
+                )}
+                style={active ? undefined : { background: GLASS_BG, borderColor: GLASS_06 }}
+              >
+                {t.label}
+                {!!count && <span className={cn("ml-1.5 tabular-nums", active ? "opacity-80" : "text-primary")}>{count}</span>}
+              </button>
+            );
+          })}
+        </div>
+        <Button size="md" onClick={openAdd} className="hidden shrink-0 md:inline-flex" data-testid="add-friend">
+          <UserPlus size={15} aria-hidden /> Add friend
+        </Button>
       </div>
 
       <div ref={animateSection} data-section-index="1" className="mt-4">
@@ -158,11 +163,13 @@ export default function FriendsPage() {
 
         <div ref={listRef} className="flex flex-col gap-3 max-[359px]:gap-1.5">
           {tab === "friends" && (!data || data.friends.length === 0) && (
-            <div className="py-10 text-center max-[359px]:py-8">
-              <Users size={28} className="mx-auto text-muted-foreground/20 mb-2" />
-              <p className="text-[12px] text-muted-foreground/60">No friends yet</p>
-              <p className="text-micro text-muted-foreground/40 mt-1">Compete to stand out on the leaderboard.</p>
-            </div>
+            <EmptyState
+              icon={Users}
+              title="Add your first friend"
+              description="Friends show up here. Add one by email or with a QR code, and they appear once they accept."
+              action={{ label: "Add a friend", onClick: openAdd }}
+              data-testid="friends-empty"
+            />
           )}
           {tab === "friends" && !!data?.friends.length && !IS_MOCK && (
             <p id="friend-duel-note" data-testid="friend-duel-note" className="px-1 text-[11px] text-muted-foreground/60">
@@ -187,6 +194,7 @@ export default function FriendsPage() {
                     </span>
                   )}
                 </div>
+                {sinceLabel(f.since) && <p className="mt-0.5 text-[11px] text-muted-foreground">Friends since {sinceLabel(f.since)}</p>}
                 <div className="flex items-center gap-3 mt-0.5 text-micro text-muted-foreground/40 max-[359px]:gap-2">
                   {f.xp !== undefined && (
                     <span className="flex items-center gap-1 whitespace-nowrap"><Zap size={10} /> {f.xp.toLocaleString()} XP</span>
@@ -226,11 +234,7 @@ export default function FriendsPage() {
           ))}
 
           {tab === "activity" && (!data || data.activity.length === 0) && (
-            <div className="py-10 text-center max-[359px]:py-8">
-              <Zap size={28} className="mx-auto text-muted-foreground/20 mb-2" />
-              <p className="text-[12px] text-muted-foreground/60">No recent activity</p>
-              <p className="text-micro text-muted-foreground/40 mt-1">Friend updates will appear here.</p>
-            </div>
+            <EmptyState icon={Zap} title="No recent activity" description="Friend updates will appear here." />
           )}
           {tab === "activity" && data?.activity.map((a) => {
             const friend = data.friends.find((f) => f.id === a.friendId);
@@ -255,11 +259,8 @@ export default function FriendsPage() {
           })}
 
           {tab === "requests" && (
-            data?.requests.length === 0 ? (
-              <div className="py-10 text-center max-[359px]:py-8">
-                <Users size={28} className="mx-auto text-muted-foreground/20 mb-2" />
-                <p className="text-[12px] text-muted-foreground/60">No pending requests</p>
-              </div>
+            data?.requests.length === 0 && sentCount === 0 ? (
+              <EmptyState icon={Users} title="No pending requests" description="Requests you receive or send wait here until they are answered." action={{ label: "Add a friend", onClick: openAdd }} />
             ) : (
               data?.requests.map((f) => (
                 <GlassCard
@@ -299,6 +300,25 @@ export default function FriendsPage() {
               ))
             )
           )}
+
+          {tab === "requests" && sentCount > 0 && (
+            <section aria-label="Requests you sent" className="mt-2" data-testid="sent-requests">
+              <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Sent</h2>
+              {data?.sent.map((r) => (
+                <GlassCard key={r.friendshipId} className="mb-2 flex items-center gap-3 p-3 sm:p-4">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground">
+                    <Clock size={16} aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] font-bold text-foreground/80">Request sent</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Waiting for a reply{sinceLabel(r.requestedAt) ? ` · sent ${sinceLabel(r.requestedAt)}` : ""}
+                    </p>
+                  </div>
+                </GlassCard>
+              ))}
+            </section>
+          )}
         </div>
       </div>
       </div>
@@ -306,13 +326,9 @@ export default function FriendsPage() {
       <Button
         aria-label="Add friend"
         size="icon"
-        onClick={() => {
-          setAddOpen(true);
-          setAddMessage(null);
-          setQrMessage(null);
-        }}
+        onClick={openAdd}
         aria-haspopup="dialog"
-        className="fixed right-5 bottom-20 z-40 size-14 rounded-full shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 max-[359px]:right-4"
+        className="fixed right-5 bottom-20 z-40 size-14 rounded-full shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 max-[359px]:right-4 md:hidden"
       >
         <UserPlus size={22} strokeWidth={2.5} />
       </Button>

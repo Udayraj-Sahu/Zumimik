@@ -7,6 +7,7 @@ import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { PageContainer } from "@/components/ui/page-container";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 
 export default function AnalyticsPage() {
@@ -38,6 +39,8 @@ export default function AnalyticsPage() {
   }
 
   const { stats, weekly, recent } = data;
+  // Nothing answered yet: the weekly chart and the list would be all zeros and an empty box.
+  const noData = stats.questions === 0 && recent.length === 0 && weekly.every((d) => d.pct === 0);
 
   return (
       <PageContainer>
@@ -72,6 +75,17 @@ export default function AnalyticsPage() {
             ))}
           </div>
 
+          {noData ? (
+            <GlassCard className="p-2" style={{ border: "1px solid var(--glass-06)" }} data-testid="analytics-empty">
+              <EmptyState
+                icon={TrendingUp}
+                title="Your analytics start with your first session"
+                description="Accuracy, speed and your week of activity appear here once you have answered a few questions."
+                action={{ label: "Start learning", href: "/learn" }}
+              />
+            </GlassCard>
+          ) : (
+          <>
           <GlassCard
             ref={animateSection} data-section-index={1}
             className="p-5 max-[359px]:p-4"
@@ -142,6 +156,8 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </GlassCard>
+          </>
+          )}
         </div>
         </div>
       </PageContainer>

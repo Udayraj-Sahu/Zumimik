@@ -1,16 +1,16 @@
-import type { Friend, FriendActivity } from "@/lib/types/friends";
+import type { Friend, FriendActivity, SentRequest } from "@/lib/types/friends";
 import { parseSignedPairingPayload } from "./backend-adapters";
 import { apiGet, apiPost } from "./api";
 import { mapBackendFriends, type BackendFriendsResponse } from "./backend-adapters";
 
 import { IS_MOCK } from "@/lib/platform";
 
-export async function getFriendsSummary(): Promise<{ friends: Friend[]; requests: Friend[] }> {
+export async function getFriendsSummary(): Promise<{ friends: Friend[]; requests: Friend[]; sent: SentRequest[] }> {
   if (IS_MOCK) {
     const { FRIENDS, PENDING_REQUESTS } = await import("@/lib/mock/friends");
     const { delay } = await import("@/lib/mock/delay");
     await delay(200);
-    return { friends: FRIENDS, requests: PENDING_REQUESTS };
+    return { friends: FRIENDS, requests: PENDING_REQUESTS, sent: [] };
   }
   const response = await apiGet<BackendFriendsResponse>("/social/friends");
   return mapBackendFriends(response);

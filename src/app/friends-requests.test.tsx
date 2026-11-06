@@ -34,7 +34,7 @@ async function renderPage() {
       <Page />
     </QueryClientProvider>,
   );
-  fireEvent.click(await screen.findByRole("button", { name: /Requests/ }));
+  fireEvent.click(await screen.findByRole("tab", { name: /Requests/ }));
   return { invalidate };
 }
 
@@ -111,7 +111,7 @@ describe("add and remove friends use the backend's request/remove contract", () 
 
   it("Add opens a form; an invalid email is rejected locally with no request", async () => {
     await renderFriends();
-    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /^Add friend$/ }))[0]);
     fireEvent.change(screen.getByPlaceholderText("friend@example.com"), { target: { value: "not-an-email" } });
     fireEvent.click(screen.getByRole("button", { name: "Send request" }));
     expect(await screen.findByTestId("add-friend-message")).toHaveTextContent("valid email");
@@ -121,7 +121,7 @@ describe("add and remove friends use the backend's request/remove contract", () 
   it("a valid email POSTs { email }, says only that it was sent, and refreshes the list", async () => {
     apiPost.mockResolvedValue({ friendship_id: "f-77", status: "pending" });
     const { invalidate } = await renderFriends();
-    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /^Add friend$/ }))[0]);
     fireEvent.change(screen.getByPlaceholderText("friend@example.com"), { target: { value: " grace@example.com " } });
     fireEvent.click(screen.getByRole("button", { name: "Send request" }));
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/social/friends/request", { email: "grace@example.com" }));
@@ -134,7 +134,7 @@ describe("add and remove friends use the backend's request/remove contract", () 
     const { ApiError } = await import("@/services/api");
     apiPost.mockRejectedValueOnce(new ApiError(404, "no such learner"));
     await renderFriends();
-    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /^Add friend$/ }))[0]);
     fireEvent.change(screen.getByPlaceholderText("friend@example.com"), { target: { value: "nobody@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: "Send request" }));
     expect(await screen.findByTestId("add-friend-message")).toHaveTextContent("no such learner");
@@ -179,7 +179,7 @@ describe("adding a friend with a QR code uses the backend's qr/redeem contract",
         <Page />
       </QueryClientProvider>,
     );
-    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /^Add friend$/ }))[0]);
     return { invalidate, input: screen.getByPlaceholderText("Code from their Add friend QR") };
   }
 
@@ -250,7 +250,7 @@ describe("scanning a friend's QR with the camera", () => {
         <Page />
       </QueryClientProvider>,
     );
-    fireEvent.click(await screen.findByRole("button", { name: /Add/ }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /^Add friend$/ }))[0]);
     fireEvent.click(screen.getByRole("button", { name: /Scan QR with camera/ }));
   }
 
