@@ -81,7 +81,7 @@ function messageFromErrorBody(data: unknown, status: number, statusText: string)
  */
 let refreshInFlight: Promise<string | null> | null = null;
 
-function refreshAccessToken(): Promise<string | null> {
+export function refreshAccessToken(): Promise<string | null> {
   if (refreshInFlight) return refreshInFlight;
   refreshInFlight = (async () => {
     const { refreshToken, setToken, setRefreshToken } = useAuthStore.getState();

@@ -1,6 +1,6 @@
 "use client";
 import { IS_MOCK } from "@/lib/platform";
-import { FeatureUnavailable } from "@/components/ui/feature-unavailable";
+import { LiveDuel } from "@/components/duel/live-duel";
 import { PageContainer } from "@/components/ui/page-container";
 
 import { useState, useRef, useEffect } from "react";
@@ -375,7 +375,7 @@ function DuelPageContent() {
 }
 
 export default function DuelPage() {
-  // Real mode: the backend has no such API, so show an unavailable state, never fixtures.
-  if (!IS_MOCK) return <FeatureUnavailable title="Duel" description="Duels aren't available in the app yet. The server's live duel service isn't connected, so no opponents or results are shown." />;
+  // Real mode: live matchmaking and matches over the server's sockets. Mock mode keeps the simulated opponent for development.
+  if (!IS_MOCK) return <LiveDuel />;
   return <DuelPageContent />;
 }

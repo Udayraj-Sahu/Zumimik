@@ -280,3 +280,34 @@ describe("scanning a friend's QR with the camera", () => {
     expect(apiPost).not.toHaveBeenCalled();
   });
 });
+
+describe("the Duel button on a friend", () => {
+  beforeEach(() => {
+    apiGet.mockReset();
+    apiPost.mockReset();
+    localStorage.clear();
+    apiGet.mockImplementation(async (path: string) => {
+      if (path === "/social/friends") return FRIENDS;
+      throw new Error(`unexpected GET ${path}`);
+    });
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("is unavailable and says why, because the server has no friend-duel invitation; it sends nothing", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+    const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <Page />
+      </QueryClientProvider>,
+    );
+    const duel = await screen.findByTestId("friend-duel");
+    expect(duel).toBeDisabled();
+    expect(duel).toHaveAttribute("aria-describedby", "friend-duel-note");
+    expect(screen.getByTestId("friend-duel-note")).toHaveTextContent("isn't available yet");
+    expect(screen.getByRole("link", { name: /find a match/i })).toHaveAttribute("href", "/play/duel");
+    fireEvent.click(duel);
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+});

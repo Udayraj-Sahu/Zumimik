@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Users, UserPlus, Swords, Zap, Award, Check, X, Camera } from "lucide-react";
+import Link from "next/link";
+import { IS_MOCK } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useFriends, useRespondToFriendRequest, useSendFriendRequest, useRemoveFriend, useRedeemFriendQr } from "@/hooks/queries/use-friends";
@@ -162,6 +164,11 @@ export default function FriendsPage() {
               <p className="text-micro text-muted-foreground/40 mt-1">Compete to stand out on the leaderboard.</p>
             </div>
           )}
+          {tab === "friends" && !!data?.friends.length && !IS_MOCK && (
+            <p id="friend-duel-note" data-testid="friend-duel-note" className="px-1 text-[11px] text-muted-foreground/60">
+              Challenging a friend isn&apos;t available yet. To play now, <Link href="/play/duel" className="font-semibold text-primary underline-offset-2 hover:underline">find a match against another player</Link>.
+            </p>
+          )}
           {tab === "friends" && data?.friends.map((f) => (
             <GlassCard
               key={f.id}
@@ -190,9 +197,15 @@ export default function FriendsPage() {
                   {f.lastActive && <span className="whitespace-nowrap">{f.lastActive}</span>}
                 </div>
               </div>
+              {/* Challenging a friend needs a server-side invitation (create, accept, start) that does not exist yet: the duel service
+                  only pairs strangers from its queue. So this is shown as unavailable rather than as a button that does nothing. */}
               <button
                 type="button"
-                className="flex min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-micro font-bold text-primary outline-none transition-colors hover:bg-primary/20 active:bg-primary/30 focus-visible:ring-2 focus-visible:ring-ring whitespace-nowrap"
+                disabled
+                aria-disabled="true"
+                aria-describedby="friend-duel-note"
+                data-testid="friend-duel"
+                className="flex min-h-11 cursor-not-allowed items-center gap-1 rounded-xl px-3 py-2 text-micro font-bold text-muted-foreground/40 outline-none whitespace-nowrap"
                 style={{ background: GLASS_BG }}
               >
                 <Swords size={12} /> Duel
