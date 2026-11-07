@@ -160,7 +160,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main
         tabIndex={0}
         className={cn(
-          "min-[1025px]:ml-[84px] min-[1025px]:transition-[margin-left] min-[1025px]:duration-300 min-[1025px]:ease-out h-dvh overflow-y-auto overflow-x-clip pt-[var(--sat)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] outline-none",
+          "min-[1025px]:ml-[84px] min-[1025px]:transition-[margin-left] min-[1025px]:duration-300 min-[1025px]:ease-out mt-[var(--sat)] h-[calc(100dvh-var(--sat))] overflow-y-auto overflow-x-clip pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] outline-none",
           expanded && "min-[1025px]:ml-[250px]",
           isExamFlow ? "pb-0" : "pb-[max(calc(var(--bottom-nav-height)+2rem),env(safe-area-inset-bottom))] min-[1025px]:pb-0",
         )}
