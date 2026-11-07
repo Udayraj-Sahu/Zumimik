@@ -10,6 +10,7 @@ import { useProfileData } from "@/hooks/queries/use-profile";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuthStore } from "@/stores/auth-store";
 import { saveAccountName } from "@/services/onboarding";
+import { NetworkError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { useAvatarStore, useMyAvatar } from "@/stores/avatar-store";
 import { AvatarError, resizeAvatar } from "@/lib/image/resize-avatar";
@@ -72,7 +73,13 @@ export default function EditProfilePage() {
       try {
         await saveAccountName(trimmedName);
       } catch (err) {
-        setErrorMsg(err instanceof Error ? err.message : "Couldn't save your name. Please try again.");
+        setErrorMsg(
+          err instanceof NetworkError
+            ? "Couldn't reach the server to save your name. Check your connection and try again. If it keeps happening, the server may be having a problem."
+            : err instanceof Error
+              ? err.message
+              : "Couldn't save your name. Please try again.",
+        );
         setSaving(false);
         return;
       }

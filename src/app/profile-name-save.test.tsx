@@ -99,4 +99,15 @@ describe("profile edit saves the name to the backend", () => {
     await waitFor(() => expect(useAvatarStore.getState().photos["u1"]).toBe("data:image/jpeg;base64,AAAA"));
     expect(await screen.findByTestId("avatar-image")).toHaveAttribute("src", "data:image/jpeg;base64,AAAA");
   });
+
+  it("a request that never gets an answer says so in plain words, not 'Network request failed'", async () => {
+    const { NetworkError } = await import("@/services/api");
+    apiPatch.mockRejectedValue(new NetworkError());
+    const { auth } = await renderEdit();
+    fireEvent.change(nameInput(), { target: { value: "Ada Lovelace" } });
+    fireEvent.click(screen.getByRole("button", { name: /Save Changes/ }));
+    expect(await screen.findByText(/Couldn't reach the server to save your name/)).toBeInTheDocument();
+    expect(screen.queryByText("Network request failed")).not.toBeInTheDocument();
+    expect(auth.getState().user?.name).toBe("Ada");
+  });
 });

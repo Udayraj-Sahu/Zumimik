@@ -134,6 +134,25 @@ describe("/dashboard/clubs against the backend hubs (real mode)", () => {
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/clubs/create", { name: "Pune Abacus", hub_type: "college", city: "Pune" }));
   });
 
+  it("a club can be placed where the creator stands: the device position is sent as latitude and longitude", async () => {
+    routeGet();
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: (ok: (p: unknown) => void) => ok({ coords: { latitude: 18.5204, longitude: 73.8567 } }) },
+    });
+    apiPost.mockResolvedValueOnce({ hub_id: "h9", name: "Pune Abacus", hub_type: "college", city: null, is_active: true, members: 1, your_role: "owner" });
+    await renderClubs();
+    fireEvent.click(await screen.findByRole("button", { name: "Create club" }));
+    const form = await screen.findByTestId("create-club-form");
+    fireEvent.change(form.querySelectorAll("input")[0], { target: { value: "Pune Abacus" } });
+    fireEvent.click(screen.getByTestId("create-club-location"));
+    await waitFor(() => expect(screen.getByTestId("create-club-location-note")).toHaveTextContent("placed where you are now"));
+    fireEvent.click(form.querySelector("button[type=submit]") as HTMLButtonElement);
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith("/clubs/create", { name: "Pune Abacus", hub_type: "city", latitude: 18.5204, longitude: 73.8567 }),
+    );
+  });
+
   it("opening a club shows GET /clubs/{id} and, for a member, the weekly leaderboard", async () => {
     routeGet();
     await renderClubs();

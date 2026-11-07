@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuthStore } from "@/stores/auth-store";
-import { HubCheckinCard } from "@/components/duel/hub-checkin-card";
+import { useSilentHubCheckin } from "@/hooks/use-silent-hub-checkin";
 import { useLiveDuel, type LiveDuelState } from "@/hooks/use-live-duel";
 import { questionOf, type DuelMatchEnd, type DuelPlayer, type IoFactory } from "@/services/duel-live";
 
@@ -83,7 +83,6 @@ function Intro({ onFind }: { onFind: () => void }) {
       <Button className="mt-6" fullWidth size="lg" onClick={onFind} data-testid="duel-find">
         <Swords size={16} aria-hidden /> Find a match
       </Button>
-      <HubCheckinCard />
     </section>
   );
 }
@@ -302,6 +301,7 @@ export function LiveDuel({ io }: { io?: IoFactory } = {}) {
   const router = useRouter();
   const { state, find, cancel, submit, reset, userId } = useLiveDuel(io);
   const name = useAuthStore((s) => s.user?.name ?? "");
+  const checkInQuietly = useSilentHubCheckin();
 
   return (
     <PageContainer>
@@ -318,7 +318,7 @@ export function LiveDuel({ io }: { io?: IoFactory } = {}) {
           {state.reconnecting && <p role="status" data-testid="duel-reconnecting" className="mb-3 text-center text-[12px] text-muted-foreground">Connection lost. Reconnecting…</p>}
           {state.opponentAway !== null && <p role="status" data-testid="duel-away" className="mb-3 text-center text-[12px] text-muted-foreground">Your opponent lost their connection. They have {state.opponentAway} seconds to come back.</p>}
 
-          {state.phase === "idle" && <Intro onFind={() => find()} />}
+          {state.phase === "idle" && <Intro onFind={() => { checkInQuietly(); find(); }} />}
 
           {state.phase === "searching" && <Searching wait={state.estimatedWait} onCancel={cancel} />}
 

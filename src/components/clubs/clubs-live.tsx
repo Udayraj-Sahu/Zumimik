@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Users, X } from "lucide-react";
+import { Loader2, MapPin, Plus, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PageContainer } from "@/components/ui/page-container";
@@ -13,6 +13,7 @@ import { useClubSearch, useCreateClub, useJoinClub, useLeaveClub, useMyClubs } f
 import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
 import { ClubDetailDialog } from "@/components/clubs/club-detail-dialog";
 import { HUB_TYPES, type Club, type HubType } from "@/services/clubs";
+import { getCurrentPosition, positionMessage, PositionError } from "@/services/hub-checkin";
 
 type Tab = "find" | "yours";
 type TypeFilter = "all" | HubType;
@@ -216,17 +217,35 @@ function CreateClubDialog({ open, onClose, onCreated }: { open: boolean; onClose
   const [hubType, setHubType] = useState<HubType>("city");
   const [city, setCity] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Where the club is, taken from this device when the creator asks. Without it the club cannot be checked in to.
+  const [place, setPlace] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [placeError, setPlaceError] = useState<string | null>(null);
+  const fillLocation = async () => {
+    setLocating(true);
+    setPlaceError(null);
+    try {
+      setPlace(await getCurrentPosition());
+    } catch (err) {
+      setPlace(null);
+      setPlaceError(err instanceof PositionError ? positionMessage(err.reason) : "Couldn't get your location. Try again.");
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const valid = name.trim().length >= 3 && name.trim().length <= 80;
   const submit = () => {
     if (!valid || create.isPending) return;
     setError(null);
     create.mutate(
-      { name, hub_type: hubType, city },
+      { name, hub_type: hubType, city, ...(place ?? {}) },
       {
         onSuccess: () => {
           setName("");
           setCity("");
+          setPlace(null);
+          setPlaceError(null);
           onClose();
           onCreated();
         },
@@ -285,6 +304,28 @@ function CreateClubDialog({ open, onClose, onCreated }: { open: boolean; onClose
             className="mt-2 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[13px] font-semibold text-foreground outline-none focus:border-primary/40"
           />
         </label>
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => void fillLocation()}
+            disabled={locating}
+            data-testid="create-club-location"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[12px] font-semibold text-foreground outline-none transition-colors hover:bg-white/[0.07] focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+          >
+            {locating ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <MapPin size={14} aria-hidden />}
+            {locating ? "Finding you…" : place ? "Location set. Use it again" : "Use my current location"}
+          </button>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground/55" data-testid="create-club-location-note">
+            {place
+              ? "This club will be placed where you are now, so members can check in for double XP when they stand within 20 m."
+              : "Optional. Stand at the club, then tap this so members can check in there for double XP."}
+          </p>
+          {placeError && (
+            <p role="alert" className="mt-1.5 text-[11px] text-destructive">
+              {placeError}
+            </p>
+          )}
+        </div>
         {error && (
           <p role="alert" data-testid="create-club-error" className="mt-3 text-[12px] text-destructive">
             {error}

@@ -5,7 +5,8 @@ import { duelReducer, INITIAL_DUEL } from "@/hooks/use-live-duel";
 import type { IoFactory } from "@/services/duel-live";
 
 vi.setConfig({ testTimeout: 30000 });
-vi.mock("@/components/duel/hub-checkin-card", () => ({ HubCheckinCard: () => null }));
+const checkInQuietly = vi.hoisted(() => vi.fn());
+vi.mock("@/hooks/use-silent-hub-checkin", () => ({ useSilentHubCheckin: () => checkInQuietly }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn(), back: vi.fn() }), usePathname: () => "/play/duel", useSearchParams: () => new URLSearchParams() }));
 const push = vi.fn();
 const refresh = vi.fn();
@@ -89,6 +90,14 @@ describe("a live duel", () => {
     useAuthStore.setState({ user: { id: "me", name: "A", email: "a@x.com", role: "user" } as never, token: "jwt-1", isAuthenticated: true });
   });
   afterEach(() => cleanup());
+
+  it("tapping Find a match quietly sends the location for hub check-in and still queues", async () => {
+    checkInQuietly.mockClear();
+    await mount();
+    fireEvent.click(screen.getByTestId("duel-find"));
+    expect(checkInQuietly).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("duel-searching")).toBeInTheDocument(); // nothing waited on, nothing shown for it
+  });
 
   it("queues on /lobby with the token, then plays the match on /game", async () => {
     await mount();

@@ -53,11 +53,18 @@ export async function getMyClubs(): Promise<Club[]> {
   return Array.isArray(res?.hubs) ? res.hubs : [];
 }
 
-export type CreateClubInput = { name: string; hub_type: HubType; city?: string };
+/** `latitude`/`longitude` are where the club physically is: hub check-in (double XP) matches a learner standing within 20 m of them. */
+export type CreateClubInput = { name: string; hub_type: HubType; city?: string; latitude?: number; longitude?: number };
 
 export async function createClub(input: CreateClubInput): Promise<Club> {
   const city = input.city?.trim();
-  return apiPost<Club>("/clubs/create", { name: input.name.trim(), hub_type: input.hub_type, ...(city ? { city } : {}) });
+  const hasPlace = Number.isFinite(input.latitude) && Number.isFinite(input.longitude);
+  return apiPost<Club>("/clubs/create", {
+    name: input.name.trim(),
+    hub_type: input.hub_type,
+    ...(city ? { city } : {}),
+    ...(hasPlace ? { latitude: input.latitude, longitude: input.longitude } : {}),
+  });
 }
 
 export async function joinClub(hubId: string): Promise<Club> {

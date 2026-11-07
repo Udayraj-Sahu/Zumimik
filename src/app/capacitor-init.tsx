@@ -16,6 +16,9 @@ export function CapacitorInit() {
         setPlatform(Capacitor.getPlatform() as "android" | "ios");
         document.documentElement.dataset.nativePlatform = Capacitor.getPlatform();
 
+        // Ask for location once, at start, so a duel never has to interrupt the player (used for hub check-in).
+        void import("@/services/hub-checkin").then((m) => m.requestLocationPermissionOnce());
+
         // Track SPA navigation depth for back button
         const origPush = history.pushState.bind(history);
         const origReplace = history.replaceState.bind(history);
