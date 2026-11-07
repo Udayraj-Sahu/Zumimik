@@ -11,6 +11,7 @@ import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
 import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
 import { useGenerateFriendQr } from "@/hooks/queries/use-friends";
 import { cn } from "@/lib/utils";
+import { shareBaseUrl } from "@/lib/platform/config";
 const REWARD_XP = 50;
 export function InviteCard() {
   const firstName = useOnboardingStore((s) => s.firstName);
@@ -69,7 +70,7 @@ export function InviteCard() {
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
-  const inviteLink = code ? `${origin || window.location.origin}/auth?ref=${code}` : "";
+  const inviteLink = code ? `${shareBaseUrl(origin || window.location.origin)}/auth?ref=${code}` : "";
   const shareText = `Join me on Zuzumik — use my invite code ${code} to get started: ${inviteLink}`;
   const earnedXp = friendsJoined * REWARD_XP;
   const handleCopy = async () => {
