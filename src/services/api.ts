@@ -16,8 +16,8 @@ export class ApiError extends Error {
 }
 
 export class NetworkError extends Error {
-  constructor(message = "Network request failed") {
-    super(message);
+  constructor(message = "Network request failed", options?: { cause?: unknown }) {
+    super(message, options);
     this.name = "NetworkError";
   }
 }
@@ -137,7 +137,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       if (err instanceof DOMException && err.name === "AbortError") {
         throw err;
       }
-      throw new NetworkError();
+      // fetch rejects with a bare TypeError for every cause (offline, blocked, CORS, a bad header or URL). Keep the real one.
+      console.warn("[api] request failed before a response:", restOptions.method ?? "GET", apiUrl(path), err);
+      throw new NetworkError(undefined, { cause: err });
     } finally {
       clearTimeout(timeout);
     }
