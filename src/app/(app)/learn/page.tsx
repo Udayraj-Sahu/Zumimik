@@ -666,7 +666,7 @@ function LearnPageContent() {
                 className="mt-5 px-0"
               />
 
-              {goal && <AdaptiveEngineSection />}
+              {goal && <AdaptiveEngineSection part="top" />}
 
               {justExploring && prepExams.length === 0 ? (
                 <AdaptiveDashboard domain={primaryExam} />
@@ -687,6 +687,9 @@ function LearnPageContent() {
               ) : (
                 <AdaptiveDashboard domain={primaryExam} />
               )}
+
+              {/* Personalised mix, learning progress, revision and the next step sit below Daily Budget and Your Topics. */}
+              {goal && <AdaptiveEngineSection part="bottom" />}
             </motion.div>
           )}
 
@@ -897,16 +900,15 @@ function LearnPageContent() {
                         </div>
 
                         <p className="text-micro text-muted-foreground/50 mt-3 font-normal">
-                          {paper.sections.map((s) => s.label).join(" | ")} • {paper.totalQuestions}{" "}
-                          Questions • {formatDuration(paper.durationMinutes)}
+                          {paper.totalQuestions} Questions • {formatDuration(paper.durationMinutes)}
                         </p>
 
-                        <div className="flex items-center justify-between mt-4 gap-3 max-[359px]:gap-1.5">
-                          <div className="flex min-w-0 flex-wrap gap-1.5">
+                        <div className="mt-4 flex flex-wrap items-end justify-between gap-x-3 gap-y-3 max-[359px]:gap-x-1.5">
+                          <div className="flex min-w-0 flex-1 basis-40 flex-wrap gap-1.5">
                             {paper.sections.map((s) => (
                               <span
                                 key={s.id}
-                                className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/[0.07] whitespace-nowrap"
+                                className="max-w-full rounded-2xl border border-white/[0.07] px-2 py-0.5 text-[9px] font-bold leading-snug break-words"
                                 style={{ color: hueText(paper.accent), background: `color-mix(in srgb, ${hueText(paper.accent)} 5%, transparent)` }}
                               >
                                 {s.label} · {s.questions}
@@ -926,7 +928,7 @@ function LearnPageContent() {
                               );
                             }}
                             aria-label={`Take test: ${paper.title}`}
-                            className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-cta px-4 py-2 max-[419px]:size-9 max-[419px]:p-0 whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-[var(--bg)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                            className="ml-auto shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-cta px-4 py-2 max-[419px]:size-9 max-[419px]:p-0 whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-[var(--bg)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                           >
                             <Play size={12} strokeWidth={2.5} /> <span className="max-[419px]:sr-only">Take Test</span>
                           </button>
