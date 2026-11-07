@@ -1,3 +1,4 @@
+import { useTourStore } from "@/stores/tour-store";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { safeLocalStorage } from "@/lib/platform";
@@ -146,6 +147,7 @@ export const useAuthStore = create<AuthState>()(
         });
         if (!res.ok) throw new Error(await authFailureMessage(res, "Registration failed"));
         const data = await res.json();
+        useTourStore.getState().markNewAccount(data.user?.id); // the first-run walkthrough is for new accounts only
         set({
           user: mergeUser(get().user, data.user),
           token: data.token,
@@ -157,6 +159,8 @@ export const useAuthStore = create<AuthState>()(
         const res = await authFetch(`/auth/${method}`, { idToken });
         if (!res.ok) throw new Error(await authFailureMessage(res, "Firebase auth failed"));
         const data = await res.json();
+        // Google/phone sign-in does not say whether the account is new: one that has not been onboarded yet is treated as new.
+        if (data.user && !data.user.isOnboarded) useTourStore.getState().markNewAccount(data.user.id);
         set({
           user: mergeUser(get().user, data.user),
           token: data.token,

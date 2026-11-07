@@ -20,6 +20,8 @@ import { useTemplateStore } from "@/stores/template-store";
 import { useThemeStore } from "@/stores/theme-store";
 import { useToastStore } from "@/stores/toast-store";
 import { useWalkthroughStore } from "@/stores/walkthrough-store";
+import { useTourStore } from "@/stores/tour-store";
+import { useAvatarStore } from "@/stores/avatar-store";
 
 const DAY = 86_400_000;
 const THEME_KEY = "zuzumik-theme";
@@ -28,6 +30,8 @@ const STORES_DIR = path.join(process.cwd(), "src", "stores");
 const PERSISTED_STORES = [
   useAuthStore,
   useWalkthroughStore,
+  useTourStore,
+  useAvatarStore,
   usePlanStore,
   useResumeStore,
   useSettingsStore,
@@ -565,6 +569,8 @@ describe("state management edge cases", () => {
     useReferralStore.getState().ensureCode();
     useThemeStore.getState().setTheme("light");
     useResumeStore.getState().clearSnapshot();
+    useTourStore.getState().markNewAccount("u11");
+    useAvatarStore.getState().setPhoto("u11", "data:image/jpeg;base64,AA");
 
     for (const name of persistedNamesFromHooks()) {
       const parsed = readStorage(name);
@@ -602,13 +608,14 @@ describe("state management edge cases", () => {
     const fromFiles = persistedNamesFromFiles();
     expect(fromFiles.sort()).toEqual(fromHooks.sort());
     expect(new Set(fromHooks).size).toBe(fromHooks.length);
-    expect(fromHooks.length).toBe(10);
+    expect(fromHooks.length).toBe(12);
   });
 
-  it("12b. no duplicated source of truth: reset keys mirror every persisted store except theme", async () => {
+  it("12b. no duplicated source of truth: reset keys mirror every persisted store except theme, the tour record and the profile photo", async () => {
     const fromHooks = persistedNamesFromHooks();
     const resetKeys = resetKeysFromSource();
-    const expected = fromHooks.filter((k) => k !== THEME_KEY).sort();
+    const KEEP_ON_SIGN_OUT = [THEME_KEY, "zuzumik-tour", "zuzumik-avatar"]; // device preferences and per-account records that sign-out must not wipe
+    const expected = fromHooks.filter((k) => !KEEP_ON_SIGN_OUT.includes(k)).sort();
 
     expect(resetKeys.sort()).toEqual(expected);
 

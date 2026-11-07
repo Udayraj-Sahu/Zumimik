@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { DriveStep } from "driver.js";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useWalkthroughStore } from "@/stores/walkthrough-store";
+import { useTourStore } from "@/stores/tour-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { DOMAIN_LABELS } from "@/lib/types/template";
 import { useDriver } from "@/hooks/use-driver";
@@ -72,9 +73,11 @@ function buildSteps(domainLabel: string): DriveStep[] {
 
 export function Walkthrough() {
   const pathname = usePathname();
-  const completed = useWalkthroughStore((s) => s.completed);
   const complete = useWalkthroughStore((s) => s.complete);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id);
+  // Only an account created on this device is toured, once. A returning user signing in never sees it.
+  const isNewAccount = useTourStore((s) => !!userId && s.pending.includes(userId));
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const isOnboarded = useOnboardingStore((s) => s.isOnboarded);
   const planHookSeen = useOnboardingStore((s) => s.planHookSeen);
@@ -87,8 +90,8 @@ export function Walkthrough() {
   const startedRef = useRef(false);
 
   useEffect(() => {
-    if (completed || startedRef.current || pathname !== "/dashboard") return;
-    if (!isAuthenticated) return;
+    if (startedRef.current || pathname !== "/dashboard") return;
+    if (!isAuthenticated || !isNewAccount) return;
 
     const isVedic = targetExam === "vedic-math";
     const eligibleExam = !!targetExam && !isVedic;
@@ -124,6 +127,7 @@ export function Walkthrough() {
           skipMissingElement: true,
           onDestroyed: () => {
             complete();
+            useTourStore.getState().finish(userId);
             startedRef.current = false;
           },
         },
@@ -136,9 +140,10 @@ export function Walkthrough() {
       clearTimeout(timer);
     };
   }, [
-    completed,
     pathname,
     isAuthenticated,
+    isNewAccount,
+    userId,
     isOnboarded,
     planHookSeen,
     arenaHookSeen,
