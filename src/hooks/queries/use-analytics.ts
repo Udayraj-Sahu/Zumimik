@@ -21,5 +21,8 @@ export function useAnalyticsData() {
   return useQuery<AnalyticsData>({
     queryKey: ["analytics"],
     queryFn: fetchAnalyticsData,
+    // Always re-read on open: practice, sprints and warm-ups change these numbers on the server.
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }

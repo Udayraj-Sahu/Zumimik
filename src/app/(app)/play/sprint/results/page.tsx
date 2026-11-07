@@ -74,7 +74,7 @@ function SprintResultsContent() {
         queryClient.invalidateQueries({ queryKey: ["adaptive-state", input.domain] });
       }
       // The learner model just changed: everything derived from it is read again.
-      for (const key of ["learner-view", "review-items", "adaptive-state", "mastery-history"])
+      for (const key of ["learner-view", "review-items", "adaptive-state", "mastery-history", "analytics", "dashboard", "account-summary"])
         void queryClient.invalidateQueries({ queryKey: [key] });
     },
   });

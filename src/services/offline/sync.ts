@@ -261,7 +261,7 @@ export function isPermanentRejection(error: unknown): boolean {
   return typeof status === "number" && status >= 400 && status < 500 && ![401, 408, 429].includes(status);
 }
 
-const REFRESH_KEYS = ["adaptive-state", "dashboard", "account-summary", "sprint", "profile"];
+const REFRESH_KEYS = ["adaptive-state", "dashboard", "analytics", "account-summary", "sprint", "profile"];
 
 /** Send every pending batch that belongs to the signed-in user. Acked batches are deleted; failures stay queued. */
 export function flushEventQueue(): Promise<number> {

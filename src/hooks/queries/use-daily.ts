@@ -31,7 +31,7 @@ export function useSubmitDaily() {
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ["daily-challenge"] });
       void qc.invalidateQueries({ queryKey: ["daily-leaderboard"] });
-      void qc.invalidateQueries({ queryKey: ["achievements"] });
+      for (const key of ["achievements", "dashboard", "analytics", "account-summary", "profile"]) void qc.invalidateQueries({ queryKey: [key] });
     },
   });
 }

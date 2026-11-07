@@ -140,6 +140,7 @@ function WarmupContent() {
         clearWarmupDraft(userId);
         if (record.activePath) useOnboardingStore.getState().setActivePath(record.activePath);
         void queryClient.invalidateQueries({ queryKey: ["warmup-offer"] });
+        for (const key of ["analytics", "dashboard", "account-summary"]) void queryClient.invalidateQueries({ queryKey: [key] });
         router.replace("/learn?mode=adaptive");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Couldn't save your warm-up. Try again.");

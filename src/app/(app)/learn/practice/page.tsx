@@ -287,6 +287,7 @@ export default function PracticePage() {
       for (const key of [
         "adaptive-state",
         "dashboard",
+        "analytics",
         "account-summary",
         "sprint",
         "profile",
