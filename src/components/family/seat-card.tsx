@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
+import { ChevronDown, Pause, Play, Trash2, Users } from "lucide-react";
+import { AdaptiveCard } from "@/components/adaptive/adaptive-card";
 import { cn } from "@/lib/utils";
-import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 import { useRemoveSeat, useSetSeatStatus } from "@/hooks/queries/use-family";
 import { ChildFriendsPanel } from "./child-friends-panel";
 import type { FamilySeat } from "@/lib/types/family";
@@ -16,6 +15,10 @@ const initials = (name: string) =>
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("") || "?";
+
+const CHIP = "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider";
+const ACTION =
+  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-2 text-micro font-bold outline-none transition-colors hover:bg-white/[0.05] focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 
 /** One child seat: status, suspend/resume (POST /family/sub-account/override), remove (POST /family/sub-account/remove), friends. */
 export function SeatCard({ seat }: { seat: FamilySeat }) {
@@ -31,25 +34,36 @@ export function SeatCard({ seat }: { seat: FamilySeat }) {
   const fail = (err: unknown) => setError(err instanceof Error ? err.message : "That didn't work.");
 
   return (
-    <GlassCard className="p-4 max-[359px]:p-3" data-testid={`seat-${seat.seatNumber}`}>
-      <div className="flex items-center gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-[12px] font-black text-primary">{initials(name)}</div>
+    <AdaptiveCard data-testid={`seat-${seat.seatNumber}`} className={cn(!active && "opacity-90")}>
+      <div className="flex items-center gap-3.5">
+        <div
+          aria-hidden
+          className={cn(
+            "grid size-12 shrink-0 place-items-center rounded-2xl text-[14px] font-black ring-1",
+            active ? "bg-gradient-to-br from-primary/30 to-primary/10 text-primary ring-primary/25" : "bg-white/[0.05] text-muted-foreground/60 ring-white/[0.08]",
+          )}
+        >
+          {initials(name)}
+        </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-bold text-foreground/85">{name}</p>
-          <p className="truncate text-micro text-muted-foreground/50">
+          <p className="truncate text-[15px] font-bold tracking-[-0.01em] text-foreground">{name}</p>
+          <p className="truncate text-micro text-muted-foreground/55">
             {seat.age != null ? `Age ${seat.age}` : "Age unknown"}
             {seat.email && seat.displayName ? ` · ${seat.email}` : ""}
           </p>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>{active ? "Active" : seat.status}</span>
-            {seat.kidsMode && <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Kids mode</span>}
-            <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Seat {seat.seatNumber} · {seat.discountPct}% off</span>
-          </div>
         </div>
+        <span className={cn(CHIP, "shrink-0", active ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>{active ? "Active" : seat.status}</span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {seat.kidsMode && <span className={cn(CHIP, "bg-white/[0.06] text-muted-foreground")}>Kids mode</span>}
+        <span className={cn(CHIP, "bg-white/[0.06] text-muted-foreground")}>
+          Seat {seat.seatNumber} · {seat.discountPct}% off
+        </span>
       </div>
 
       {childId && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-4 grid grid-cols-[1fr_1fr] gap-2 border-t border-white/[0.06] pt-4 sm:grid-cols-[auto_auto_1fr]">
           <button
             type="button"
             onClick={() => {
@@ -58,9 +72,9 @@ export function SeatCard({ seat }: { seat: FamilySeat }) {
             }}
             disabled={setStatus.isPending}
             aria-label={active ? `Suspend ${name}` : `Resume ${name}`}
-            className="min-h-11 rounded-xl px-3 py-2 text-micro font-bold text-foreground/80 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ background: GLASS_BG, border: `1px solid ${GLASS_BORDER}` }}
+            className={cn(ACTION, "text-foreground/80")}
           >
+            {active ? <Pause size={13} aria-hidden /> : <Play size={13} aria-hidden />}
             {active ? "Suspend" : "Resume"}
           </button>
           <button
@@ -72,8 +86,9 @@ export function SeatCard({ seat }: { seat: FamilySeat }) {
             }}
             disabled={remove.isPending}
             aria-label={confirmRemove ? `Confirm remove ${name}` : `Remove ${name}`}
-            className="min-h-11 rounded-xl px-3 py-2 text-micro font-bold text-muted-foreground outline-none hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn(ACTION, confirmRemove ? "border-destructive/40 bg-destructive/10 text-destructive" : "text-muted-foreground hover:text-destructive")}
           >
+            <Trash2 size={13} aria-hidden />
             {confirmRemove ? "Confirm remove" : "Remove seat"}
           </button>
           <button
@@ -81,19 +96,19 @@ export function SeatCard({ seat }: { seat: FamilySeat }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={`Friends of ${name}`}
-            className="ml-auto flex min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-micro font-bold text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn(ACTION, "col-span-2 text-primary sm:col-span-1 sm:justify-self-end")}
           >
-            Friends <ChevronDown size={12} className={cn("transition-transform", open && "rotate-180")} />
+            <Users size={13} aria-hidden /> Friends <ChevronDown size={12} aria-hidden className={cn("transition-transform", open && "rotate-180")} />
           </button>
         </div>
       )}
 
       {error && (
-        <p role="alert" data-testid="seat-error" className="mt-2 text-[12px] text-destructive">
+        <p role="alert" data-testid="seat-error" className="mt-3 text-[12px] text-destructive">
           {error}
         </p>
       )}
       {open && childId && <ChildFriendsPanel childUserId={childId} childName={name} />}
-    </GlassCard>
+    </AdaptiveCard>
   );
 }

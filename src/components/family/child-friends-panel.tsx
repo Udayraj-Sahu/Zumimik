@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GLASS_BG, GLASS_BORDER } from "@/lib/theme";
+import { GLASS_BORDER } from "@/lib/theme";
 import {
   useChildFriends,
   useRequestChildFriend,
@@ -60,13 +60,13 @@ export function ChildFriendsPanel({ childUserId, childName }: { childUserId: str
 
   const nothing = data.friends.length + data.awaitingYourApproval.length + data.awaitingOtherSide.length === 0;
   return (
-    <div className="mt-3 flex flex-col gap-3" data-testid="child-friends-panel">
+    <div className="mt-4 flex flex-col gap-4 border-t border-white/[0.06] pt-4" data-testid="child-friends-panel">
       {data.awaitingYourApproval.length > 0 && (
         <section aria-label={`Requests waiting for your approval for ${childName}`}>
           <p className="text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Waiting for your approval</p>
           <ul className="mt-2 flex flex-col gap-2">
             {data.awaitingYourApproval.map((f) => (
-              <li key={f.friendshipId} className="flex flex-wrap items-center gap-2 rounded-2xl border p-3" style={{ borderColor: GLASS_BORDER, background: GLASS_BG }}>
+              <li key={f.friendshipId} className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/[0.06] px-3.5 py-2.5">
                 <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/85">{f.name}</span>
                 <button type="button" aria-label={`Approve ${f.name} for ${childName}`} onClick={() => answer(f.friendshipId, "approve")} disabled={respond.isPending} className={`${SMALL_BTN} bg-primary text-primary-foreground`}>
                   <Check size={12} /> Approve
@@ -88,7 +88,7 @@ export function ChildFriendsPanel({ childUserId, childName }: { childUserId: str
           <p className="text-micro font-bold uppercase tracking-[0.14em] text-muted-foreground/50">Friends</p>
           <ul className="mt-2 flex flex-col gap-2">
             {data.friends.map((f) => (
-              <li key={f.friendshipId} className="flex items-center gap-2 rounded-2xl border p-3" style={{ borderColor: GLASS_BORDER, background: GLASS_BG }}>
+              <li key={f.friendshipId} className="flex items-center gap-2 rounded-2xl border border-white/[0.06] px-3.5 py-2.5">
                 <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/85">{f.name}</span>
                 {f.parentApproved === true && <span className="text-micro text-primary/80">Approved</span>}
                 <button
