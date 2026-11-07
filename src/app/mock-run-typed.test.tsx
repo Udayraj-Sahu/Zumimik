@@ -92,4 +92,20 @@ describe("mock exam: typed (TITA) answers", () => {
     expect(screen.getByRole("button", { name: /Submit answer and finish/ })).toBeDisabled();
     expect(screen.queryByText(/Correct|Not quite/)).not.toBeInTheDocument();
   });
+
+  it("Back and Next move between questions, and a chosen answer is still shown when you return", async () => {
+    await renderRun();
+    expect(await screen.findByText("2+2?")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-prev")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("mock-next")); // skip without answering
+    expect(await screen.findByText("What is 6 x 7?")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-finish")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("mock-prev"));
+    expect(await screen.findByText("2+2?")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("4"));
+    await screen.findByText("What is 6 x 7?", {}, { timeout: 3000 }); // answering auto-advances
+    fireEvent.click(screen.getByTestId("mock-prev"));
+    expect(await screen.findByText("2+2?")).toBeInTheDocument();
+    expect(screen.getByText("4").closest("button")).toHaveClass("text-primary"); // the earlier choice is highlighted
+  });
 });

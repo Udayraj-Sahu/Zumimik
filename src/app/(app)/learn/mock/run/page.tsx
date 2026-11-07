@@ -1,11 +1,10 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
-import { MathText } from "@/components/ui/math-text";
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
-import { ArrowLeft, Check, X, Clock, FileText, ChevronRight } from "lucide-react";
+import { ArrowLeft, Check, X, Clock, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMockPaperSession } from "@/hooks/queries/use-mock-exam";
 import { submitMock, submitMockAnswer } from "@/services/mock-exam";
@@ -22,6 +21,7 @@ import ContentFeedback from "@/components/ui/content-feedback";
 import { Button } from "@/components/ui/button";
 import { ExamShell } from "@/components/exam/exam-shell";
 import { QuestionNavigator } from "@/components/exam/question-navigator";
+import { QuestionText } from "@/components/exam/question-text";
 import { CTA_06, CTA_30, GLASS_02, GLASS_BG, GLASS_BORDER, RED_06, RED_30 } from "@/lib/theme";
 import { formatTime } from "@/lib/text";
 
@@ -236,6 +236,12 @@ function MockRunContent() {
       flush();
     };
   }, [status, buildSnapshot, saveSnapshot]);
+
+  // Moving to a question shows what was already typed for it, so Back / Next never loses or blanks an answer.
+  useEffect(() => {
+    const q = activeQuestions[currentIndex];
+    setTypedAnswer(q ? (useSprintStore.getState().answers[q.id]?.answerText ?? "") : "");
+  }, [currentIndex, activeQuestions]);
 
   const handleSelect = (optionIndex: number) => {
     if (showFeedback || status !== "active") return;
@@ -483,16 +489,29 @@ function MockRunContent() {
               </Button>
             </div>
           ) : (
-            <div className="flex justify-center gap-1.5 md:hidden">
-              {activeQuestions.map((_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "size-2 rounded-full transition-all duration-300",
-                    i === currentIndex ? "bg-primary scale-125" : i < currentIndex ? "bg-primary/40" : "bg-muted",
-                  )}
-                />
-              ))}
+            <div className="flex items-center justify-between gap-3" data-testid="mock-nav">
+              <Button
+                variant="glass"
+                onClick={() => handleJump(currentIndex - 1)}
+                disabled={currentIndex <= 0}
+                aria-label="Previous question"
+                data-testid="mock-prev"
+                className="min-h-11 gap-1 px-4"
+              >
+                <ChevronLeft size={18} /> <span className="max-[359px]:sr-only">Back</span>
+              </Button>
+              <span className="text-micro font-bold uppercase tracking-widest text-muted-foreground/50 whitespace-nowrap md:hidden">
+                {currentIndex + 1} / {activeQuestions.length}
+              </span>
+              {isLast ? (
+                <Button onClick={() => void finishMock()} aria-label="Finish and submit the exam" data-testid="mock-finish" className="min-h-11 gap-1 px-4">
+                  Finish <Check size={16} />
+                </Button>
+              ) : (
+                <Button onClick={() => handleJump(currentIndex + 1)} aria-label="Next question" data-testid="mock-next" className="min-h-11 gap-1 px-4">
+                  <span className="max-[359px]:sr-only">Next</span> <ChevronRight size={18} />
+                </Button>
+              )}
             </div>
           )
         }
@@ -517,9 +536,7 @@ function MockRunContent() {
         )}
         {question && (
           <div key={question.id} ref={questionRef}>
-            <p className="text-[16px] font-bold leading-snug text-foreground mb-5 max-[359px]:mb-4">
-              <MathText text={question.text} />
-            </p>
+            <QuestionText text={question.text} />
 
             {question.answerType === "text" && question.serverGraded && (
               <form
@@ -548,7 +565,8 @@ function MockRunContent() {
             )}
             <div className="flex flex-col gap-2.5 max-[359px]:gap-2">
               {question.options.map((option, i) => {
-                const isSelected = selectedIndex === i;
+                const chosenIndex = selectedIndex ?? (answers[question.id]?.selectedIndex ?? -1);
+                const isSelected = chosenIndex === i;
                 const isCorrect = !question.serverGraded && i === question.correctIndex;
                 let variantStyles: React.CSSProperties = { backgroundColor: GLASS_BG, borderColor: GLASS_BORDER };
                 let variantClass = "border backdrop-blur-xl text-foreground hover:bg-white/[0.06] active:bg-white/[0.06]" as string;
