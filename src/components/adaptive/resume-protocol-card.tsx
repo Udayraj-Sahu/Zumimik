@@ -36,8 +36,12 @@ export function ResumeProtocolCard({
   const accentSecondary = shade(accent, -20);
   const { data: plan } = useTodayPlan(domain);
 
+  // A snapshot with every question answered is a finished session, never one to resume.
+  const unfinished =
+    !!snapshot && snapshot.questions.some((q) => snapshot.answers[q.id] === undefined);
   const visibleSnapshot =
     snapshot &&
+    unfinished &&
     (!domain || !snapshot.domain || snapshot.domain === domain) &&
     (!kind || snapshot.kind === kind)
       ? snapshot

@@ -74,9 +74,11 @@ function SprintContent() {
   const feedbackRef = useRef<HTMLDivElement>(null);
   const totalTimeRef = useRef(0);
   const initializedRef = useRef(false);
+  /** Set once the session is finished: nothing may save a resume snapshot after that (the unmount flush would bring the card back). */
+  const finishedRef = useRef(false);
 
   const buildSnapshot = useCallback((): ResumeSnapshot | null => {
-    if (activeQuestions.length === 0) return null;
+    if (activeQuestions.length === 0 || finishedRef.current) return null;
     const s = useSprintStore.getState();
     return {
       kind: "sprint",
@@ -114,6 +116,7 @@ function SprintContent() {
 
   const finishSprint = useCallback(() => {
     if (activeQuestions.length > 0) {
+      finishedRef.current = true;
       feedback.complete();
       useSprintStore.getState().setPsychometricEvents(wellbeingEvents());
       completeSprint({

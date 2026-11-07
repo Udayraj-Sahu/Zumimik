@@ -70,7 +70,10 @@ function MockRunContent() {
   const totalTimeRef = useRef(0);
   const initializedRef = useRef(false);
 
+  /** Set once the exam is submitted: nothing may save a resume snapshot after that (the unmount flush would bring the card back). */
+  const finishedRef = useRef(false);
   const buildSnapshot = useCallback((): ResumeSnapshot | null => {
+    if (finishedRef.current) return null;
     if (activeQuestions.length === 0) return null;
     const s = useSprintStore.getState();
     return {
@@ -133,6 +136,7 @@ function MockRunContent() {
             return [{ question_id: q.id, answer, time_ms: Math.round(entry.timeSpent * 1000) }];
           }),
         });
+        finishedRef.current = true;
         feedback.complete();
         completeSprint(meta);
         useSprintStore.setState({ lastResult: result });
@@ -145,6 +149,7 @@ function MockRunContent() {
       }
       return;
     }
+    finishedRef.current = true;
     feedback.complete();
     completeSprint(meta);
     clearSnapshot();
