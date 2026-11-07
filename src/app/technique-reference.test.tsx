@@ -44,7 +44,6 @@ const CARD = {
 
 async function renderPage(card: unknown, skills: Array<{ id: string; label: string }> = [], corpus: string[] = []) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   catalog.mockReturnValue({ data: { topics: skills }, isFetched: true });
   apiGet.mockImplementation(async (path: string) => {
     if (path === "/api/subtopics/nikhilam_sutra/reference") {
@@ -182,7 +181,6 @@ describe("/learn/technique/[id] static params", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ pages: [{ subtopic_id: "brand_new_page" }, { subtopic_id: "bad id!" }] }), { status: 200 })));
     const { generateStaticParams } = await import("@/app/(app)/learn/technique/[id]/page");
     const ids = (await generateStaticParams()).map((p) => p.id);
-    expect(ids).toContain("work-rate"); // bundled lesson
     expect(ids).toContain("nikhilam_sutra"); // snapshot
     expect(ids).toContain("brand_new_page"); // live
     expect(ids).not.toContain("bad id!");
@@ -196,7 +194,6 @@ describe("/learn/technique/[id] static params", () => {
     const { generateStaticParams } = await import("@/app/(app)/learn/technique/[id]/page");
     const ids = (await generateStaticParams()).map((p) => p.id);
     expect(ids).toContain("nikhilam_sutra");
-    expect(ids).toContain("work-rate");
   });
 });
 

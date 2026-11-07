@@ -20,7 +20,6 @@ type Server = { states: Record<string, unknown>; posts: Array<{ path: string; bo
 
 async function boot(server: Server) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const apiGet = vi.fn(async (path: string) => {
     if (path === "/practice/mastery") {
       if (server.masteryFails) throw new Error("mastery unavailable");
@@ -37,7 +36,6 @@ async function boot(server: Server) {
     throw new Error("unexpected POST " + path);
   });
   vi.doMock("@/services/api", async (orig) => ({ ...(await orig<object>()), apiGet, apiPost }));
-  vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage, apiUrl: (p: string) => p }));
   vi.doMock("@/providers/query-provider", () => ({ queryClient: { invalidateQueries: vi.fn() } }));
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "A", email: "a@x.com", role: "user" } as never, token: "t", isAuthenticated: true });

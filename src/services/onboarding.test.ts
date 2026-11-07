@@ -22,7 +22,6 @@ const EMPTY_USER = {
 
 async function load() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   localStorage.clear();
   const svc = await import("@/services/onboarding");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
@@ -87,14 +86,6 @@ describe("saveOnboardingProfile", () => {
   it("makes no request when there is nothing to save", async () => {
     const { svc } = await load();
     await svc.saveOnboardingProfile({ firstName: "", triggers: [] });
-    expect(apiPatch).not.toHaveBeenCalled();
-  });
-
-  it("explicit mock mode stays local: no request", async () => {
-    vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "true");
-    const svc = await import("@/services/onboarding");
-    await svc.saveOnboardingProfile({ firstName: "Ada", isOnboarded: true });
     expect(apiPatch).not.toHaveBeenCalled();
   });
 });

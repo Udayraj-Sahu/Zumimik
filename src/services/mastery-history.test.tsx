@@ -57,7 +57,6 @@ describe("the mastery timeline kept on this device", () => {
   it("is recorded by the real session pipeline, once per session, and not for a technique that did not change", async () => {
     vi.resetModules();
     localStorage.clear();
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     let held = freshState("Held");
     for (let i = 0; i < 30; i++) held = processAttempt(held, { correct: true, timeSpentSeconds: 3, targetTimeSeconds: 10, problemId: `h${i}`, at: NOW - DAY + i });
     apiGet.mockImplementation(async (path: string) => {
@@ -109,7 +108,6 @@ describe("the lesson page's progress panel", () => {
   afterEach(() => cleanup());
 
   async function open(states: Record<string, TechniqueState>, readable = true) {
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     apiGet.mockImplementation(async (path: string) => {
       if (path === "/practice/mastery") {
         if (!readable) throw new Error("offline");

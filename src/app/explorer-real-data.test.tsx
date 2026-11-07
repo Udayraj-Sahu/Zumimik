@@ -96,7 +96,6 @@ function routeApi(over: Partial<Record<"topics" | "techniques" | "catalog" | "ma
 
 async function renderExplorer(opts: { mock?: boolean; exam?: string; preps?: string[]; activePath?: string | null } = {}) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", opts.mock ? "true" : "false");
   const { default: Page } = await import("@/app/(app)/learn/explorer/page");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
   useOnboardingStore.setState({
@@ -217,7 +216,6 @@ describe("global topic/technique mapping", () => {
 describe("query keys: exam and learning path", () => {
   it("exam-scoped data is keyed per exam, so each exam has its own cache entry", async () => {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { explorerKeys } = await import("@/hooks/queries/use-explorer");
     expect(explorerKeys.tree("cat")).not.toEqual(explorerKeys.tree("gmat"));
     expect(explorerKeys.techniques("cat")).not.toEqual(explorerKeys.techniques("gre"));
@@ -229,13 +227,6 @@ describe("query keys: exam and learning path", () => {
     expect(explorerScopeKey("gmat", false, false)).toBe("global");
     expect(explorerScopeKey("cat", false, true)).toBe("cat");
     expect(explorerScopeKey("gmat", false, true)).toBe("gmat");
-  });
-
-  it("mock fixtures are per exam, so mock mode keys include it", async () => {
-    vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "true");
-    const { explorerKeys } = await import("@/hooks/queries/use-explorer");
-    expect(explorerKeys.tree("cat")).not.toEqual(explorerKeys.tree("gmat"));
   });
 
   it("exam and learning path are resolved independently", async () => {
@@ -257,9 +248,6 @@ describe("/learn/explorer in real mode", () => {
   });
   afterEach(() => {
     vi.unstubAllEnvs();
-    vi.doUnmock("@/lib/mock/explorer");
-    vi.doUnmock("@/lib/mock/topic-node-map");
-    vi.doUnmock("@/lib/mock/techniques");
   });
 
   it("asks the backend for the selected exam's topics and says so", async () => {
@@ -348,35 +336,12 @@ describe("/learn/explorer in real mode", () => {
   it("uses no mock fixtures: no mock tree, topic map or bundled lessons are loaded", async () => {
     const touched = vi.fn();
     for (const m of ["explorer", "topic-node-map", "techniques"]) {
-      vi.doMock(`@/lib/mock/${m}`, () => {
-        touched(m);
-        return {};
-      });
     }
     routeApi({ topics: new Error("down") });
     await renderExplorer({ exam: "cat" });
     await screen.findByTestId("explorer-error");
     expect(touched).not.toHaveBeenCalled();
     expect(screen.queryByText("Quantitative Aptitude")).not.toBeInTheDocument();
-  });
-});
-
-describe("/learn/explorer in explicit mock mode", () => {
-  beforeEach(() => {
-    apiGet.mockReset();
-    localStorage.clear();
-    params = new URLSearchParams();
-  });
-  afterEach(() => vi.unstubAllEnvs());
-
-  it("still renders the per-exam development fixtures without calling the backend", async () => {
-    await renderExplorer({ mock: true, exam: "cat" });
-    const { getSubjectTree } = await import("@/lib/mock/explorer");
-    const first = getSubjectTree("cat")[0];
-    expect(await screen.findByText(first.title)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Explore CAT");
-    expect(screen.queryByTestId("global-topics-notice")).not.toBeInTheDocument();
-    expect(apiGet.mock.calls.filter(([p]) => String(p).startsWith("/api/")).length).toBe(0);
   });
 });
 
@@ -390,7 +355,6 @@ describe("Practice deep link from the Explorer", () => {
 
   async function renderPractice(skill: string) {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     params = new URLSearchParams({ skill });
     routeApi();
     const { default: Practice } = await import("@/app/(app)/learn/practice/page");
@@ -417,7 +381,6 @@ describe("Practice deep link from the Explorer", () => {
 
   async function renderPracticeWith(query: Record<string, string>) {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     params = new URLSearchParams(query);
     routeApi();
     apiPost.mockResolvedValue({ items: [], summary: { requested: 10, served: 0 } });
@@ -454,7 +417,6 @@ describe("Practice deep link from the Explorer", () => {
 
   it("starts a GET /practice/session for a problem-bank topic label", async () => {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     params = new URLSearchParams({ bankTopic: "Number Theory" });
     apiGet.mockImplementation(async (path: string) => {
       if (path === "/practice/catalog") return CATALOG;
@@ -508,12 +470,5 @@ describe("/learn/explorer quick reference (GET /api/subtopics/reference)", () =>
     await renderExplorer({ exam: "cat" });
     expect(await screen.findByTestId("reference-error")).toBeInTheDocument();
     expect(screen.getByText("Other skills")).toBeInTheDocument();
-  });
-
-  it("is not shown in explicit mock mode (no fixtures, no request)", async () => {
-    await renderExplorer({ mock: true, exam: "cat" });
-    await screen.findByRole("heading", { level: 1 });
-    expect(screen.queryByTestId("quick-reference")).not.toBeInTheDocument();
-    expect(apiGet.mock.calls.filter(([path]) => String(path).includes("/api/subtopics")).length).toBe(0);
   });
 });

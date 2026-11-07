@@ -50,7 +50,6 @@ class FakeApiError extends Error {
 
 async function setup(mock = false, signedIn = false) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { default: PracticePage } = await import("@/app/(app)/learn/practice/page");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
   if (signedIn) {
@@ -99,7 +98,6 @@ describe("/learn/practice against the backend (real mode)", () => {
   });
   afterEach(() => {
     vi.unstubAllEnvs();
-    vi.doUnmock("@/lib/mock/sprint-session");
   });
 
   describe("catalog", () => {
@@ -177,10 +175,6 @@ describe("/learn/practice against the backend (real mode)", () => {
 
     it("an unauthorized or server error shows the error with Retry — never a fake session", async () => {
       const mockFixture = vi.fn();
-      vi.doMock("@/lib/mock/sprint-session", () => {
-        mockFixture();
-        return { generateSprintSession: () => ({ questions: [] }) };
-      });
       routeApi();
       const { ApiError } = await setup();
       apiPost.mockImplementation(async (path: string) => {
@@ -284,28 +278,5 @@ describe("/learn/practice against the backend (real mode)", () => {
       expect(sends.length).toBe(2);
       expect(sends[1].events.map((e) => e.event_id)).toEqual(sends[0].events.map((e) => e.event_id));
     });
-  });
-});
-
-describe("/learn/practice in explicit mock mode", () => {
-  beforeEach(() => {
-    apiGet.mockReset();
-    apiPost.mockReset();
-    localStorage.clear();
-  });
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    vi.doUnmock("@/lib/mock/sprint-session");
-  });
-
-  it("still runs from the development fixtures without calling the backend", async () => {
-    await setup(true);
-    const { getTopicsByDomain } = await import("@/lib/mock/sprint");
-    const first = getTopicsByDomain("cat")[0];
-    fireEvent.click(await screen.findByRole("button", { name: `Select ${first.label}` }));
-    fireEvent.click(screen.getByRole("button", { name: /Start Practice/ }));
-    await waitFor(() => expect(screen.getByText(/Practice\s*·/)).toBeInTheDocument(), { timeout: 4000 });
-    expect(apiGet).not.toHaveBeenCalled();
-    expect(apiPost).not.toHaveBeenCalled();
   });
 });

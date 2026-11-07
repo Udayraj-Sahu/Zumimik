@@ -50,7 +50,6 @@ function route(decision: unknown, flags: Record<string, unknown> = { ad_engine: 
 
 async function mount(which: "banner" | "interstitial") {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "a@x.com", role: "user" }, isAuthenticated: true });
   const { AdBanner } = await import("@/components/ads/ad-banner");

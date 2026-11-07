@@ -11,7 +11,6 @@ class FakeApiError extends Error {
 }
 
 vi.mock("./api", () => ({ apiGet: (...a: unknown[]) => apiGet(...a), apiPost: (...a: unknown[]) => apiPost(...a), ApiError: FakeApiError }));
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false }));
 
 const UNIT = { unit_id: "house_referral", title: "Bring a study partner", body: "…", cta_label: "Invite a friend", cta_route: "/dashboard/referral" };
 const imp = (n: number) => ({ token: `t${n}`, unit_id: "house_referral", placement: "dashboard_banner" as const, screen: "dashboard", shown_at: 1000 + n, duration_ms: 5000 });

@@ -32,7 +32,6 @@ function fluidSnapshot() {
 
 async function boot(items: Array<ReturnType<typeof item>>) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   apiGet.mockImplementation(async (path: string) => {
     if (path === "/practice/mastery") return fluidSnapshot();
     if (path === "/practice/catalog") return { skills: [{ skill: SKILL, servable: 20, feeds_mastery: 20, by_difficulty: {}, generated: 0, parents: [] }] };

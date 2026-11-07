@@ -28,7 +28,6 @@ describe("ghost runs with the live backend", () => {
     apiPost.mockReset();
     push.mockReset();
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   });
   afterEach(() => vi.unstubAllEnvs());
 

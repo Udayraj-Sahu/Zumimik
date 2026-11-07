@@ -57,9 +57,7 @@ function makeServer(initial: Record<string, TechniqueState>) {
 
 async function boot(initial: Record<string, TechniqueState>, existing?: ReturnType<typeof makeServer>) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const fake = existing ?? makeServer(initial);
-  vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage, apiUrl: (p: string) => p }));
   vi.doMock("@/services/api", async (orig) => ({ ...(await orig<object>()), apiGet: fake.apiGet, apiPost: fake.apiPost }));
   vi.doMock("@/providers/query-provider", () => ({ queryClient: { invalidateQueries: vi.fn() } }));
   const telemetry = await import("@/services/telemetry");

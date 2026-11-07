@@ -20,7 +20,6 @@ function signIn(id = "u1") {
 }
 
 beforeEach(async () => {
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   apiPost.mockReset();
   localStorage.clear();
   useNetworkStore.getState().clearQueue();

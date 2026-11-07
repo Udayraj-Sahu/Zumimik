@@ -25,7 +25,6 @@ describe("Settings shows backend data, not fabricated account data", () => {
     localStorage.clear();
     summary.mockReset();
     subscription.mockReset();
-    vi.doMock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: false }));
     const { useAuthStore } = await import("@/stores/auth-store");
     useAuthStore.setState({
       user: { id: "u1", name: "Ada Lovelace", email: "a@x.com", role: "user", tier: "pro" },

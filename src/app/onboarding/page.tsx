@@ -1,41 +1,33 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { CYAN, LIME_BRIGHT, PURPLE, YELLOW } from "@/lib/theme";
 import gsap from "gsap";
-import { Globe, Mail, Smartphone, Zap, Target, Trophy } from "lucide-react";
+import { Mail, Zap, Target, Trophy } from "lucide-react";
 import { ZuzumikMark } from "@/components/brand/zuzumik-mark";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWelcomeStore } from "@/stores/welcome-store";
 import { useRouter } from "next/navigation";
 import { ZuzumikWordmark } from "@/components/brand/zuzumik-wordmark";
 import { AuthModal } from "@/components/auth/auth-modal";
-import { IS_MOCK } from "@/lib/platform";
-
 const FEATURES = [
   { icon: Zap, label: "Speed Drills", color: LIME_BRIGHT },
   { icon: Target, label: "Smart Sprints", color: CYAN },
   { icon: Trophy, label: "Live Rankings", color: YELLOW },
 ];
-
 export default function OnboardingPage() {
   const authLogin = useAuthStore((s) => s.login);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
   const [showAuth, setShowAuth] = useState(false);
-
   const heroRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLDivElement>(null);
   const taglineRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (isAuthenticated) return;
-
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
     tl.fromTo(
       brandRef.current,
       { opacity: 0, y: -20, scale: 0.9 },
@@ -59,30 +51,20 @@ export default function OnboardingPage() {
         { opacity: 1, y: 0, duration: 0.2, stagger: 0.04 },
         "-=0.1",
       )
-      .fromTo(
-        footerRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.2 },
-        "-=0.1",
-      );
-
-    return () => { tl.kill(); };
+      .fromTo(footerRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2 }, "-=0.1");
+    return () => {
+      tl.kill();
+    };
   }, [isAuthenticated]);
-
   useEffect(() => {
     if (isAuthenticated) router.replace("/dashboard");
   }, [isAuthenticated, router]);
-
   if (isAuthenticated) return null;
-
   const handleLogin = (method: "google" | "phone") => {
-    if (!IS_MOCK) {
-      setShowAuth(true);
-      return;
-    }
+    setShowAuth(true);
+    return;
 
     const name = method === "google" ? "Google User" : "Phone User";
-
     gsap.to(buttonsRef.current, {
       opacity: 0,
       y: 10,
@@ -95,7 +77,6 @@ export default function OnboardingPage() {
       },
     });
   };
-
   return (
     <main className="relative flex h-dvh flex-col items-center justify-between bg-background overflow-hidden max-w-5xl mx-auto">
       {/* Background ambient glow */}
@@ -115,9 +96,15 @@ export default function OnboardingPage() {
       </div>
 
       {/* Hero */}
-      <div ref={heroRef} className="relative flex flex-1 flex-col items-center justify-center px-6 max-[359px]:px-4 w-full">
+      <div
+        ref={heroRef}
+        className="relative flex flex-1 flex-col items-center justify-center px-6 max-[359px]:px-4 w-full"
+      >
         {/* Brand */}
-        <div ref={brandRef} className="flex flex-col items-center gap-4 mb-8 max-[359px]:gap-3 max-[359px]:mb-6">
+        <div
+          ref={brandRef}
+          className="flex flex-col items-center gap-4 mb-8 max-[359px]:gap-3 max-[359px]:mb-6"
+        >
           <div className="relative">
             <ZuzumikMark className="size-16" />
             <div className="absolute -inset-2 rounded-3xl bg-primary/5 blur-xl" />
@@ -141,15 +128,16 @@ export default function OnboardingPage() {
           <p className="text-sm leading-relaxed text-muted-foreground/70">
             Not a coaching app.
             <br />
-            <span className="text-foreground/90 font-semibold">
-              A competitive battlefield
-            </span>{" "}
+            <span className="text-foreground/90 font-semibold">A competitive battlefield</span>{" "}
             where India&apos;s sharpest minds fight, rank, and rise.
           </p>
         </div>
 
         {/* Feature pills */}
-        <div ref={featuresRef} className="flex flex-wrap items-center justify-center gap-3 mb-12 max-[359px]:gap-2 max-[359px]:mb-10">
+        <div
+          ref={featuresRef}
+          className="flex flex-wrap items-center justify-center gap-3 mb-12 max-[359px]:gap-2 max-[359px]:mb-10"
+        >
           {FEATURES.map((f) => {
             const Icon = f.icon;
             return (
@@ -177,29 +165,20 @@ export default function OnboardingPage() {
             className="group flex items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm font-bold text-foreground outline-none transition-all hover:border-primary/30 hover:bg-accent/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring md:flex-1 max-[359px]:gap-2.5 max-[359px]:px-4 max-[359px]:py-3.5"
           >
             <span className="grid size-8 place-items-center rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-              {IS_MOCK ? <Globe size={16} className="text-foreground/80" /> : <Mail size={16} className="text-foreground/80" />}
+              {<Mail size={16} className="text-foreground/80" />}
             </span>
-            {IS_MOCK ? "Continue with Google" : "Continue with email"}
+            {"Continue with email"}
           </button>
-          {IS_MOCK && (
-            <button
-              type="button"
-              onClick={() => handleLogin("phone")}
-              className="group flex items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm font-bold text-foreground outline-none transition-all hover:border-primary/30 hover:bg-accent/30 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring md:flex-1 max-[359px]:gap-2.5 max-[359px]:px-4 max-[359px]:py-3.5"
-            >
-              <span className="grid size-8 place-items-center rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-                <Smartphone size={16} className="text-foreground/80" />
-              </span>
-              Continue with Phone
-            </button>
-          )}
         </div>
       </div>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
 
       {/* Footer */}
-      <div ref={footerRef} className="relative pb-8 max-[359px]:pb-6 max-[359px]:pt-3 pt-4 text-center px-6 max-[359px]:px-4">
+      <div
+        ref={footerRef}
+        className="relative pb-8 max-[359px]:pb-6 max-[359px]:pt-3 pt-4 text-center px-6 max-[359px]:px-4"
+      >
         <p className="text-[11px] text-muted-foreground/40 leading-relaxed">
           By continuing, you agree to our{" "}
           <span className="text-muted-foreground/60 font-medium">Terms of Service</span>

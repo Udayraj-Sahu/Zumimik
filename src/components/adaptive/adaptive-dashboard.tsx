@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { CYAN, EMERALD, GLASS_BG, GLASS_BORDER, ROSE, VIOLET_PURPLE, YELLOW } from "@/lib/theme";
 import { useAccentHex } from "@/hooks/use-accent-hex";
@@ -26,7 +25,6 @@ import {
 } from "lucide-react";
 import { useAdaptiveState, useTodayPlan } from "@/hooks/queries/use-adaptive";
 import { useAccountSummary, type AccountSummary } from "@/hooks/queries/use-account-summary";
-import { IS_MOCK } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { resolveJourneyProfile } from "@/lib/adaptive/modes";
@@ -37,14 +35,18 @@ import type {
   MockRecommendation,
   AdaptiveDomainState,
 } from "@/lib/types/adaptive";
-
 const TEMPORAL_LABELS: Record<string, string> = {
   this_year: "This Year",
   whenever: "Flexible",
   not_sure: "Exploring",
 };
-
-const TOPIC_ICONS: Record<string, { icon: typeof Grid3x3; color: string }> = {
+const TOPIC_ICONS: Record<
+  string,
+  {
+    icon: typeof Grid3x3;
+    color: string;
+  }
+> = {
   "Problem Solving": { icon: Calculator, color: EMERALD },
   "Data Sufficiency": { icon: ListChecks, color: CYAN },
   "Sentence Correction": { icon: BookOpen, color: VIOLET_PURPLE },
@@ -64,11 +66,9 @@ const TOPIC_ICONS: Record<string, { icon: typeof Grid3x3; color: string }> = {
   "Vedic Multiplication": { icon: Zap, color: YELLOW },
   "Squares & Bases": { icon: Pentagon, color: VIOLET_PURPLE },
 };
-
 function sprintHref(rec: PracticeRecommendation, domain: string): string {
   return `/play/sprint?topic=${encodeURIComponent(rec.topicId)}&length=${rec.length}&difficulty=${encodeURIComponent(rec.difficulty)}&adaptive=1&domain=${encodeURIComponent(domain)}`;
 }
-
 function CircularGauge({
   percent,
   accent,
@@ -76,11 +76,14 @@ function CircularGauge({
 }: {
   percent: number;
   accent: string;
-  segments?: { id: string; color: string; mastery: number }[];
+  segments?: {
+    id: string;
+    color: string;
+    mastery: number;
+  }[];
 }) {
   const r = 54;
   const c = 2 * Math.PI * r;
-
   const arcPoint = (deg: number) => {
     const a = ((deg - 90) * Math.PI) / 180;
     return { x: 60 + r * Math.cos(a), y: 60 + r * Math.sin(a) };
@@ -91,11 +94,16 @@ function CircularGauge({
     const large = to - from > 180 ? 1 : 0;
     return `M ${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`;
   };
-
   return (
     <div className="relative size-[120px] shrink-0">
       <svg width="120" height="120" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r={r} fill="none" style={{ stroke: GLASS_BORDER, strokeWidth: 8 }} />
+        <circle
+          cx="60"
+          cy="60"
+          r={r}
+          fill="none"
+          style={{ stroke: GLASS_BORDER, strokeWidth: 8 }}
+        />
         {segments && segments.length > 0 ? (
           (() => {
             const n = segments.length;
@@ -150,7 +158,6 @@ function CircularGauge({
     </div>
   );
 }
-
 type VariantCtx = {
   /** Real /dashboard/* numbers. null in explicit mock mode, where the fixture state supplies them. */
   live: AccountSummary | null;
@@ -170,9 +177,7 @@ type VariantCtx = {
   startHref: string;
   daysRemaining: number | null;
 };
-
 /* ── Mode-specific blocks ── */
-
 function ModeHeader({
   profile,
   temporalLabel,
@@ -240,7 +245,6 @@ function ModeHeader({
     </div>
   );
 }
-
 function CardHeader({
   children,
   accent,
@@ -262,7 +266,6 @@ function CardHeader({
     </div>
   );
 }
-
 function ExamReadyBlock({ ctx }: { ctx: VariantCtx }) {
   const mission = [
     ...(ctx.weak
@@ -297,10 +300,7 @@ function ExamReadyBlock({ ctx }: { ctx: VariantCtx }) {
       : []),
   ];
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Today&apos;s Mission</CardHeader>
       <div className="mt-3.5 flex flex-col gap-3">
         {mission.length === 0 && (
@@ -354,15 +354,11 @@ function ExamReadyBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function GapCloserBlock({ ctx }: { ctx: VariantCtx }) {
   const gap = 100 - ctx.overall;
   const gaps = [...ctx.topics].sort((a, b) => a.mastery - b.mastery).slice(0, 3);
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader
         accent={ctx.profile.accent}
         action={
@@ -417,20 +413,15 @@ function GapCloserBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 const DISCOVERY_PHASES = [
   { t: "Build Foundation", d: "Core concepts, no pressure" },
   { t: "Discover Weak Areas", d: "See where you need reps" },
   { t: "Develop Consistency", d: "Daily check-ins add up" },
   { t: "Track Your Readiness", d: "Watch the gauge climb" },
 ];
-
 function DiscoveryBlock({ ctx }: { ctx: VariantCtx }) {
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Current Focus</CardHeader>
       <p className="mt-3.5 mb-4 text-[12px] text-muted-foreground/55">
         Your exam date isn&apos;t fixed yet — that&apos;s okay. We&apos;ll build your skills while
@@ -455,15 +446,11 @@ function DiscoveryBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function GuidedLearningBlock({ ctx }: { ctx: VariantCtx }) {
   const weak = ctx.topics[0];
   const next = ctx.topics[1] ?? weak;
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Today&apos;s Lesson</CardHeader>
       <div className="mt-3.5 flex flex-col gap-2">
         {ctx.topics.slice(0, 3).map((t, i) => (
@@ -510,7 +497,6 @@ function GuidedLearningBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
   const accuracy = ctx.live ? (ctx.live.accuracy ?? 0) : (ctx.data?.lastSession?.accuracy ?? 0);
   // Real mode: measured average seconds/question from /dashboard/stats, or unknown. Never a made-up default.
@@ -529,10 +515,7 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
   const target = avgSec === null ? null : Math.max(4, avgSec - 1.5);
   const weak = ctx.topics[0];
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Speed Training</CardHeader>
       <div className="mt-3.5 grid grid-cols-2 gap-2.5">
         <div className="rounded-2xl border border-white/[0.06] p-3.5">
@@ -541,7 +524,9 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
           </p>
           <p className="mt-1.5 text-[22px] font-black tracking-tight text-foreground leading-none">
             {avgSec ?? "--"}
-            {avgSec !== null && <span className="text-[12px] font-bold text-muted-foreground/50"> sec/q</span>}
+            {avgSec !== null && (
+              <span className="text-[12px] font-bold text-muted-foreground/50"> sec/q</span>
+            )}
           </p>
         </div>
         <div className="rounded-2xl border border-white/[0.06] p-3.5">
@@ -550,7 +535,10 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
           </p>
           <p className="mt-1.5 text-[22px] font-black tracking-tight text-foreground leading-none">
             {accuracy > 0 ? `${accuracy}%` : "--"}
-            <span className="text-[12px] font-bold text-muted-foreground/50"> {ctx.live ? "overall" : "last"}</span>
+            <span className="text-[12px] font-bold text-muted-foreground/50">
+              {" "}
+              {ctx.live ? "overall" : "last"}
+            </span>
           </p>
         </div>
       </div>
@@ -571,21 +559,20 @@ function SpeedTrainingBlock({ ctx }: { ctx: VariantCtx }) {
             )}
           </div>
           <p className="mt-1.5 text-[12px] text-foreground/70">
-            {(ctx.practice?.length ?? ctx.weak?.length) ? `${ctx.practice?.length ?? ctx.weak?.length} calculations · ` : ""}focus: {weak.name}
+            {(ctx.practice?.length ?? ctx.weak?.length)
+              ? `${ctx.practice?.length ?? ctx.weak?.length} calculations · `
+              : ""}
+            focus: {weak.name}
           </p>
         </div>
       )}
     </div>
   );
 }
-
 function PerformanceBlock({ ctx }: { ctx: VariantCtx }) {
   const weak = ctx.topics[0];
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Competitive Exam Mode</CardHeader>
       <div className="mt-3.5 flex items-center gap-5">
         <CircularGauge percent={ctx.overall} accent={ctx.profile.accent} />
@@ -628,7 +615,6 @@ function PerformanceBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function BrainGymBlock({ ctx }: { ctx: VariantCtx }) {
   const score = Math.round(ctx.overall * 0.9);
   const pb = Math.max(score, 91);
@@ -639,10 +625,7 @@ function BrainGymBlock({ ctx }: { ctx: VariantCtx }) {
     { t: "Memory Challenge", d: "5 min" },
   ];
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader accent={ctx.profile.accent}>Today&apos;s Mental Workout</CardHeader>
       <div className="mt-3.5 grid grid-cols-2 gap-2.5">
         <div className="rounded-2xl border border-white/[0.06] p-3.5">
@@ -679,9 +662,7 @@ function BrainGymBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 /* ── Shared blocks ── */
-
 function StatsBlock({ ctx }: { ctx: VariantCtx }) {
   return (
     <div
@@ -715,8 +696,13 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
             >
               <Grid3x3 size={12} style={{ color: ctx.profile.accent }} />
             </div>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">Topics Mastered</span>
-            <span className="ml-auto shrink-0 text-[13px] font-bold" style={{ color: ctx.profile.accent }}>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">
+              Topics Mastered
+            </span>
+            <span
+              className="ml-auto shrink-0 text-[13px] font-bold"
+              style={{ color: ctx.profile.accent }}
+            >
               {ctx.mastered}/{ctx.topics.length}
             </span>
           </div>
@@ -727,9 +713,18 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
             >
               <Flame size={12} style={{ color: ctx.profile.accent }} />
             </div>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">Daily Streak</span>
-            <span className="ml-auto shrink-0 text-[13px] font-bold" style={{ color: ctx.profile.accent }}>
-              {ctx.live ? (ctx.live.streakDays == null ? "--" : `${ctx.live.streakDays} days`) : `${ctx.bestStreak} days`}
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">
+              Daily Streak
+            </span>
+            <span
+              className="ml-auto shrink-0 text-[13px] font-bold"
+              style={{ color: ctx.profile.accent }}
+            >
+              {ctx.live
+                ? ctx.live.streakDays == null
+                  ? "--"
+                  : `${ctx.live.streakDays} days`
+                : `${ctx.bestStreak} days`}
             </span>
           </div>
           <div className="flex min-w-0 items-center gap-2.5">
@@ -739,8 +734,13 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
             >
               <Clock size={12} style={{ color: ctx.profile.accent }} />
             </div>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">Time Spent</span>
-            <span className="ml-auto shrink-0 text-[13px] font-bold" style={{ color: ctx.profile.accent }}>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground/80">
+              Time Spent
+            </span>
+            <span
+              className="ml-auto shrink-0 text-[13px] font-bold"
+              style={{ color: ctx.profile.accent }}
+            >
               {ctx.live && !(ctx.data.totalTimeSpent ?? 0) ? "--" : `${ctx.hours}h`}
             </span>
           </div>
@@ -782,15 +782,11 @@ function StatsBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function TimeBudgetBlock({ ctx }: { ctx: VariantCtx }) {
   if (ctx.timeBudget.length === 0) return null;
   const total = ctx.timeBudget.reduce((s, b) => s + b.minutes, 0);
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <div className="flex items-center justify-between">
         <p
           className="text-[9px] font-semibold tracking-[0.18em] uppercase"
@@ -838,14 +834,10 @@ function TimeBudgetBlock({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 function TopicMasteryList({ ctx }: { ctx: VariantCtx }) {
   const mastered = ctx.topics.filter((t) => t.mastery >= 80).length;
   return (
-    <div
-      className="rounded-3xl border backdrop-blur-xl p-5"
-      style={{ borderColor: GLASS_BORDER }}
-    >
+    <div className="rounded-3xl border backdrop-blur-xl p-5" style={{ borderColor: GLASS_BORDER }}>
       <CardHeader
         accent={ctx.profile.accent}
         action={
@@ -905,9 +897,7 @@ function TopicMasteryList({ ctx }: { ctx: VariantCtx }) {
     </div>
   );
 }
-
 /* ── Root dispatcher ── */
-
 export function AdaptiveDashboard({ domain }: { domain: string }) {
   const router = useRouter();
   const accent = useAccentHex();
@@ -919,11 +909,17 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
   const examDates = useOnboardingStore((s) => s.examDates);
   const { data } = useAdaptiveState(domain);
   const { data: liveSummary } = useAccountSummary();
-  const live: AccountSummary | null = IS_MOCK ? null : (liveSummary ?? { streakDays: null, xp: null, questions: null, rank: null, accuracy: null, speed: null, percentile: null });
+  const live: AccountSummary | null = liveSummary ?? {
+    streakDays: null,
+    xp: null,
+    questions: null,
+    rank: null,
+    accuracy: null,
+    speed: null,
+    percentile: null,
+  };
   const plan = useTodayPlan(domain).data;
-
   const temporalLabel = temporalWindow ? (TEMPORAL_LABELS[temporalWindow] ?? "") : "";
-
   const profile: JourneyProfile = {
     ...resolveJourneyProfile({
       domain,
@@ -934,7 +930,6 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
     }),
     accent,
   };
-
   const daysRemaining = (() => {
     const raw = examDates[domain];
     if (!raw) return null;
@@ -942,7 +937,6 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
     if (Number.isNaN(parsed.getTime())) return null;
     return Math.max(0, Math.ceil((parsed.getTime() - Date.now()) / 86400000));
   })();
-
   if (!data) {
     return (
       <div
@@ -955,20 +949,17 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
       </div>
     );
   }
-
   const topics = data.topics;
   const mastered = topics.filter((t) => t.mastery >= 80).length;
   const overall =
     topics.length > 0 ? Math.round(topics.reduce((s, t) => s + t.mastery, 0) / topics.length) : 0;
   const bestStreak = topics.reduce((m, t) => Math.max(m, t.bestStreak), 0);
   const hours = Math.max(0, Math.round((data.totalTimeSpent ?? 0) / 3600));
-
   const weak = plan?.weakTopic ?? null;
   const practice = plan?.practice ?? null;
   const mock = plan?.mock ?? null;
   const startRec = weak ?? practice;
   const startHref = startRec ? sprintHref(startRec, domain) : "/play/configure-sprint";
-
   const ctx: VariantCtx = {
     live,
     domain,
@@ -987,7 +978,6 @@ export function AdaptiveDashboard({ domain }: { domain: string }) {
     startHref,
     daysRemaining,
   };
-
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
       {/* Left column — mission + daily work */}

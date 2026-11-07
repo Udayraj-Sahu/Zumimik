@@ -9,7 +9,7 @@ import {
   STUDENT_REVIEW_RATING,
   STUDENT_REVIEWS,
   type StudentReview,
-} from "@/lib/mock/reviews";
+} from "@/lib/content/reviews";
 
 const REVIEWS = STUDENT_REVIEWS;
 

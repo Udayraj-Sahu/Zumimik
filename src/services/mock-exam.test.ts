@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiGet, apiPost } from "./api";
 
 vi.mock("./api", () => ({ apiGet: vi.fn(), apiPost: vi.fn() }));
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false }));
 
 const get = vi.mocked(apiGet);
 const post = vi.mocked(apiPost);

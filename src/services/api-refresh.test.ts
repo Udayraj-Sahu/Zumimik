@@ -8,7 +8,6 @@ const json = (status: number, body: unknown) =>
 
 async function setup(opts: { refresh: (n: number) => Response | Promise<Response> }) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   localStorage.clear();
   resetAppState.mockClear();
   const { useAuthStore } = await import("@/stores/auth-store");

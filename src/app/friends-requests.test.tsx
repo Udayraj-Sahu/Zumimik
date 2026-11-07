@@ -25,7 +25,6 @@ const FRIENDS = {
 
 async function renderPage() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -97,7 +96,6 @@ describe("add and remove friends use the backend's request/remove contract", () 
 
   async function renderFriends() {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -170,7 +168,6 @@ describe("adding a friend with a QR code uses the backend's qr/redeem contract",
 
   async function openCodeForm() {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -243,7 +240,6 @@ describe("scanning a friend's QR with the camera", () => {
   async function openScanner(getUserMedia: unknown) {
     Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia } });
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -295,7 +291,6 @@ describe("the Duel button on a friend", () => {
 
   it("is unavailable and says why, because the server has no friend-duel invitation; it sends nothing", async () => {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const { default: Page } = await import("@/app/(app)/dashboard/friends/page");
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>

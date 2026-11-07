@@ -21,7 +21,6 @@ function snapshot() {
 
 async function open(masteryReadable: boolean) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   apiGet.mockImplementation(async (path: string) => {
     if (path.startsWith("/api/topics")) return { topics: [] };
     if (path.startsWith("/api/practice/techniques")) return { techniques: [

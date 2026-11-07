@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 
 import TrialTimeline from "@/components/onboarding/slides/trial-timeline";
-import { STUDENT_REVIEWS } from "@/lib/mock/reviews";
+import { STUDENT_REVIEWS } from "@/lib/content/reviews";
 
 const timeline = () => screen.getByRole("list", { name: "How the free trial works" });
 const stepItems = () => within(timeline()).getAllByRole("listitem");

@@ -5,7 +5,6 @@ import path from "node:path";
 
 import { resetAppState } from "@/lib/platform";
 import { db } from "@/services/offline/db";
-import { useAdaptiveStore } from "@/stores/adaptive-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useHabitStore } from "@/stores/habit-store";
 import { useNetworkStore } from "@/stores/network-store";
@@ -32,7 +31,6 @@ const PERSISTED_STORES = [
   usePlanStore,
   useResumeStore,
   useSettingsStore,
-  useAdaptiveStore,
   useHabitStore,
   useReferralStore,
   useOnboardingStore,
@@ -95,9 +93,7 @@ function wipeStoresInMemory(): void {
   usePlanStore.getState().reset();
   useRateStore.getState().reset();
   useWalkthroughStore.getState().reset();
-  useResumeStore.getState().reset();
-  useAdaptiveStore.getState().reset();
-  useReferralStore.getState().reset();
+  useResumeStore.getState().reset();  useReferralStore.getState().reset();
   useOnboardingStore.getState().reset();
   useHabitStore.getState().reset();
   useThemeStore.getState().reset();
@@ -135,10 +131,6 @@ function walkthroughData() {
 
 function resumeData() {
   return { snapshot: useResumeStore.getState().snapshot };
-}
-
-function adaptiveData() {
-  return { states: useAdaptiveStore.getState().states };
 }
 
 function referralData() {
@@ -224,7 +216,6 @@ const BASELINE = {
   rate: rateData(),
   walkthrough: walkthroughData(),
   resume: resumeData(),
-  adaptive: adaptiveData(),
   referral: referralData(),
   onboarding: onboardingData(),
   habit: habitData(),
@@ -270,7 +261,6 @@ describe("state management edge cases", () => {
     expect(rateData()).toEqual(BASELINE.rate);
     expect(walkthroughData()).toEqual(BASELINE.walkthrough);
     expect(resumeData()).toEqual(BASELINE.resume);
-    expect(adaptiveData()).toEqual(BASELINE.adaptive);
     expect(referralData()).toEqual(BASELINE.referral);
     expect(onboardingData()).toEqual(BASELINE.onboarding);
     expect(habitData()).toEqual(BASELINE.habit);
@@ -318,7 +308,6 @@ describe("state management edge cases", () => {
     useOnboardingStore.getState().finishOnboarding();
     useHabitStore.getState().toggleLog("h1", "2026-09-01");
     useReferralStore.getState().ensureCode("Alice Chen");
-    useAdaptiveStore.getState().ensureState("Quant");
     useThemeStore.getState().setTheme("light");
 
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
@@ -335,7 +324,6 @@ describe("state management edge cases", () => {
       useHabitStore.getState().logs.length,
     );
     expect(readStorage("zuzumik-referral")?.state.code).toMatch(/^ALIC-/);
-    expect(readStorage("zuzumik-adaptive")?.state.states).toHaveProperty("Quant");
     expect(readStorage(THEME_KEY)?.state.theme).toBe("light");
   });
 
@@ -362,10 +350,6 @@ describe("state management edge cases", () => {
     useResumeStore.getState().clearSnapshot();
     useResumeStore.getState().reset();
     expect(resumeData()).toEqual(BASELINE.resume);
-
-    useAdaptiveStore.getState().ensureState("Quant");
-    useAdaptiveStore.getState().reset();
-    expect(adaptiveData()).toEqual(BASELINE.adaptive);
 
     useReferralStore.getState().ensureCode();
     useReferralStore.getState().markInvited();
@@ -579,7 +563,6 @@ describe("state management edge cases", () => {
     useOnboardingStore.getState().finishOnboarding();
     useHabitStore.getState().toggleLog("h1", "2026-09-01");
     useReferralStore.getState().ensureCode();
-    useAdaptiveStore.getState().ensureState("Quant");
     useThemeStore.getState().setTheme("light");
     useResumeStore.getState().clearSnapshot();
 
@@ -619,7 +602,7 @@ describe("state management edge cases", () => {
     const fromFiles = persistedNamesFromFiles();
     expect(fromFiles.sort()).toEqual(fromHooks.sort());
     expect(new Set(fromHooks).size).toBe(fromHooks.length);
-    expect(fromHooks.length).toBe(11);
+    expect(fromHooks.length).toBe(10);
   });
 
   it("12b. no duplicated source of truth: reset keys mirror every persisted store except theme", async () => {
@@ -659,7 +642,6 @@ describe("state management edge cases", () => {
     useOnboardingStore.getState().finishOnboarding();
     useHabitStore.getState().removeHabit("h1");
     useReferralStore.getState().ensureCode();
-    useAdaptiveStore.getState().ensureState("Quant");
     useNetworkStore.getState().setOnline(false);
     usePaywallStore.getState().openPaywall("mock");
     useToastStore.getState().push("error", "boom");
@@ -683,7 +665,6 @@ describe("state management edge cases", () => {
     expect(onboardingData()).toEqual(BASELINE.onboarding);
     expect(habitData()).toEqual(BASELINE.habit);
     expect(referralData()).toEqual(BASELINE.referral);
-    expect(adaptiveData()).toEqual(BASELINE.adaptive);
     expect(networkData()).toEqual(BASELINE.network);
     expect(paywallData()).toEqual(BASELINE.paywall);
     expect(sprintData()).toEqual(BASELINE.sprint);

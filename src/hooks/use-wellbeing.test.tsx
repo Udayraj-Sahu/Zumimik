@@ -7,8 +7,6 @@ vi.setConfig({ testTimeout: 60000 });
 
 const T0 = Date.UTC(2026, 10, 6, 12, 0, 0);
 const MIN = 60_000;
-
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
 vi.mock("@/services/learner", () => {
   let s = freshState("S");
   for (let i = 0; i < 30; i++) s = processAttempt(s, { correct: true, timeSpentSeconds: 3, targetTimeSeconds: 20, problemId: `old${i}`, at: T0 - 2 * 86_400_000 + i * 1000 });

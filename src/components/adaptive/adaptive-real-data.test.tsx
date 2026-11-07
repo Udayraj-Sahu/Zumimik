@@ -26,7 +26,6 @@ const STATE = {
 
 async function renderDashboard(mock: boolean) {
   vi.resetModules();
-  vi.doMock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: mock }));
   const { AdaptiveDashboard } = await import("./adaptive-dashboard");
   return render(<AdaptiveDashboard domain="cat" />);
 }

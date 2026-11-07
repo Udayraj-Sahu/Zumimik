@@ -12,7 +12,6 @@ const EVENTS = [attempt("e1"), attempt("e2"), attempt("e3"), { event_id: "e4", e
 const REJECTED = { accepted: 3, duplicates: 0, rejected: [{ event_id: "e2", index: 1, reason: "client_timestamp: Input should be greater than or equal to 0" }] };
 
 beforeEach(async () => {
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   apiPost.mockReset();
   localStorage.clear();
   await db.eventQueue.clear();

@@ -12,7 +12,6 @@ const EVENTS = [{ event_id: "e1", event_type: "session_end", client_timestamp: D
 
 describe("the device id sent with every sync", () => {
   beforeEach(async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     apiPost.mockReset().mockResolvedValue({ accepted: 1, rejected: [] });
     localStorage.clear();
     await db.eventQueue.clear();

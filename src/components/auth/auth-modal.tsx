@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { X } from "lucide-react";
@@ -9,13 +8,10 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { hydrateOnboardingFromUser, refreshProfileFromServer } from "@/services/onboarding";
 import { useRouter } from "next/navigation";
-import { IS_MOCK } from "@/lib/platform";
 import { redeemPendingReferral } from "@/services/referral";
-
 type AuthModalProps = {
   onClose: () => void;
 };
-
 export function AuthModal({ onClose }: AuthModalProps) {
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -24,23 +20,30 @@ export function AuthModal({ onClose }: AuthModalProps) {
   const setAuthData = useOnboardingStore((s) => s.setAuthData);
   const authLogin = useAuthStore((s) => s.login);
   const authRegister = useAuthStore((s) => s.register);
-  const authLoginMockUser = useAuthStore((s) => s.loginMockUser);
   const authLoginWithFirebase = useAuthStore((s) => s.loginWithFirebase);
-
   useEffect(() => {
     if (overlayRef.current && dialogRef.current) {
-      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" });
-      gsap.fromTo(dialogRef.current, { opacity: 0, scale: 0.95, y: 8 }, { opacity: 1, scale: 1, y: 0, duration: 0.25, ease: "power2.out" });
+      gsap.fromTo(
+        overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power2.out" },
+      );
+      gsap.fromTo(
+        dialogRef.current,
+        { opacity: 0, scale: 0.95, y: 8 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.25, ease: "power2.out" },
+      );
     }
     closeBtnRef.current?.focus();
   }, []);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      onClose();
-    }
-  }, [onClose]);
-
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    },
+    [onClose],
+  );
   const handleAuthSuccess = async (data: AuthSuccessData) => {
     if (data.authMethod === "email") {
       if (data.intent === "register") {
@@ -61,25 +64,19 @@ export function AuthModal({ onClose }: AuthModalProps) {
       hydrateOnboardingFromUser(useAuthStore.getState().user, { authoritative: true });
       try {
         await refreshProfileFromServer({ authoritative: true });
-      } catch {
-        /* offline or transient: keep what the login response gave us */
-      }
+      } catch {}
     } else {
       setAuthData(data);
       if (data.idToken) {
         await authLoginWithFirebase(data.idToken, data.authMethod);
-      } else if (IS_MOCK) {
-        await authLoginMockUser({
-          name: data.name ?? "User",
-          ...(data.phone ? { phone: data.phone } : {}),
-        });
       } else {
-        throw new Error("Google and phone sign-in are not configured for this backend. Use email instead.");
+        throw new Error(
+          "Google and phone sign-in are not configured for this backend. Use email instead.",
+        );
       }
     }
     router.push("/dashboard");
   };
-
   return (
     <div
       ref={overlayRef}
@@ -98,7 +95,12 @@ export function AuthModal({ onClose }: AuthModalProps) {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <ZuzumikMark className="size-7" />
-            <span id="auth-modal-title" className="text-fluid-sm font-bold tracking-wider text-foreground">ZUZUMIK</span>
+            <span
+              id="auth-modal-title"
+              className="text-fluid-sm font-bold tracking-wider text-foreground"
+            >
+              ZUZUMIK
+            </span>
           </div>
           <button
             ref={closeBtnRef}

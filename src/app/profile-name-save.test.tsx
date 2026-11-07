@@ -20,7 +20,6 @@ vi.mock("next/navigation", () => ({
 
 async function renderEdit() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "ada@example.com", role: "user" }, token: "t", isAuthenticated: true });
   const { default: Page } = await import("@/app/(app)/settings/profile/edit/page");

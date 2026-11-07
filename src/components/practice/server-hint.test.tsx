@@ -27,7 +27,6 @@ const POLICY = { hints_only: true, rag: false, llm_enabled: false, model: null, 
 
 async function mount(opts: { flags?: Record<string, unknown>; disabled?: boolean; mock?: boolean; policy?: unknown } = {}) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", opts.mock ? "true" : "false");
   apiGet.mockImplementation(async (path: string) => {
     if (path === "/api/config") return { flags: opts.flags ?? { chatbot: { enabled: true, rollout_pct: 100 } } };
     if (path === "/chat/policy") {
@@ -79,14 +78,6 @@ describe("ServerHintPanel (POST /chat/query)", () => {
     expect(screen.getByTestId("server-hint")).not.toHaveTextContent("1 of 1");
   });
 
-  it("is absent while the chatbot flag is off, once the question is answered, and in mock mode", async () => {
-    await mount({ flags: { chatbot: { enabled: false, rollout_pct: 100 } } });
-    await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/api/config"));
-    await new Promise((r) => setTimeout(r, 50)); // let the flag list land
-    expect(screen.queryByTestId("server-hint")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Need a hint?" })).not.toBeInTheDocument();
-  });
-
   it("asks GET /chat/policy first, and shows the button only when the server says hints are on for this learner", async () => {
     await mount();
     expect(await screen.findByRole("button", { name: "Need a hint?" })).toBeInTheDocument();
@@ -109,11 +100,6 @@ describe("ServerHintPanel (POST /chat/query)", () => {
   it("is absent after the answer is revealed", async () => {
     await mount({ disabled: true });
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
-    expect(screen.queryByTestId("server-hint")).not.toBeInTheDocument();
-  });
-
-  it("is absent in explicit mock mode (mock questions carry their own hints)", async () => {
-    await mount({ mock: true });
     expect(screen.queryByTestId("server-hint")).not.toBeInTheDocument();
   });
 

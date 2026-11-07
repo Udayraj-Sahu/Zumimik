@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const apiGet = vi.fn();
 const apiPost = vi.fn();
 vi.mock("./api", () => ({ apiGet: (...a: unknown[]) => apiGet(...a), apiPost: (...a: unknown[]) => apiPost(...a) }));
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false }));
 
 const RUNG = (threshold: number, name: string, over: Record<string, unknown> = {}) => ({
   threshold, name, capability: "x", tier: null, reached: false, granted: false, active: false, grant_months: null, expires_at: null, ...over,

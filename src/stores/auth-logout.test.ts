@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: false, apiUrl: (p: string) => `https://api.test/api/v1${p}` }));
-
 describe("logout revokes the refresh token on the backend", () => {
   beforeEach(() => {
     vi.resetModules();

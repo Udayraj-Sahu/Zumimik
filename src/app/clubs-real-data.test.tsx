@@ -47,7 +47,6 @@ function routeGet(flags: Record<string, unknown> = { virtual_hubs: { enabled: tr
 
 async function renderClubs() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "a@x.com", role: "user" }, isAuthenticated: true });
   const { default: Page } = await import("@/app/(app)/dashboard/clubs/page");

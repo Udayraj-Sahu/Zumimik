@@ -59,7 +59,6 @@ describe("the indicator", () => {
   beforeEach(async () => {
     syncAll.mockClear();
     await db.eventQueue.clear();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     useAuthStore.setState({ user: { id: "u1", name: "A", email: "a@x.com", role: "user" } as never, token: "t", isAuthenticated: true });
     useNetworkStore.setState({ isOnline: true });
   });
@@ -149,19 +148,5 @@ describe("the indicator", () => {
     await mount();
     fireEvent.click(screen.getByRole("button", { name: /Sync status/ }));
     expect(screen.getByTestId("sync-details")).toHaveTextContent("saved on this device");
-  });
-
-  it("is hidden when nobody is signed in and in demo mode", async () => {
-    useAuthStore.setState({ user: null, token: null, isAuthenticated: false } as never);
-    await mount();
-    expect(screen.queryByTestId("sync-indicator")).not.toBeInTheDocument();
-    cleanup();
-    vi.resetModules();
-    vi.doMock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: true }));
-    useAuthStore.setState({ user: { id: "u1" } as never });
-    const { SyncIndicator } = await import("./sync-indicator");
-    render(<SyncIndicator />);
-    expect(screen.queryByTestId("sync-indicator")).not.toBeInTheDocument();
-    vi.doUnmock("@/lib/platform");
   });
 });

@@ -1,8 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AuthPanel } from "./auth-panel";
-
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false }));
 vi.mock("@/lib/firebase/client", () => ({
   isFirebaseConfigured: () => false,
   getFirebaseAuth: vi.fn(),

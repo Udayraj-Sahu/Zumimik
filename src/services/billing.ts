@@ -1,6 +1,4 @@
 import { apiGet } from "./api";
-import { IS_MOCK } from "@/lib/platform";
-
 /** GET /api/v1/billing/subscription — verified against the backend router (billing.py). */
 export type BackendSubscriptionResponse = {
   tier: string;
@@ -18,9 +16,13 @@ export type BackendSubscriptionResponse = {
     trial_ends_at: string | null;
     cancel_at_period_end: boolean;
   } | null;
-  entitlement: { tier: string; expires_at: number; grace_days: number; signature: string };
+  entitlement: {
+    tier: string;
+    expires_at: number;
+    grace_days: number;
+    signature: string;
+  };
 };
-
 export type Subscription = {
   /** Entitled tier decided by the backend ("free" | "pro" | "bundle_2" | "bundle_3"). */
   tier: string;
@@ -30,7 +32,6 @@ export type Subscription = {
   trialEndsAt: string | null;
   cancelAtPeriodEnd: boolean;
 };
-
 export function mapSubscription(response: BackendSubscriptionResponse): Subscription {
   // The entitlement is the backend's decision; the plan the UI selected is never proof of it.
   const tier = response.entitlement?.tier ?? "free";
@@ -44,22 +45,23 @@ export function mapSubscription(response: BackendSubscriptionResponse): Subscrip
     cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
   };
 }
-
 /** GET /api/v1/billing/plans (public): the real tier prices. Only the fields pricing needs are typed. */
 export type BackendPlansResponse = {
-  plans: Array<{ tier: string; lanes: number; usd_cents: number; inr_paise: number; trial_days: number; ad_free: boolean }>;
+  plans: Array<{
+    tier: string;
+    lanes: number;
+    usd_cents: number;
+    inr_paise: number;
+    trial_days: number;
+    ad_free: boolean;
+  }>;
   trial_days: number;
   default_currency: string;
   providers_available: string[];
 };
-
 export async function getPlans(): Promise<BackendPlansResponse> {
   return apiGet<BackendPlansResponse>("/billing/plans");
 }
-
 export async function getSubscription(): Promise<Subscription> {
-  if (IS_MOCK) {
-    return { tier: "free", isPaid: false, status: null, periodEnd: null, trialEndsAt: null, cancelAtPeriodEnd: false };
-  }
   return mapSubscription(await apiGet<BackendSubscriptionResponse>("/billing/subscription"));
 }

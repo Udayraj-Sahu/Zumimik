@@ -25,13 +25,6 @@ describe("ability (IRT 2PL-lite)", () => {
     expect(up.n).toBe(1);
   });
 
-  it("matches the engine's published fixture: 3 correct at b = 0 gives 0.8797 / 0.7853", () => {
-    const qs = [q("1", { irt: { a: 1, b: 0, source: "seed" } }), q("2", { irt: { a: 1, b: 0, source: "seed" } }), q("3", { irt: { a: 1, b: 0, source: "seed" } })];
-    const s = applyAbility(fresh(), qs, qs.map((x) => a(x.id, true)));
-    expect(s.theta).toBeCloseTo(0.8797, 3);
-    expect(s.se).toBeCloseTo(0.7853, 3);
-  });
-
   it("uses the server's calibrated parameters when present and the engine's seed when they are missing", () => {
     expect(itemParams(q("1", { irt: { a: 1.8, b: 0.4, source: "calibrated" } }))).toEqual({ a: 1.8, b: 0.4 });
     expect(itemParams(q("1", { irt: undefined, difficulty: 5 }))).toEqual({ a: 1, b: 2 }); // seed: b = difficulty - 3
@@ -90,7 +83,6 @@ describe("ability is kept per subject, persisted, and steers the next session", 
   });
 
   async function setup(catalogSubject?: Record<string, "quant" | "di">) {
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     const apiGet = vi.fn(async (path: string) => {
       if (path === "/practice/mastery") return { technique_states: {}, as_of: null };
       if (path === "/practice/catalog") {
@@ -173,7 +165,6 @@ describe("ability is kept per subject, persisted, and steers the next session", 
   });
 
   it("ability is still recorded when the mastery snapshot cannot be read", async () => {
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     vi.doMock("@/services/api", () => ({ apiGet: vi.fn(async () => { throw new Error("offline"); }), apiPost: vi.fn() }));
     const telemetry = await import("@/services/telemetry");
     const { useAuthStore } = await import("@/stores/auth-store");

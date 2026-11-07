@@ -36,7 +36,6 @@ function feed(over: Record<string, unknown> = {}) {
 
 async function renderFeed() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { default: Page } = await import("@/app/(app)/dashboard/feed/page");
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -147,7 +146,6 @@ describe("/dashboard/feed has no bundled posts in any mode", () => {
     apiGet.mockReset();
     apiGet.mockResolvedValue(feed({ stories: [story("only", "Quant", "Only from the server")], total_stories: 1 }));
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "true");
     const { default: Page } = await import("@/app/(app)/dashboard/feed/page");
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>

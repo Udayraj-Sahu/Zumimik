@@ -24,7 +24,6 @@ const PROBLEMS = [
 
 async function renderDaily() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { default: Page } = await import("@/app/(app)/play/daily/page");
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>

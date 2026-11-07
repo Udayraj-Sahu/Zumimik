@@ -7,7 +7,6 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn(), 
 
 async function load(mock: boolean, offer: "start" | "resume" | "none") {
   vi.resetModules();
-  vi.doMock("@/lib/platform", () => ({ IS_MOCK: mock, safeLocalStorage: localStorage, apiUrl: (p: string) => p }));
   vi.doMock("@/hooks/queries/use-warmup", () => ({ useWarmupOffer: () => ({ data: offer }) }));
   const { AdaptiveEngineSection } = await import("./adaptive-engine-section");
   return render(<QueryClientProvider client={new QueryClient()}><AdaptiveEngineSection /></QueryClientProvider>);
@@ -33,10 +32,5 @@ describe("adaptive engine section (Adaptive Learning tab)", () => {
   it("offers to finish a half-done warm-up", async () => {
     await load(false, "resume");
     expect(screen.getByText("Finish your warm-up")).toBeInTheDocument();
-  });
-
-  it("is hidden in demo mode (it needs the learner's server history)", async () => {
-    await load(true, "start");
-    expect(screen.queryByTestId("adaptive-engine-section")).not.toBeInTheDocument();
   });
 });

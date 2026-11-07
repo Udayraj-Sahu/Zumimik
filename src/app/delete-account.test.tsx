@@ -24,7 +24,6 @@ async function renderSettings() {
   vi.resetModules();
   vi.doMock("@/lib/platform", async (orig) => ({
     ...(await orig<object>()),
-    IS_MOCK: false,
     resetAppState: (...a: unknown[]) => resetAppState(...a),
     purgeUserData: (...a: unknown[]) => purgeUserData(...a),
   }));

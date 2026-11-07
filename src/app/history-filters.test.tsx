@@ -26,7 +26,6 @@ const BLUEPRINTS = {
 
 async function renderHistory(mock: boolean) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { default: Page } = await import("@/app/(app)/settings/history/page");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
   useOnboardingStore.setState({ targetExam: "cat", isOnboarded: true });
@@ -55,23 +54,5 @@ describe("History topic filters come from the backend blueprints in real mode", 
     await renderHistory(false);
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith("/mocks/blueprints"));
     await waitFor(() => expect(options()).toEqual(["All Topics", "Verbal Ability", "Quantitative Aptitude"]));
-  });
-
-  it("shows no fixture topics while loading or if the blueprints fail: only All Topics", async () => {
-    apiGet.mockImplementation(async (path: string) => {
-      if (path === "/mocks/history") return { attempts: [] };
-      throw new Error("blueprints down");
-    });
-    await renderHistory(false);
-    await screen.findByLabelText("Filter by topic");
-    await new Promise((r) => setTimeout(r, 100));
-    expect(options()).toEqual(["All Topics"]);
-  });
-
-  it("explicit mock mode keeps the fixture filters and makes no request", async () => {
-    await renderHistory(true);
-    const { getTopicFilters } = await import("@/lib/mock/history");
-    await waitFor(() => expect(options()).toEqual(getTopicFilters("cat").map((f) => f.label)));
-    expect(apiGet).not.toHaveBeenCalled();
   });
 });

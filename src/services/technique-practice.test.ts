@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
-
 const mk = (id: string, skill: string) => ({ source: "tier1_static", template_id: id, question_text: id, difficulty: 2, skill, technique: null, topic: null, sub_topic: null, trust: "trusted", feeds_mastery: true, answer_check: "client_extract", expected_answer: 1 });
 
 async function run(first: ReturnType<typeof mk>[], fallback: ReturnType<typeof mk>[] | Error) {

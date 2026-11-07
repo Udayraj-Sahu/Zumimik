@@ -137,7 +137,6 @@ describe("a finished session updates the stored book and the next request uses i
   });
 
   async function setup() {
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     const snapshot = { technique_states: { Fractions: practised("Fractions", [true, true, true, true, true, true], NOW - DAY), Decimals: practised("Decimals", [true, true, true, true, true, true], NOW - DAY) }, as_of: NOW - DAY };
     const apiGet = vi.fn(async (path: string) => {
       if (path === "/practice/mastery") return snapshot;

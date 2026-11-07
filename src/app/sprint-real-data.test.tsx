@@ -27,7 +27,6 @@ const ITEM = {
 
 async function renderSprint() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { default: Page } = await import("@/app/(app)/play/sprint/page");
   const { useOnboardingStore } = await import("@/stores/onboarding-store");
   useOnboardingStore.setState({ targetExam: "cat", isOnboarded: true });

@@ -10,7 +10,6 @@ describe("backend authentication", () => {
   });
 
   it("persists the refresh token returned by email login", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.resetModules();
     vi.stubGlobal(
       "fetch",
@@ -34,7 +33,6 @@ describe("backend authentication", () => {
   });
 
   it("surfaces backend validation details without echoing submitted values", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.resetModules();
     vi.stubGlobal(
       "fetch",
@@ -59,7 +57,6 @@ describe("backend authentication", () => {
   });
 
   it("registers email accounts and stores both backend tokens", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.resetModules();
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
@@ -87,20 +84,7 @@ describe("backend authentication", () => {
     expect(useAuthStore.getState().refreshToken).toBe("registered-refresh-token");
   });
 
-  it("never sends a mock provider placeholder to the backend in live mode", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
-    vi.resetModules();
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    const { useAuthStore } = await import("./auth-store");
-    await expect(useAuthStore.getState().loginMockUser({ name: "Google User" }))
-      .rejects.toThrow("Mock sign-in is disabled");
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
   it("turns a network failure on login/register into a readable message", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.resetModules();
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
 

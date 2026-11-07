@@ -27,7 +27,6 @@ const snapshotOf = (states: Record<string, TechniqueState>) => ({ technique_stat
 
 async function boot(states: Record<string, TechniqueState>, catalogSkills: string[] = Object.keys(states)) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   apiGet.mockImplementation(async (path: string) => {
     if (path === "/practice/mastery") return snapshotOf(states);
     if (path === "/practice/catalog") return { skills: catalogSkills.map((skill) => ({ skill, parents: [], servable: 9 })) };

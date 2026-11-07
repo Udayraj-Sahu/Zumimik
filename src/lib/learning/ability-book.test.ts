@@ -163,7 +163,6 @@ describe("loading the book (new device, offline, no server data)", () => {
   });
 
   async function load(serverTheta: unknown, readable = true) {
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     vi.doMock("@/services/api", () => ({
       apiGet: vi.fn(async (path: string) => {
         if (path === "/practice/mastery" && readable) return { technique_states: {}, as_of: null, ...(serverTheta === undefined ? {} : { theta: serverTheta }) };

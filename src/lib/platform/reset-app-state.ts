@@ -2,7 +2,6 @@ import { db } from "@/services/offline/db";
 import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useSprintStore } from "@/stores/sprint-store";
-import { useAdaptiveStore } from "@/stores/adaptive-store";
 import { useWalkthroughStore } from "@/stores/walkthrough-store";
 import { useTemplateStore } from "@/stores/template-store";
 import { useRateStore } from "@/stores/rate-store";
@@ -26,7 +25,6 @@ const STORAGE_KEYS = [
   "zuzumik-plan",
   "zuzumik-resume",
   "zuzumik-settings",
-  "zuzumik-adaptive",
   "zuzumik-habits",
   "zuzumik-referral",
 ];
@@ -35,7 +33,6 @@ export async function resetAppState(): Promise<void> {
   useAuthStore.getState().logout();
   useOnboardingStore.getState().reset();
   useSprintStore.getState().reset();
-  useAdaptiveStore.getState().reset();
   useWalkthroughStore.getState().reset();
   useTemplateStore.getState().reset();
   useRateStore.getState().reset();

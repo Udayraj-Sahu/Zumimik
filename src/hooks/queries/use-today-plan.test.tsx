@@ -17,7 +17,6 @@ function practised(skill: string, results: boolean[], lastAt: number): Technique
 
 async function plan(opts: { readable: boolean }) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const states = {
     Basics: practised("Basics", Array(30).fill(true), NOW - DAY),
     Fractions: practised("Fractions", [false, false, true, false], NOW - 2 * DAY),
@@ -67,7 +66,6 @@ describe("no flash of the earlier plan while the learner model loads", () => {
   it("shows nothing until the engine's plan is ready, and never the heuristic's choice in between", async () => {
     vi.resetModules();
     localStorage.clear();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     const states = {
       Basics: practised("Basics", Array(30).fill(true), NOW - DAY),
       Fractions: practised("Fractions", [false, false, true, false], NOW - 2 * DAY), // the lowest percentage: what the heuristic would pick

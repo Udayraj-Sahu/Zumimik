@@ -25,7 +25,6 @@ describe("real mode data (mock flag off)", () => {
     vi.resetModules();
     apiGet.mockReset();
     localStorage.clear();
-    vi.doMock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: false }));
   });
   afterEach(() => vi.doUnmock("@/lib/platform"));
 
@@ -113,31 +112,4 @@ describe("real mode data (mock flag off)", () => {
     });
   });
 
-  it("adaptive topics start at 0 / NEW — fixture mastery values are never shown as the learner's", async () => {
-    const { initialTopics } = await import("@/lib/adaptive/engine");
-    const topics = initialTopics("cat");
-    expect(topics.length).toBeGreaterThan(0);
-    expect(topics.every((t) => t.mastery === 0 && t.status === "NEW")).toBe(true);
-  });
-});
-
-describe("explicit mock mode keeps the development fixtures", () => {
-  // Each test loads its target first: the platform barrel re-exports resetAppState, which imports every store.
-  beforeEach(() => {
-    vi.resetModules();
-    localStorage.clear();
-    vi.doMock("@/lib/platform", async (orig) => ({ ...(await orig<object>()), IS_MOCK: true }));
-  });
-  afterEach(() => vi.doUnmock("@/lib/platform"));
-
-  it("a local plan upgrade works only in mock mode", async () => {
-    const { usePlanStore } = await import("@/stores/plan-store");
-    usePlanStore.getState().setPro();
-    expect(usePlanStore.getState().plan).toBe("pro");
-  });
-
-  it("adaptive topics keep their fixture mastery seeds", async () => {
-    const { initialTopics } = await import("@/lib/adaptive/engine");
-    expect(initialTopics("cat").some((t) => t.mastery > 0)).toBe(true);
-  });
 });

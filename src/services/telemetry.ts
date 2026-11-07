@@ -1,22 +1,39 @@
 import type { SprintResult, SprintSession } from "@/lib/types/sprint-session";
-import { IS_MOCK } from "@/lib/platform";
 import { apiPost } from "./api";
 import { useAuthStore } from "@/stores/auth-store";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import { applySession, ageFromDob, buildSessionLog, resolveAttemptTimes } from "@/lib/learning/learner-state";
+import {
+  applySession,
+  ageFromDob,
+  buildSessionLog,
+  resolveAttemptTimes,
+} from "@/lib/learning/learner-state";
 import { recordMasteryHistory } from "./mastery-history";
 import { cognitiveLoadOf } from "@/lib/learning/wellbeing";
 import { applyAbilityBook, sendableAbility } from "@/lib/learning/ability-book";
 import type { CalibrationRecord } from "@/lib/learning/calibration";
 import { summariseChange, type SessionChange } from "@/lib/learning/session-change";
 import { applySessionToSinking } from "@/lib/learning/review";
-import { commitAbilityBook, commitSinkingBook, invalidateLearnerCache, loadAbilityBook, loadSinkingBook, reconcileLearnerStates, withLearnerLock } from "./learner";
+import {
+  commitAbilityBook,
+  commitSinkingBook,
+  invalidateLearnerCache,
+  loadAbilityBook,
+  loadSinkingBook,
+  reconcileLearnerStates,
+  withLearnerLock,
+} from "./learner";
 import { syncDeviceId } from "./offline/device-id";
 import { trackSync } from "./offline/sync-activity";
-import { flushQueuedBefore, settleAcknowledged, enqueueEventBatch, isPermanentRejection, parkEventBatch, removeEventBatch } from "./offline/sync";
-
+import {
+  flushQueuedBefore,
+  settleAcknowledged,
+  enqueueEventBatch,
+  isPermanentRejection,
+  parkEventBatch,
+  removeEventBatch,
+} from "./offline/sync";
 export type SyncEvent = Record<string, unknown>;
-
 /**
  * Build the /sync events for a finished session. Event ids are generated here, once: re-sending the SAME events
  * after a failure is idempotent on the backend (event_id is the key), whereas rebuilding would double-count.
@@ -32,7 +49,9 @@ export function buildSprintSyncEvents(
   // Each attempt carries the time it actually happened (session end minus the time still to come), not one shared stamp.
   const times = resolveAttemptTimes(result.answers, now);
   const questions = new Map(session.questions.map((question) => [question.id, question]));
-  const attempted = result.answers.filter((answer) => answer.selectedIndex !== -1 || answer.answerText !== undefined);
+  const attempted = result.answers.filter(
+    (answer) => answer.selectedIndex !== -1 || answer.answerText !== undefined,
+  );
   const events: SyncEvent[] = attempted.map((answer) => {
     const question = questions.get(answer.questionId);
     return {
@@ -53,7 +72,9 @@ export function buildSprintSyncEvents(
         domain: domain ?? session.domain ?? "vedic-math",
         ...(question?.difficulty !== undefined ? { difficulty: question.difficulty } : {}),
         // The engine's base cognitive load of the question (COG-01), logged with the attempt as the design specifies.
-        ...(cognitiveLoadOf(question?.text) !== undefined ? { bcl: cognitiveLoadOf(question?.text) } : {}),
+        ...(cognitiveLoadOf(question?.text) !== undefined
+          ? { bcl: cognitiveLoadOf(question?.text) }
+          : {}),
         ...(question?.feedsMastery !== undefined ? { feeds_mastery: question.feedsMastery } : {}),
         ...(question?.answerCheck ? { answer_check: question.answerCheck } : {}),
         ...(answer.correct === null && answer.answerText !== undefined
@@ -62,7 +83,6 @@ export function buildSprintSyncEvents(
       },
     };
   });
-
   events.push({
     event_id: crypto.randomUUID(),
     event_type: "session_end",
@@ -77,10 +97,8 @@ export function buildSprintSyncEvents(
       total_time_ms: Math.max(0, Math.round(result.totalTimeSpent * 1000)),
     },
   });
-
   return events;
 }
-
 /**
  * The /sync events for a finished session PLUS the learner's updated mastery. The session_end event carries `technique_states`
  * (the whole picture, which every server reader treats as the learner's mastery): the persisted snapshot, hydrated by the
@@ -93,14 +111,24 @@ export async function buildSessionSyncEvents(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }>; onChange?: (change: SessionChange) => void } = {},
+  opts: {
+    calibration?: CalibrationRecord;
+    extraEvents?: Array<{
+      event_type: string;
+      metadata: Record<string, unknown>;
+    }>;
+    onChange?: (change: SessionChange) => void;
+  } = {},
 ): Promise<SyncEvent[]> {
   const events = buildSprintSyncEvents(session, result, domain, sessionType);
-  if (IS_MOCK) return events;
   const now = Date.now();
   const userKey = useAuthStore.getState().user?.id ?? "";
   const age = ageFromDob(useOnboardingStore.getState().dob, now);
-  const end = events[events.length - 1] as { event_id: string; session_id: string; metadata: Record<string, unknown> };
+  const end = events[events.length - 1] as {
+    event_id: string;
+    session_id: string;
+    metadata: Record<string, unknown>;
+  };
   // Psychometric events from the session (fatigue checkpoints, cognitive-load interventions), logged with it.
   for (const extra of opts.extraEvents ?? []) {
     events.splice(events.length - 1, 0, {
@@ -133,7 +161,9 @@ export async function buildSessionSyncEvents(
   // snapshot could not be read. Only subjects the server knows (quant, di) are sent; items with no named subject feed a local-only
   // estimate and are never reported as Quant.
   const abilities = await loadAbilityBook(userKey);
-  const abilitiesNext = applyAbilityBook(abilities, session.questions, result.answers, { endedAt: now });
+  const abilitiesNext = applyAbilityBook(abilities, session.questions, result.answers, {
+    endedAt: now,
+  });
   if (abilitiesNext !== abilities) {
     const sendable = sendableAbility(abilitiesNext);
     if (Object.keys(sendable).length > 0) end.metadata.theta = sendable;
@@ -154,7 +184,6 @@ export async function buildSessionSyncEvents(
   end.metadata.technique_states = next;
   return events;
 }
-
 /**
  * Build a finished session's events AND store them durably, as one step under the learner lock. A session that finishes while
  * another is being built waits, and then starts from a state that already includes the first one's queued events, so neither
@@ -166,22 +195,25 @@ export async function queueSessionSync(
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  opts: { calibration?: CalibrationRecord; extraEvents?: Array<{ event_type: string; metadata: Record<string, unknown> }>; onChange?: (change: SessionChange) => void } = {},
+  opts: {
+    calibration?: CalibrationRecord;
+    extraEvents?: Array<{
+      event_type: string;
+      metadata: Record<string, unknown>;
+    }>;
+    onChange?: (change: SessionChange) => void;
+  } = {},
 ): Promise<SyncEvent[]> {
-  if (IS_MOCK) return buildSprintSyncEvents(session, result, domain, sessionType);
   return withLearnerLock(async () => {
     const events = await buildSessionSyncEvents(session, result, domain, sessionType, opts);
     await enqueueEventBatch(events);
     return events;
   });
 }
-
 /** POST /api/v1/sync. Resolves only when the backend acknowledged the batch. */
 export async function postSyncEvents(events: SyncEvent[]): Promise<void> {
-  if (IS_MOCK) return;
   await apiPost("/sync", { events, device_id: syncDeviceId() });
 }
-
 /**
  * Durable send. The batch is written to Dexie first, then posted:
  *  - "synced": the backend acknowledged it (the stored copy is removed).
@@ -189,7 +221,6 @@ export async function postSyncEvents(events: SyncEvent[]): Promise<void> {
  * A permanent rejection (e.g. 422) is parked and thrown, so the caller never claims it was saved.
  */
 export async function sendSyncBatch(events: SyncEvent[]): Promise<"synced" | "queued"> {
-  if (IS_MOCK) return "synced";
   const id = await enqueueEventBatch(events);
   try {
     await flushQueuedBefore(id); // earlier sessions first, so the server sees them in order
@@ -208,17 +239,25 @@ export async function sendSyncBatch(events: SyncEvent[]): Promise<"synced" | "qu
     return "queued";
   }
 }
-
 export async function syncSprintResult(
   session: Pick<SprintSession, "questions" | "topic"> & Partial<Pick<SprintSession, "domain">>,
   result: SprintResult,
   domain?: string,
   sessionType = "sprint",
-  extraEvents: Array<{ event_type: string; metadata: Record<string, unknown> }> = [],
+  extraEvents: Array<{
+    event_type: string;
+    metadata: Record<string, unknown>;
+  }> = [],
 ): Promise<SessionChange | null> {
-  if (IS_MOCK) return null;
   let change: SessionChange | null = null;
   // Durable: a failed send is kept on the device and retried, not dropped.
-  await sendSyncBatch(await queueSessionSync(session, result, domain, sessionType, { extraEvents, onChange: (c) => { change = c; } }));
+  await sendSyncBatch(
+    await queueSessionSync(session, result, domain, sessionType, {
+      extraEvents,
+      onChange: (c) => {
+        change = c;
+      },
+    }),
+  );
   return change;
 }

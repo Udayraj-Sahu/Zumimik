@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Dialog } from "@/components/ui/dialog";
@@ -12,10 +11,7 @@ import { useFeatureFlags } from "@/hooks/queries/use-feature-flags";
 import { gatedFeatureMessage, isFeatureOff } from "@/services/flags";
 import { useGenerateFriendQr } from "@/hooks/queries/use-friends";
 import { cn } from "@/lib/utils";
-import { IS_MOCK } from "@/lib/platform";
-
 const REWARD_XP = 50;
-
 export function InviteCard() {
   const firstName = useOnboardingStore((s) => s.firstName);
   const local = useReferralStore();
@@ -24,29 +20,27 @@ export function InviteCard() {
   // backend and would not redeem. While it loads, or if the feature is off, no code is shown rather than an invented one.
   const { data: flags, isLoading: flagsLoading } = useFeatureFlags();
   // GET /api/config says whether the referral ladder is on. When it is definitely off, say so (a bare 404 is indistinguishable from a bug).
-  const referralOff = !IS_MOCK && isFeatureOff(flags, "referral_ladder");
+  const referralOff = isFeatureOff(flags, "referral_ladder");
   // Wait for the flag list to settle (loaded or failed) so a feature that is off never gets a pointless request.
   const { data: server } = useReferralStatus({ enabled: !flagsLoading && !referralOff });
   const claim = useClaimReferralReward();
   const [claimedName, setClaimedName] = useState<string | null>(null);
-  const code = IS_MOCK ? local.code : (server?.code ?? null);
-  const friendsJoined = IS_MOCK ? local.friendsJoined : (server?.verifiedReferrals ?? 0);
+  const code = server?.code ?? null;
+  const friendsJoined = server?.verifiedReferrals ?? 0;
   const [copied, setCopied] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [origin, setOrigin] = useState("");
   const [qrTab, setQrTab] = useState<"invite" | "friend">("invite");
   const friendQr = useGenerateFriendQr();
-  const friendsOff = !IS_MOCK && isFeatureOff(flags, "social_friends");
+  const friendsOff = isFeatureOff(flags, "social_friends");
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const { mutate: generateFriend, reset: resetFriend } = friendQr;
-
   // The friend code is issued by the server (one-time, 300 s), so it is requested only while that tab is showing.
   useEffect(() => {
     if (!qrOpen || qrTab !== "friend" || friendsOff) return;
     generateFriend(undefined, { onSuccess: (r) => setExpiresAt(Date.now() + r.expiresIn * 1000) });
   }, [qrOpen, qrTab, friendsOff, generateFriend]);
-
   useEffect(() => {
     if (!qrOpen) {
       resetFriend();
@@ -54,7 +48,6 @@ export function InviteCard() {
       setQrTab("invite");
     }
   }, [qrOpen, resetFriend]);
-
   useEffect(() => {
     if (expiresAt === null) return;
     const tick = () => setSecondsLeft(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
@@ -62,29 +55,23 @@ export function InviteCard() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [expiresAt]);
-
   const friendCode = friendQr.data ? `${friendQr.data.code}.${friendQr.data.sig}` : null;
   const friendExpired = !!friendQr.data && expiresAt !== null && secondsLeft <= 0;
   const friendError = friendQr.error
-    ? (gatedFeatureMessage(friendQr.error, "Friend QR") ?? (friendQr.error instanceof Error ? friendQr.error.message : "Couldn't create a friend code."))
+    ? (gatedFeatureMessage(friendQr.error, "Friend QR") ??
+      (friendQr.error instanceof Error ? friendQr.error.message : "Couldn't create a friend code."))
     : null;
   const regenerateFriend = () => {
     setExpiresAt(null);
     generateFriend(undefined, { onSuccess: (r) => setExpiresAt(Date.now() + r.expiresIn * 1000) });
   };
-
-  useEffect(() => {
-    if (IS_MOCK) ensureCode(firstName); // development-only local code
-  }, [firstName, ensureCode]);
-
+  useEffect(() => {}, [firstName, ensureCode]);
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
-
   const inviteLink = code ? `${origin || window.location.origin}/auth?ref=${code}` : "";
   const shareText = `Join me on Zuzumik — use my invite code ${code} to get started: ${inviteLink}`;
   const earnedXp = friendsJoined * REWARD_XP;
-
   const handleCopy = async () => {
     if (!code) return;
     try {
@@ -96,7 +83,6 @@ export function InviteCard() {
       setCopied(false);
     }
   };
-
   const handleShare = async () => {
     if (!code) return;
     let shared = false;
@@ -104,7 +90,12 @@ export function InviteCard() {
       const { Capacitor } = await import("@capacitor/core");
       if (Capacitor.isNativePlatform()) {
         const { Share } = await import("@capacitor/share");
-        await Share.share({ title: "Zuzumik invite", text: shareText, url: inviteLink, dialogTitle: "Invite friends" });
+        await Share.share({
+          title: "Zuzumik invite",
+          text: shareText,
+          url: inviteLink,
+          dialogTitle: "Invite friends",
+        });
         shared = true;
       } else if (navigator.share) {
         await navigator.share({ title: "Zuzumik invite", text: shareText, url: inviteLink });
@@ -116,7 +107,6 @@ export function InviteCard() {
     if (shared) markInvited();
     else handleCopy();
   };
-
   return (
     <GlassCard className="h-full p-5">
       {/* Header */}
@@ -154,7 +144,11 @@ export function InviteCard() {
           </span>
         </div>
         {referralOff && (
-          <p data-testid="referral-off" role="status" className="mt-2 text-[11px] text-muted-foreground/60">
+          <p
+            data-testid="referral-off"
+            role="status"
+            className="mt-2 text-[11px] text-muted-foreground/60"
+          >
             Referrals aren&apos;t enabled for your account yet.
           </p>
         )}
@@ -179,7 +173,11 @@ export function InviteCard() {
             onClick={handleCopy}
             className="flex h-12 items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--glass-05)] px-5 font-mono text-[12px] font-bold uppercase tracking-wider text-foreground transition-all hover:bg-[var(--glass-07)] active:scale-95"
           >
-            {copied ? <Check size={15} className="text-primary" /> : <Copy size={15} className="text-primary" />}
+            {copied ? (
+              <Check size={15} className="text-primary" />
+            ) : (
+              <Copy size={15} className="text-primary" />
+            )}
             <span>{copied ? "Done" : "Copy"}</span>
           </button>
         </div>
@@ -193,9 +191,14 @@ export function InviteCard() {
       </div>
 
       {/* Reward ladder (GET /referral rungs; claim = POST /referral/claim) */}
-      {!IS_MOCK && !referralOff && server && server.rungs.length > 0 && (
-        <div data-testid="referral-ladder" className="mt-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-02)] p-4">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Reward ladder</p>
+      {!referralOff && server && server.rungs.length > 0 && (
+        <div
+          data-testid="referral-ladder"
+          className="mt-4 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-02)] p-4"
+        >
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            Reward ladder
+          </p>
           <p data-testid="referral-next" className="mt-1.5 text-[11px] text-muted-foreground/70">
             {server.nextRung
               ? `Next: ${server.nextRung.name}, ${server.nextRung.remaining} more verified ${server.nextRung.remaining === 1 ? "friend" : "friends"}.`
@@ -204,9 +207,19 @@ export function InviteCard() {
           <ul className="mt-2 space-y-1.5">
             {server.rungs.map((r) => (
               <li key={r.threshold} className="flex items-center gap-2 text-[12px]">
-                <span className="w-7 shrink-0 text-right font-mono font-bold text-muted-foreground">{r.threshold}</span>
+                <span className="w-7 shrink-0 text-right font-mono font-bold text-muted-foreground">
+                  {r.threshold}
+                </span>
                 <span className="min-w-0 flex-1 truncate text-foreground">{r.name}</span>
-                <span className={r.granted ? "text-[var(--primary)]" : r.reached ? "text-chart-4" : "text-muted-foreground/40"}>
+                <span
+                  className={
+                    r.granted
+                      ? "text-[var(--primary)]"
+                      : r.reached
+                        ? "text-chart-4"
+                        : "text-muted-foreground/40"
+                  }
+                >
                   {r.granted ? "Claimed" : r.reached ? "Ready" : "Locked"}
                 </span>
               </li>
@@ -226,12 +239,20 @@ export function InviteCard() {
             </button>
           )}
           {claimedName && (
-            <p role="status" data-testid="referral-claimed" className="mt-2 text-center text-[12px] text-[var(--primary)]">
+            <p
+              role="status"
+              data-testid="referral-claimed"
+              className="mt-2 text-center text-[12px] text-[var(--primary)]"
+            >
               Claimed: {claimedName}.
             </p>
           )}
           {claim.error && (
-            <p role="alert" data-testid="referral-claim-error" className="mt-2 text-center text-[12px] text-destructive">
+            <p
+              role="alert"
+              data-testid="referral-claim-error"
+              className="mt-2 text-center text-[12px] text-destructive"
+            >
               {claim.error instanceof Error ? claim.error.message : "Couldn't claim the reward."}
             </p>
           )}
@@ -282,8 +303,17 @@ export function InviteCard() {
             </button>
           </div>
 
-          <div role="tablist" aria-label="QR type" className="mt-3 grid grid-cols-2 gap-1 rounded-full border border-[var(--glass-border)] bg-[var(--glass-05)] p-1">
-            {([["invite", "Invite link"], ["friend", "Add friend"]] as const).map(([id, label]) => (
+          <div
+            role="tablist"
+            aria-label="QR type"
+            className="mt-3 grid grid-cols-2 gap-1 rounded-full border border-[var(--glass-border)] bg-[var(--glass-05)] p-1"
+          >
+            {(
+              [
+                ["invite", "Invite link"],
+                ["friend", "Add friend"],
+              ] as const
+            ).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
@@ -292,7 +322,9 @@ export function InviteCard() {
                 onClick={() => setQrTab(id)}
                 className={cn(
                   "rounded-full px-3 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider transition-all",
-                  qrTab === id ? "bg-[var(--accent-10)] text-[var(--primary)]" : "text-muted-foreground hover:text-foreground",
+                  qrTab === id
+                    ? "bg-[var(--accent-10)] text-[var(--primary)]"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {label}
@@ -303,25 +335,50 @@ export function InviteCard() {
           {qrTab === "friend" ? (
             <div data-testid="friend-qr" className="mt-4">
               {friendsOff ? (
-                <p role="status" className="py-8 text-center text-[11px] text-muted-foreground/60">Adding friends isn&apos;t enabled for your account yet.</p>
+                <p role="status" className="py-8 text-center text-[11px] text-muted-foreground/60">
+                  Adding friends isn&apos;t enabled for your account yet.
+                </p>
               ) : friendError ? (
                 <div role="alert" className="py-6 text-center">
                   <p className="text-[11px] text-destructive">{friendError}</p>
-                  <button type="button" onClick={regenerateFriend} className="mt-3 rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground">Try again</button>
+                  <button
+                    type="button"
+                    onClick={regenerateFriend}
+                    className="mt-3 rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground"
+                  >
+                    Try again
+                  </button>
                 </div>
               ) : friendCode ? (
                 <>
                   <div className="flex justify-center">
-                    <div className={cn("rounded-2xl bg-white p-3 transition-opacity", friendExpired && "opacity-20")} style={{ boxShadow: "0 0 30px var(--accent-15)" }}>
+                    <div
+                      className={cn(
+                        "rounded-2xl bg-white p-3 transition-opacity",
+                        friendExpired && "opacity-20",
+                      )}
+                      style={{ boxShadow: "0 0 30px var(--accent-15)" }}
+                    >
                       <QRCodeSVG value={friendCode} size={196} level="M" marginSize={0} />
                     </div>
                   </div>
-                  <p className="mt-3 text-center font-mono text-[11px] text-muted-foreground" aria-live="polite">
-                    {friendExpired ? "Code expired" : `Expires in ${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
+                  <p
+                    className="mt-3 text-center font-mono text-[11px] text-muted-foreground"
+                    aria-live="polite"
+                  >
+                    {friendExpired
+                      ? "Code expired"
+                      : `Expires in ${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
                   </p>
                   {friendExpired && (
                     <div className="mt-2 flex justify-center">
-                      <button type="button" onClick={regenerateFriend} className="rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground">New code</button>
+                      <button
+                        type="button"
+                        onClick={regenerateFriend}
+                        className="rounded-full border border-[var(--glass-border)] px-4 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground"
+                      >
+                        New code
+                      </button>
                     </div>
                   )}
                   <p className="mt-2 text-center font-mono text-[10.5px] leading-relaxed text-muted-foreground">
@@ -329,59 +386,60 @@ export function InviteCard() {
                   </p>
                 </>
               ) : (
-                <p className="py-10 text-center font-mono text-[11px] text-muted-foreground" role="status">Creating your friend code…</p>
+                <p
+                  className="py-10 text-center font-mono text-[11px] text-muted-foreground"
+                  role="status"
+                >
+                  Creating your friend code…
+                </p>
               )}
             </div>
           ) : (
-          <>
-          <div className="mt-4 flex justify-center">
-            <div className="rounded-2xl bg-white p-3" style={{ boxShadow: "0 0 30px var(--accent-15)" }}>
-              {inviteLink && (
-                <QRCodeSVG value={inviteLink} size={196} level="M" marginSize={0} />
-              )}
-            </div>
-          </div>
+            <>
+              <div className="mt-4 flex justify-center">
+                <div
+                  className="rounded-2xl bg-white p-3"
+                  style={{ boxShadow: "0 0 30px var(--accent-15)" }}
+                >
+                  {inviteLink && (
+                    <QRCodeSVG value={inviteLink} size={196} level="M" marginSize={0} />
+                  )}
+                </div>
+              </div>
 
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <span className="select-all font-mono text-[15px] font-bold tracking-[0.18em] text-foreground">
-              {code ?? "——————"}
-            </span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              aria-label="Copy invite code"
-              className="rounded-full p-1.5 text-muted-foreground transition-all hover:bg-[var(--glass-07)] hover:text-primary active:scale-90"
-            >
-              {copied ? <Check size={15} className="text-primary" /> : <Copy size={15} />}
-            </button>
-          </div>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <span className="select-all font-mono text-[15px] font-bold tracking-[0.18em] text-foreground">
+                  {code ?? "——————"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  aria-label="Copy invite code"
+                  className="rounded-full p-1.5 text-muted-foreground transition-all hover:bg-[var(--glass-07)] hover:text-primary active:scale-90"
+                >
+                  {copied ? <Check size={15} className="text-primary" /> : <Copy size={15} />}
+                </button>
+              </div>
 
-          <p className="mt-3 text-center font-mono text-[10.5px] leading-relaxed text-muted-foreground">
-            Point your friend&apos;s camera at the code — or share the {REWARD_XP} XP invite.
-          </p>
-          </>
+              <p className="mt-3 text-center font-mono text-[10.5px] leading-relaxed text-muted-foreground">
+                Point your friend&apos;s camera at the code — or share the {REWARD_XP} XP invite.
+              </p>
+            </>
           )}
         </div>
       </Dialog>
     </GlassCard>
   );
 }
-
-function Stat({
-  label,
-  value,
-  valueClass,
-}: {
-  label: string;
-  value: string;
-  valueClass: string;
-}) {
+function Stat({ label, value, valueClass }: { label: string; value: string; valueClass: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-02)] px-1 py-3.5">
       <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {label}
       </span>
-      <span className={`mt-1.5 font-mono text-[12px] font-bold uppercase ${valueClass}`}>{value}</span>
+      <span className={`mt-1.5 font-mono text-[12px] font-bold uppercase ${valueClass}`}>
+        {value}
+      </span>
     </div>
   );
 }

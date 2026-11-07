@@ -35,7 +35,6 @@ const PRACTICE_PAPER = {
 
 async function renderRun() {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   const { default: Page } = await import("@/app/(app)/learn/mock/run/page");
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>

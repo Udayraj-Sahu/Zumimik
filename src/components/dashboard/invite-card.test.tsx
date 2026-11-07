@@ -14,7 +14,6 @@ vi.mock("@/services/api", async (orig) => ({
 
 async function renderCard(mock: boolean) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "u1", name: "Ada", email: "a@x.com", role: "user" }, isAuthenticated: true });
   const { InviteCard } = await import("./invite-card");
@@ -49,12 +48,6 @@ describe("InviteCard uses the server's referral code", () => {
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
     expect(screen.getAllByText("——————").length).toBeGreaterThan(0);
     expect(referral.getState().code).toBeNull();
-  });
-
-  it("explicit mock mode keeps the development code and makes no request", async () => {
-    const { referral } = await renderCard(true);
-    await waitFor(() => expect(referral.getState().code).toBeTruthy());
-    expect(apiGet).not.toHaveBeenCalled();
   });
 });
 

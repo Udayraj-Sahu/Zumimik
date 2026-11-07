@@ -1,4 +1,3 @@
-import { getAllTechniques } from "@/lib/mock/techniques";
 import { REFERENCE_PAGE_IDS_SNAPSHOT, hasTechniquePage, skillSlug } from "@/lib/reference-ids";
 import { ClientTechniquePage } from "./client-page";
 
@@ -42,7 +41,7 @@ async function fetchSkillIds(): Promise<string[]> {
 
 export async function generateStaticParams() {
   const [live, skills] = await Promise.all([fetchReferenceIds(), fetchSkillIds()]);
-  const ids = new Set<string>([...getAllTechniques().map((t) => t.id), ...REFERENCE_PAGE_IDS_SNAPSHOT, ...live, ...skills]);
+  const ids = new Set<string>([...REFERENCE_PAGE_IDS_SNAPSHOT, ...live, ...skills]);
   return [...ids].map((id) => ({ id }));
 }
 

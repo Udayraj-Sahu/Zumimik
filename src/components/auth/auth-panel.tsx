@@ -1,13 +1,9 @@
 "use client";
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
-import { Globe, Smartphone, Mail, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Mail, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isFirebaseConfigured, getFirebaseAuth, getFirebaseGoogleProvider } from "@/lib/firebase/client";
-
-import { IS_MOCK } from "@/lib/platform";
-
+import { isFirebaseConfigured, getFirebaseAuth } from "@/lib/firebase/client";
 export type AuthSuccessData =
   | {
       authMethod: "email";
@@ -16,16 +12,21 @@ export type AuthSuccessData =
       displayName?: string;
       intent: "login" | "register";
     }
-  | { name?: string; phone?: string; idToken?: string; authMethod: "google" | "phone" };
-
+  | {
+      name?: string;
+      phone?: string;
+      idToken?: string;
+      authMethod: "google" | "phone";
+    };
 type AuthPanelProps = {
   onAuthSuccess: (data: AuthSuccessData) => void | Promise<void>;
   onPauseAutoSlide?: () => void;
   onResumeAutoSlide?: () => void;
 };
-
 export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }: AuthPanelProps) {
-  const [mode, setMode] = useState<"select" | "email" | "phone-input" | "otp" | "verifying">("select");
+  const [mode, setMode] = useState<"select" | "email" | "phone-input" | "otp" | "verifying">(
+    "select",
+  );
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,17 +39,28 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
   const contentRef = useRef<HTMLDivElement>(null);
   const pauseRef = useRef(false);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-  const recaptchaVerifierRef = useRef<{ type: string; verify: () => Promise<string>; clear: () => void } | null>(null);
-  const confirmationResultRef = useRef<{ confirm: (code: string) => Promise<{ user: { getIdToken: () => Promise<string> } }> } | null>(null);
-
-  const firebaseAvailable = !IS_MOCK && isFirebaseConfigured();
-
+  const recaptchaVerifierRef = useRef<{
+    type: string;
+    verify: () => Promise<string>;
+    clear: () => void;
+  } | null>(null);
+  const confirmationResultRef = useRef<{
+    confirm: (code: string) => Promise<{
+      user: {
+        getIdToken: () => Promise<string>;
+      };
+    }>;
+  } | null>(null);
+  const firebaseAvailable = isFirebaseConfigured();
   useEffect(() => {
     if (contentRef.current) {
-      gsap.fromTo(contentRef.current, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" });
+      gsap.fromTo(
+        contentRef.current,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
+      );
     }
   }, [mode]);
-
   useEffect(() => {
     return () => {
       if (recaptchaVerifierRef.current) {
@@ -57,13 +69,6 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       }
     };
   }, []);
-
-  const initFirebase = useCallback(async () => {
-    const auth = await getFirebaseAuth();
-    const provider = await getFirebaseGoogleProvider();
-    return { auth, provider };
-  }, []);
-
   const initRecaptcha = useCallback(async () => {
     if (recaptchaVerifierRef.current) return;
     if (!recaptchaContainerRef.current) return;
@@ -73,17 +78,15 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       size: "invisible",
     });
   }, []);
-
   const enterOtp = async () => {
     if (phone.replace(/\D/g, "").length < 10) return;
     setError(null);
-    if (!IS_MOCK && !firebaseAvailable) {
+    if (!firebaseAvailable) {
       setError("Phone sign-in is not configured. Sign in with email and password instead.");
       return;
     }
     pauseRef.current = true;
     onPauseAutoSlide?.();
-
     if (firebaseAvailable) {
       setIsLoading(true);
       try {
@@ -91,7 +94,11 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
         const auth = await getFirebaseAuth();
         const { signInWithPhoneNumber } = await import("firebase/auth");
         const formattedPhone = `+91${phone.replace(/\D/g, "")}`;
-        const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current!);
+        const confirmation = await signInWithPhoneNumber(
+          auth,
+          formattedPhone,
+          recaptchaVerifierRef.current!,
+        );
         confirmationResultRef.current = confirmation;
         setMode("otp");
       } catch (err: unknown) {
@@ -106,7 +113,6 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       setMode("otp");
     }
   };
-
   const exitOtp = () => {
     pauseRef.current = false;
     onResumeAutoSlide?.();
@@ -114,45 +120,6 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
     setOtp(["", "", "", "", "", ""]);
     setError(null);
   };
-
-  const handleGoogle = async () => {
-    setError(null);
-    if (!IS_MOCK && !firebaseAvailable) {
-      setError("Google sign-in is not configured. Sign in with email and password instead.");
-      return;
-    }
-    if (firebaseAvailable) {
-      setIsLoading(true);
-      try {
-        const { auth, provider } = await initFirebase();
-        const { signInWithPopup } = await import("firebase/auth");
-        const result = await signInWithPopup(auth, provider);
-        const idToken = await result.user.getIdToken();
-        await onAuthSuccess({
-          name: result.user.displayName || "Google User",
-          idToken,
-          authMethod: "google",
-        });
-      } catch (err: unknown) {
-        if (err instanceof Error && "code" in err) {
-          const firebaseErr = err as { code: string };
-          if (firebaseErr.code === "auth/popup-closed-by-user") {
-            return;
-          }
-        }
-        setError(err instanceof Error ? err.message : "Google sign-in failed");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      try {
-        await onAuthSuccess({ name: "Google User", authMethod: "google" });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Google sign-in failed");
-      }
-    }
-  };
-
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -171,7 +138,6 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       setIsLoading(false);
     }
   };
-
   const handleOtpChange = async (val: string, i: number) => {
     setError(null);
     const digit = val.replace(/\D/g, "").slice(-1);
@@ -196,7 +162,9 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
           inputRefs.current[0]?.focus();
           setMode("otp");
           if (err instanceof Error && "code" in err) {
-            const firebaseErr = err as { code: string };
+            const firebaseErr = err as {
+              code: string;
+            };
             if (firebaseErr.code === "auth/invalid-verification-code") {
               setError("Incorrect OTP. Try again.");
             } else if (firebaseErr.code === "auth/code-expired") {
@@ -221,13 +189,11 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       }
     }
   };
-
   const handleOtpKeyDown = (e: React.KeyboardEvent, i: number) => {
     if (e.key === "Backspace" && !otp[i] && i > 0) {
       inputRefs.current[i - 1]?.focus();
     }
   };
-
   const handleResendOtp = async () => {
     setError(null);
     if (firebaseAvailable) {
@@ -237,7 +203,11 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
         const auth = await getFirebaseAuth();
         const { signInWithPhoneNumber } = await import("firebase/auth");
         const formattedPhone = `+91${phone.replace(/\D/g, "")}`;
-        const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current!);
+        const confirmation = await signInWithPhoneNumber(
+          auth,
+          formattedPhone,
+          recaptchaVerifierRef.current!,
+        );
         confirmationResultRef.current = confirmation;
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to resend OTP");
@@ -246,9 +216,7 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       }
     }
   };
-
   const phoneDigits = phone.replace(/\D/g, "");
-
   return (
     <div ref={contentRef} className="flex flex-col items-center gap-5">
       <div ref={recaptchaContainerRef} />
@@ -274,42 +242,7 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
       {mode === "select" && (
         <>
           {/* Google and phone sign-in return 501 on the staging backend: hidden outside mock mode until they are configured. */}
-          {IS_MOCK && (<>
-          <button
-            data-step-el
-            type="button"
-            onClick={handleGoogle}
-            disabled={isLoading || (!IS_MOCK && !firebaseAvailable)}
-            className="group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-4 text-fluid-base font-semibold text-foreground outline-none transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-            {isLoading ? (
-              <Loader2 size={20} className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Globe size={20} className="text-muted-foreground" aria-hidden="true" />
-            )}
-            {isLoading ? "Signing in..." : "Continue with Google"}
-          </button>
-          <div className="flex w-full items-center gap-3 text-fluid-xs text-muted-foreground/40">
-            <span className="flex-1 h-px bg-border" />
-            <span>or</span>
-            <span className="flex-1 h-px bg-border" />
-          </div>
-          <button
-            data-step-el
-            type="button"
-            onClick={() => {
-              setError(null);
-              setMode("phone-input");
-            }}
-            disabled={isLoading || (!IS_MOCK && !firebaseAvailable)}
-            className="group relative flex w-full items-center justify-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-4 text-fluid-base font-semibold text-foreground outline-none transition-all hover:border-primary/40 hover:bg-accent/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring overflow-hidden disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
-            <Smartphone size={20} className="text-muted-foreground" aria-hidden="true" />
-            Continue with Phone Number
-          </button>
-          </>)}
+
           <button
             data-step-el
             type="button"
@@ -369,7 +302,11 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
             disabled={isLoading || !email.trim() || !password}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-fluid-sm font-bold uppercase tracking-widest text-primary-foreground outline-none transition-all hover:opacity-90 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:pointer-events-none"
           >
-            {isLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <ArrowRight size={16} />}
+            {isLoading ? (
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <ArrowRight size={16} />
+            )}
             {isLoading ? "Please wait..." : emailIntent === "login" ? "Sign in" : "Create account"}
           </button>
           <div className="flex items-center justify-between gap-3">
@@ -399,7 +336,9 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
 
       {mode === "phone-input" && (
         <div className="w-full flex flex-col gap-4">
-          <p data-step-el className="text-fluid-sm font-semibold text-foreground/80">Enter your phone number</p>
+          <p data-step-el className="text-fluid-sm font-semibold text-foreground/80">
+            Enter your phone number
+          </p>
           <div data-step-el className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded-xl border border-border/60 bg-card px-3 py-3 text-fluid-sm font-medium text-foreground">
               <span className="text-muted-foreground">+91</span>
@@ -442,7 +381,9 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
             {otp.map((d, i) => (
               <input
                 key={i}
-                ref={(el) => { inputRefs.current[i] = el; }}
+                ref={(el) => {
+                  inputRefs.current[i] = el;
+                }}
                 type="tel"
                 inputMode="numeric"
                 maxLength={1}
@@ -453,7 +394,9 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
                 disabled={isLoading}
                 className={cn(
                   "size-11 rounded-xl border text-center text-fluid-lg font-bold outline-none transition-all",
-                  d ? "border-primary bg-primary/5 text-foreground scale-110" : "border-border/60 bg-card text-foreground",
+                  d
+                    ? "border-primary bg-primary/5 text-foreground scale-110"
+                    : "border-border/60 bg-card text-foreground",
                   isLoading && "opacity-50",
                 )}
                 autoFocus={i === 0}
@@ -492,7 +435,12 @@ export function AuthPanel({ onAuthSuccess, onPauseAutoSlide, onResumeAutoSlide }
 
       {mode === "verifying" && (
         <div className="flex flex-col items-center gap-3 py-6">
-          <Loader2 size={32} className="animate-spin text-primary" role="status" aria-label="Verifying OTP" />
+          <Loader2
+            size={32}
+            className="animate-spin text-primary"
+            role="status"
+            aria-label="Verifying OTP"
+          />
           <p className="text-fluid-sm text-muted-foreground/60">Verifying OTP...</p>
         </div>
       )}

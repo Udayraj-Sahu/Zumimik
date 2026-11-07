@@ -167,7 +167,6 @@ describe("session sync carries the updated mastery", () => {
 
   async function load(masteryResult: "ok" | "fail") {
     const snapshot = { technique_states: { Fractions: practised("Fractions", [true, true, true]) }, as_of: NOW - DAY };
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
     vi.doMock("@/services/api", () => ({
       apiGet: vi.fn(async (path: string) => {
         if (path === "/practice/mastery" && masteryResult === "ok") return snapshot;

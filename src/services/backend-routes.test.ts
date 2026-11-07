@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiGet, apiPost } from "./api";
 
 vi.mock("./api", () => ({ apiGet: vi.fn(), apiPost: vi.fn() }));
-vi.mock("@/lib/platform", () => ({ IS_MOCK: false, safeLocalStorage: localStorage }));
 // Mastery is unreadable here, so session building takes the plain single-skill request (the planner has its own tests).
 vi.mock("./learner", () => ({ loadLearnerStates: vi.fn().mockResolvedValue(null), loadCatalogSkills: vi.fn().mockResolvedValue([]), loadAbilityBook: vi.fn(async () => ({})), commitAbilityBook: vi.fn(), invalidateLearnerCache: vi.fn(), reconcileLearnerStates: vi.fn().mockResolvedValue(null), withLearnerLock: <T,>(fn: () => Promise<T>) => fn() }));
 

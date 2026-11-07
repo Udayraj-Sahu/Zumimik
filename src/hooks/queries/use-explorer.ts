@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubjectTree, getLeafTechniques } from "@/services/explorer";
-import { getCorpusTopicNames, getReferencePages, getReferenceCard, type ReferencePageSummary, type ReferenceCard } from "@/services/reference";
+import {
+  getCorpusTopicNames,
+  getReferencePages,
+  getReferenceCard,
+  type ReferencePageSummary,
+  type ReferenceCard,
+} from "@/services/reference";
 import { useOnboardingStore } from "@/stores/onboarding-store";
-import { IS_MOCK } from "@/lib/platform";
 import { explorerScopeKey } from "@/lib/exam-scope";
 import type { TopicNode } from "@/lib/types/technique";
-
 export const explorerKeys = {
-  tree: (exam?: string | null) => ["explorer", "tree", explorerScopeKey(exam, IS_MOCK)] as const,
-  techniques: (exam?: string | null) => ["explorer", "techniques", explorerScopeKey(exam, IS_MOCK)] as const,
+  tree: (exam?: string | null) => ["explorer", "tree", explorerScopeKey(exam, false)] as const,
+  techniques: (exam?: string | null) =>
+    ["explorer", "techniques", explorerScopeKey(exam, false)] as const,
 };
-
 export function useSubjectTree(domain?: string) {
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const activeDomain = domain || targetExam;
@@ -20,7 +24,6 @@ export function useSubjectTree(domain?: string) {
     enabled: !!activeDomain,
   });
 }
-
 export function useLeafTechniques(domain?: string) {
   const targetExam = useOnboardingStore((s) => s.targetExam);
   const activeDomain = domain || targetExam;
@@ -30,7 +33,6 @@ export function useLeafTechniques(domain?: string) {
     enabled: !!activeDomain,
   });
 }
-
 /** The Reference Library index (public). Real mode only: there are no bundled fixtures for it. */
 export function useReferencePages(enabled = true) {
   return useQuery<ReferencePageSummary[]>({
@@ -40,7 +42,6 @@ export function useReferencePages(enabled = true) {
     staleTime: 5 * 60 * 1000,
   });
 }
-
 export function useReferenceCard(subtopicId: string | null) {
   return useQuery<ReferenceCard>({
     queryKey: ["explorer", "reference", "card", subtopicId],
@@ -49,7 +50,6 @@ export function useReferenceCard(subtopicId: string | null) {
     staleTime: 5 * 60 * 1000,
   });
 }
-
 /** The problem-corpus topic names (GET /api/topics, global), for the technique page's topic-level practice fallback. */
 export function useCorpusTopicNames(enabled = true) {
   return useQuery<string[]>({

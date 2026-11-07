@@ -19,7 +19,6 @@ const PLANS_RESPONSE = {
 
 async function renderTiers(mock: boolean) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { ClearanceTiers } = await import("./clearance-tiers");
   const view = render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -56,12 +55,5 @@ describe("paywall plan prices", () => {
     await new Promise((r) => setTimeout(r, 150));
     expect(view.container.textContent).not.toMatch(/₹399|₹649/);
     expect(view.container.textContent).toContain("—");
-  });
-
-  it("explicit mock mode keeps the bundled prices and the annual/monthly toggle, with no request", async () => {
-    const view = await renderTiers(true);
-    expect(view.container.textContent).toMatch(/₹3,990|₹399/);
-    expect(screen.getByRole("group", { name: "Billing cycle" })).toBeInTheDocument();
-    expect(apiGet).not.toHaveBeenCalled();
   });
 });

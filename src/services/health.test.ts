@@ -5,7 +5,6 @@ const json = (status: number, body: unknown) => new Response(JSON.stringify(body
 describe("silent server check (GET /ready)", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
     vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.example.com");
   });
   afterEach(() => {
@@ -39,16 +38,6 @@ describe("silent server check (GET /ready)", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("not found", { status: 404 })));
     const { getReadiness } = await import("./health");
     expect(await getReadiness()).toEqual({ state: "ready" });
-  });
-
-  it("makes no request in explicit mock mode", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "true");
-    vi.resetModules();
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-    const { getReadiness } = await import("./health");
-    expect(await getReadiness()).toEqual({ state: "ready" });
-    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("checkServer keeps the answer in the network store and shows nothing", async () => {

@@ -95,25 +95,14 @@ describe("security surface", () => {
     expect(isFirebaseConfigured()).toBe(true);
   });
 
-  it("6. env separation: API url is trimmed, mock flag gates the mock layer, site defaults apply", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
+  it("6. env separation: API url is trimmed and site defaults apply", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.example.com/");
     vi.resetModules();
     const mod = await import("@/lib/platform");
-    expect(mod.IS_MOCK).toBe(false);
     expect(mod.API_BASE_URL).toBe("https://api.example.com");
     expect(mod.apiUrl("sync/foo")).toBe("https://api.example.com/api/v1/sync/foo");
     expect(mod.apiUrl("/api/topics")).toBe("https://api.example.com/api/topics");
     expect(mod.SITE_NAME).toBe("Zuzumik");
-  });
-
-  it("7. real backend is the default; mock fixtures need an explicit NEXT_PUBLIC_API_MOCK=true", async () => {
-    for (const [value, expected] of [[undefined, false], ["false", false], ["true", true]] as const) {
-      vi.stubEnv("NEXT_PUBLIC_API_MOCK", value as never);
-      vi.resetModules();
-      const mod = await import("@/lib/platform");
-      expect(mod.IS_MOCK).toBe(expected);
-    }
   });
 
   it("8. logout clears auth user + token + refreshToken in state AND in the persisted blob", async () => {
@@ -186,16 +175,12 @@ describe("loading & empty-state inventory (static)", () => {
 
 describe("images & media (static)", () => {
   const FEED = join(SRC, "components", "feed", "feed-live.tsx"); // the Feed page is a thin wrapper; the images live here
-  const CLUBS = join(SRC, "app", "(app)", "dashboard", "clubs", "page.tsx");
 
-  it("14. feed/club images load lazily with fixed boxes + object-cover (no layout shift)", () => {
+  it("14. feed images load lazily with fixed boxes + object-cover (no layout shift)", () => {
     const feed = readFileSync(FEED, "utf8");
-    const clubs = readFileSync(CLUBS, "utf8");
     expect(feed).toContain("decoding=\"async\"");
     expect(feed).toContain("loading=\"lazy\"");
     expect(feed).toContain("object-cover");
-    expect(clubs).toContain("loading=\"lazy\"");
-    expect(clubs).toContain("object-cover");
   });
 
   it("15. raw <img> is used (no next/image) and there is NO onError fallback - broken/missing image gap is documented", () => {

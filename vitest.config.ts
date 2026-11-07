@@ -22,7 +22,6 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
       exclude: [
         "src/app/**",
-        "src/lib/mock/**",
         "src/lib/types/**",
         "src/providers/**",
         "next.config.mjs",

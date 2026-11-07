@@ -7,7 +7,6 @@ describe("feature flags (GET /api/config)", () => {
   beforeEach(() => {
     vi.resetModules();
     apiGet.mockReset();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "false");
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -36,13 +35,5 @@ describe("feature flags (GET /api/config)", () => {
     expect(gatedFeatureMessage(new ApiError(500, "boom"), "Mock exams")).toBeNull();
     expect(gatedFeatureMessage(new ApiError(404, "no such mock"), "Mock exams")).toBeNull(); // a specific 404 is not a disabled feature
     expect(gatedFeatureMessage(new Error("x"), "Mock exams")).toBeNull();
-  });
-
-  it("explicit mock mode gates nothing and makes no request", async () => {
-    vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_API_MOCK", "true");
-    const { getFeatureFlags } = await import("./flags");
-    expect(await getFeatureFlags()).toEqual({});
-    expect(apiGet).not.toHaveBeenCalled();
   });
 });

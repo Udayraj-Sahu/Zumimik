@@ -66,7 +66,6 @@ describe("services: global topics, mastery and practice stay distinct (real API 
     vi.resetModules();
     apiGet.mockReset();
     vi.doMock("./../services/api", () => ({ apiGet, apiPost: vi.fn() }));
-    vi.doMock("@/lib/platform", () => ({ IS_MOCK: false }));
   });
 
   it("selecting CAT sends the exam as domain to /api/topics and /api/practice/techniques", async () => {
@@ -109,10 +108,6 @@ describe("services: global topics, mastery and practice stay distinct (real API 
 
   it("real API mode never reads from the mock layer", async () => {
     const mockModule = vi.fn();
-    vi.doMock("@/lib/mock/explorer", () => {
-      mockModule();
-      return { getSubjectTree: () => [] };
-    });
     const { getSubjectTree } = await import("@/services/explorer");
     apiGet.mockResolvedValue({ topics: [], techniques: [] });
     await getSubjectTree("cat");

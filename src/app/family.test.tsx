@@ -43,7 +43,6 @@ function routeGets(map: { family?: unknown; friends?: unknown }) {
 
 async function renderFamily(mock = false) {
   vi.resetModules();
-  vi.stubEnv("NEXT_PUBLIC_API_MOCK", mock ? "true" : "false");
   const { useAuthStore } = await import("@/stores/auth-store");
   useAuthStore.setState({ user: { id: "p-1", name: "Parent", email: "p@example.com", role: "user" }, token: "t", isAuthenticated: true });
   const { default: Page } = await import("@/app/(app)/dashboard/family/page");
@@ -265,13 +264,5 @@ describe("/dashboard/family", () => {
       fireEvent.click(await screen.findByRole("button", { name: "Friends of Mira" }));
       expect(await screen.findByTestId("child-friends-error")).toHaveTextContent("friends down");
     });
-  });
-
-  it("explicit mock mode: an empty free family and no requests", async () => {
-    await renderFamily(true);
-    expect(await screen.findByTestId("family-empty")).toBeInTheDocument();
-    expect(screen.getByTestId("family-needs-plan")).toBeInTheDocument();
-    expect(apiGet).not.toHaveBeenCalled();
-    expect(apiPost).not.toHaveBeenCalled();
   });
 });

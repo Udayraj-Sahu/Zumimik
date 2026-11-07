@@ -1,18 +1,16 @@
 "use client";
 import { PageContainer } from "@/components/ui/page-container";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEntranceAnimations } from "@/hooks/use-entrance-animations";
 import { useSprintTopics } from "@/hooks/queries/use-sprint";
-import { useTemplatesByCategory } from "@/hooks/queries/use-templates";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useSprintStore } from "@/stores/sprint-store";
 import { useResumeStore } from "@/stores/resume-store";
-import { getTemplateCategoriesForTopic } from "@/lib/content";
 import { GLASS_06, GLASS_BG, GLASS_BORDER } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 
@@ -24,14 +22,6 @@ export default function ConfigureSprintPage() {
   const [topic, setTopic] = useState<string | null>(null);
   const [length, setLength] = useState(10);
   const [difficulty, setDifficulty] = useState("Beginner");
-  const templateCats = useMemo(
-    () => (topic ? getTemplateCategoriesForTopic(targetExam, topic) : []),
-    [topic, targetExam],
-  );
-  const { data: templates = [], isLoading: loadingTemplates } = useTemplatesByCategory(
-    templateCats[0] ?? null,
-    targetExam,
-  );
 
   const { headerRef, animateSection } = useEntranceAnimations();
 
@@ -202,74 +192,7 @@ export default function ConfigureSprintPage() {
           </section>
         </div>
 
-        {(templates.length > 0 || loadingTemplates) && (
-          <section
-            ref={animateSection} data-section-index={3}
-            className="mt-6 max-[359px]:mt-4"
-          >
-            <div className="mb-3 flex items-center gap-2 max-[359px]:mb-2.5 max-[359px]:gap-1.5">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-chart-3/10 px-3 py-1 text-micro font-bold uppercase tracking-wider text-chart-3">
-                Learn
-              </span>
-              <h2 className="text-micro font-bold uppercase tracking-[0.18em] text-muted-foreground/40">
-                Learn the Technique
-              </h2>
-            </div>
-            {loadingTemplates ? (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin snap-x snap-mandatory max-[359px]:gap-2 md:grid md:grid-cols-2 md:gap-3 md:overflow-visible md:pb-0 md:snap-none">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="min-w-[65vw] sm:min-w-[260px] md:min-w-0 snap-start rounded-3xl border border-white/[0.06] backdrop-blur-xl p-4 animate-pulse" style={{ background: GLASS_BG }}>
-                    <div className="h-4 w-24 rounded-xl bg-white/[0.06] mb-3" />
-                    <div className="h-3 w-32 rounded-xl bg-white/[0.06] mb-2" />
-                    <div className="h-8 w-20 rounded-xl bg-white/[0.06] mt-3" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin snap-x snap-mandatory max-[359px]:gap-2 md:grid md:grid-cols-2 md:gap-3 md:overflow-visible md:pb-0 md:snap-none">
-                {templates.map((tpl) => (
-                  <div
-                    key={tpl.id}
-                    className="min-w-[65vw] sm:min-w-[240px] md:min-w-0 snap-start shrink-0 rounded-3xl border border-white/[0.06] backdrop-blur-xl p-4 max-[359px]:p-3.5 flex flex-col"
-                    style={{ background: GLASS_BG }}
-                  >
-                    <p className="text-micro font-bold uppercase tracking-wider text-chart-3 mb-1">
-                      {tpl.concept.category}
-                    </p>
-                    <p className="text-[12px] font-bold text-foreground leading-snug">
-                      {tpl.concept.technique_name}
-                    </p>
-                    <p className="text-micro text-muted-foreground/50 mt-1">
-                      {tpl.examples.length} example{tpl.examples.length > 1 ? "s" : ""} &middot; ~{tpl.expected_time}s
-                    </p>
-                    <div className="flex items-center gap-1 mt-1.5">
-                      {[1, 2, 3, 4, 5].map((d) => (
-                        <span
-                          key={d}
-                          className={cn(
-                            "size-1.5 rounded-full",
-                            d <= tpl.difficulty ? "bg-chart-3" : "bg-white/[0.06]",
-                          )}
-                        />
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(`/learn/practice?templateId=${tpl.id}&returnTo=/play/configure-sprint&topic=${topic ?? ""}&difficulty=${difficulty.toLowerCase()}`)
-                      }
-                      className="mt-3 flex items-center justify-center gap-1.5 rounded-xl py-3 text-micro font-bold uppercase tracking-wider text-chart-3 outline-none transition-colors hover:bg-chart-3/20 active:bg-chart-3/30 focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]"
-                      style={{ background: GLASS_BG, border: `1px solid ${GLASS_BORDER}` }}
-                    >
-                      <BookOpen size={12} />
-                      Learn
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        
 
         <div ref={animateSection} data-section-index={4} className="mt-6 sm:mt-8 max-[359px]:mt-5">
           <Button
