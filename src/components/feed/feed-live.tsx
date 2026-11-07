@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Clock, Compass, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { GLASS_BG } from "@/lib/theme";
 import { useFeed } from "@/hooks/queries/use-feed";
 import { resolveAdCta } from "@/services/ads";
+import { storyHref, videoHref } from "@/services/feed";
 
 const DEFAULT_CATEGORIES = ["Explore"];
 
@@ -124,7 +126,8 @@ export function FeedLive() {
               ) : (
                 <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:items-stretch md:gap-5 max-[359px]:gap-1.5" data-testid="feed-stories">
                   {shownStories.map((story) => (
-                    <GlassCard key={story.id} data-feed-story className="flex items-center gap-3.5 p-3.5 max-[359px]:gap-2.5 max-[359px]:p-3">
+                    <Link key={story.id} href={storyHref(story.id)} className="group block rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={story.title ?? story.subtitle}>
+                    <GlassCard data-feed-story className="flex h-full items-center gap-3.5 p-3.5 transition-colors group-hover:bg-white/[0.05] max-[359px]:gap-2.5 max-[359px]:p-3">
                       <img src={story.thumbnailUrl} alt="" loading="lazy" decoding="async" className="h-14 w-14 shrink-0 rounded-xl border border-white/[0.06] object-cover" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-micro font-semibold uppercase tracking-wider text-primary/80">{story.eyebrow}</p>
@@ -136,6 +139,7 @@ export function FeedLive() {
                         </div>
                       </div>
                     </GlassCard>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -153,7 +157,7 @@ export function FeedLive() {
                 <h2 className="text-[13px] font-bold text-foreground mb-3">Strategy Videos</h2>
                 <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin max-[359px]:gap-1.5">
                   {shownVideos.map((video) => (
-                    <div key={video.id} className="keep-white relative h-[150px] w-[120px] shrink-0 overflow-hidden rounded-3xl border border-white/[0.06] backdrop-blur-xl" style={{ backgroundColor: GLASS_BG }}>
+                    <Link key={video.id} href={videoHref(video.id)} aria-label={`${video.label}, ${video.duration}`} className="keep-white relative block h-[150px] w-[120px] shrink-0 overflow-hidden rounded-3xl border border-white/[0.06] outline-none backdrop-blur-xl focus-visible:ring-2 focus-visible:ring-ring" style={{ backgroundColor: GLASS_BG }}>
                       <img src={video.thumbnailUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-70" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <div className="absolute left-2 right-2 top-2">
@@ -163,7 +167,7 @@ export function FeedLive() {
                         <span className="rounded bg-cta px-1.5 py-0.5 text-[8px] font-bold text-[var(--on-accent)]">{video.source}</span>
                         <span className="rounded bg-black/40 px-1.5 py-0.5 text-[8px] font-bold text-white">{video.duration}</span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

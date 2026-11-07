@@ -156,4 +156,12 @@ describe("/dashboard/feed has no bundled posts in any mode", () => {
     expect(screen.queryByText("Speed reading techniques for verbal sections")).not.toBeInTheDocument(); // the old fixture text
   });
 
+
+  it("stories and videos link to their own pages", async () => {
+    apiGet.mockResolvedValue(feed());
+    await renderFeed();
+    const storyLink = await screen.findByRole("link", { name: "Percentages in 10 seconds" });
+    expect(storyLink).toHaveAttribute("href", "/dashboard/feed/story?id=a");
+    expect(screen.getByRole("link", { name: /Crosswise in action/ })).toHaveAttribute("href", "/dashboard/feed/video?id=v1");
+  });
 });

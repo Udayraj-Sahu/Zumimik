@@ -31,6 +31,10 @@ export type FeedPage = {
 
 export const FEED_PAGE_SIZE = 20;
 
+/** Where a story or a video opens. The id goes in the query string so the static export needs no page per backend id. */
+export const storyHref = (id: string) => `/dashboard/feed/story?id=${encodeURIComponent(id)}`;
+export const videoHref = (id: string) => `/dashboard/feed/video?id=${encodeURIComponent(id)}`;
+
 export async function getFeed(category: string, offset = 0, limit = FEED_PAGE_SIZE): Promise<FeedPage> {
   const qs = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (category && category !== "Explore") qs.set("category", category);
