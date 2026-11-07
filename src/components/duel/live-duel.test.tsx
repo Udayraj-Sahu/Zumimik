@@ -5,6 +5,7 @@ import { duelReducer, INITIAL_DUEL } from "@/hooks/use-live-duel";
 import type { IoFactory } from "@/services/duel-live";
 
 vi.setConfig({ testTimeout: 30000 });
+vi.mock("@/components/duel/hub-checkin-card", () => ({ HubCheckinCard: () => null }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn(), back: vi.fn() }), usePathname: () => "/play/duel", useSearchParams: () => new URLSearchParams() }));
 const push = vi.fn();
 const refresh = vi.fn();

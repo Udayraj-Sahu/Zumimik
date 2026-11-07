@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuthStore } from "@/stores/auth-store";
+import { HubCheckinCard } from "@/components/duel/hub-checkin-card";
 import { useLiveDuel, type LiveDuelState } from "@/hooks/use-live-duel";
 import { questionOf, type DuelMatchEnd, type DuelPlayer, type IoFactory } from "@/services/duel-live";
 
@@ -82,6 +83,7 @@ function Intro({ onFind }: { onFind: () => void }) {
       <Button className="mt-6" fullWidth size="lg" onClick={onFind} data-testid="duel-find">
         <Swords size={16} aria-hidden /> Find a match
       </Button>
+      <HubCheckinCard />
     </section>
   );
 }
