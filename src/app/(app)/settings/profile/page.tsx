@@ -1,4 +1,5 @@
 "use client";
+import { useMyAvatar } from "@/stores/avatar-store";
 import { AdBanner } from "@/components/ads/ad-banner";
 
 import { Zap, Trophy, Target, Star, Flame, Shield, Swords, Medal, User } from "lucide-react";
@@ -14,6 +15,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export default function ProfilePage() {
   usePageMeta("Profile — Zuzumik");
   const { data, isLoading, error } = useProfileData();
+  const photo = useMyAvatar();
 
   if (isLoading || !data) {
     return (
@@ -48,8 +50,13 @@ export default function ProfilePage() {
         </div>
 
         <header className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <span className="relative grid size-20 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-fluid-3xl font-black text-primary ring-2 ring-primary/30 sm:size-24">
-            {profile.initials}
+          <span className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-fluid-3xl font-black text-primary ring-2 ring-primary/30 sm:size-24">
+            {photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photo} alt="" className="h-full w-full object-cover" />
+            ) : (
+              profile.initials
+            )}
           </span>
           <div className="text-center sm:text-left">
             <h1 className="text-fluid-2xl font-black tracking-tight text-foreground">

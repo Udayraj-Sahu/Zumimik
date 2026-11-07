@@ -7,6 +7,8 @@ vi.setConfig({ testTimeout: 30000 });
 const apiGet = vi.fn();
 const apiPatch = vi.fn();
 const push = vi.fn();
+const resizeAvatarMock = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/image/resize-avatar", async (orig) => ({ ...(await orig<object>()), resizeAvatar: resizeAvatarMock }));
 vi.mock("@/services/api", async (orig) => ({
   ...(await orig<object>()),
   apiGet: (...a: unknown[]) => apiGet(...a),
@@ -72,5 +74,29 @@ describe("profile edit saves the name to the backend", () => {
     fireEvent.click(screen.getByRole("button", { name: /Save Changes/ }));
     await waitFor(() => expect(auth.getState().user?.phone).toBe("+911234567890"));
     expect(apiPatch).not.toHaveBeenCalled();
+  });
+
+  it("the email is shown but cannot be edited, and saving never changes it", async () => {
+    const { auth } = await renderEdit();
+    const email = screen.getByDisplayValue("ada@example.com");
+    expect(email).toHaveAttribute("readonly");
+    fireEvent.change(nameInput(), { target: { value: "Ada Lovelace" } });
+    fireEvent.click(screen.getByRole("button", { name: /Save Changes/ }));
+    await waitFor(() => expect(auth.getState().user?.name).toBe("Ada Lovelace"));
+    expect(auth.getState().user?.email).toBe("ada@example.com");
+  });
+
+  it("the camera icon opens the photo picker, and a chosen photo is stored for this account", async () => {
+    resizeAvatarMock.mockResolvedValue("data:image/jpeg;base64,AAAA");
+    await renderEdit();
+    const { useAvatarStore } = await import("@/stores/avatar-store");
+    const input = screen.getByTestId("avatar-input") as HTMLInputElement;
+    const click = vi.spyOn(input, "click");
+    fireEvent.click(screen.getByTestId("avatar-camera"));
+    expect(click).toHaveBeenCalled();
+    const file = new File(["x"], "me.png", { type: "image/png" });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() => expect(useAvatarStore.getState().photos["u1"]).toBe("data:image/jpeg;base64,AAAA"));
+    expect(await screen.findByTestId("avatar-image")).toHaveAttribute("src", "data:image/jpeg;base64,AAAA");
   });
 });

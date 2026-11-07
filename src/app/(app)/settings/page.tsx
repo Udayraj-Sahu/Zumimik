@@ -1,5 +1,6 @@
 "use client";
 
+import { useMyAvatar } from "@/stores/avatar-store";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -150,6 +151,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 /*  Profile header                                                      */
 /* ------------------------------------------------------------------ */
 function ProfileHeader({ name, initials, badge, onEdit }: { name: string; initials: string; badge: string; onEdit: () => void }) {
+  const photo = useMyAvatar();
   return (
     <div className="relative flex flex-col items-center pt-2 pb-1 text-center">
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] rounded-full opacity-15" style={{ background: "radial-gradient(circle, var(--accent-25) 0%, transparent 70%)" }} />
@@ -158,8 +160,13 @@ function ProfileHeader({ name, initials, badge, onEdit }: { name: string; initia
           <span className="text-[11px] font-semibold tracking-[0.22em] text-primary/80">SETTINGS</span>
         </div>
       <div className="relative">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/10 backdrop-blur-sm">
-          <span className="text-lg font-bold tracking-[-0.02em] text-primary">{initials}</span>
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-primary/10 backdrop-blur-sm">
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-lg font-bold tracking-[-0.02em] text-primary">{initials}</span>
+          )}
         </div>
         <button
           type="button"

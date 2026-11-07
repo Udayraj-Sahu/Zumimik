@@ -1,5 +1,6 @@
 "use client";
 
+import { useMyAvatar } from "@/stores/avatar-store";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useEffect, useCallback, useState } from "react";
@@ -76,6 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const visibleItems = MOBILE_NAV;
   const isExamFlow = EXAM_ROUTES.some((route) => pathname.startsWith(route));
+  const photo = useMyAvatar();
   const avatarInitial = user?.name?.[0]?.toUpperCase() ?? "U";
   const displayName = (user?.name ?? "Operative").toUpperCase();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -132,8 +134,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="flex items-center gap-3 px-1.5">
-            <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-chrome-avatar text-sm font-bold text-white dark:text-white keep-white">
-              {avatarInitial}
+            <span className="grid size-[34px] shrink-0 place-items-center overflow-hidden rounded-full bg-chrome-avatar text-sm font-bold text-white dark:text-white keep-white">
+              {photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo} alt="" className="h-full w-full object-cover" />
+              ) : (
+                avatarInitial
+              )}
             </span>
             <span className="hidden flex-1 truncate whitespace-nowrap text-[12.5px] font-bold uppercase tracking-[0.5px] text-chrome-foreground/60 group-hover:block">
               {displayName}
