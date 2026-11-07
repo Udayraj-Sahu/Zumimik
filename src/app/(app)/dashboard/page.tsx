@@ -213,7 +213,11 @@ export default function DashboardPage() {
   const setPitchHookSeen = useOnboardingStore((s) => s.setPitchHookSeen);
   const temporalWindow = useOnboardingStore((s) => s.temporalWindow);
   const resumeSnapshot = useResumeStore((s) => s.snapshot);
-  const hasResume = Boolean(resumeSnapshot && resumeSnapshot.questions.some((q) => resumeSnapshot.answers[q.id] === undefined));
+  const hasResume = Boolean(
+    resumeSnapshot &&
+      Object.keys(resumeSnapshot.answers).length > 0 &&
+      resumeSnapshot.questions.some((q) => resumeSnapshot.answers[q.id] === undefined),
+  );
   const { data, isLoading, isError, error, refetch } = useDashboardData(targetExam);
   const { reduced } = useEntranceAnimations();
 

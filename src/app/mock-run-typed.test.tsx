@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -107,5 +107,46 @@ describe("mock exam: typed (TITA) answers", () => {
     fireEvent.click(screen.getByTestId("mock-prev"));
     expect(await screen.findByText("2+2?")).toBeInTheDocument();
     expect(screen.getByText("4").closest("button")).toHaveClass("text-primary"); // the earlier choice is highlighted
+  });
+
+  it("after the exam is submitted no resume snapshot is left behind", async () => {
+    await renderRun();
+    const { useResumeStore } = await import("@/stores/resume-store"); // after renderRun: it resets modules, so this is the page's own store
+    useResumeStore.getState().clearSnapshot();
+    fireEvent.click(await screen.findByText("4"));
+    expect(await screen.findByText("What is 6 x 7?", {}, { timeout: 3000 })).toBeInTheDocument();
+    await waitFor(() => expect(useResumeStore.getState().snapshot).not.toBeNull()); // saved while in progress
+    fireEvent.change(screen.getByPlaceholderText("Type your answer"), { target: { value: "42" } });
+    fireEvent.click(screen.getByRole("button", { name: /Submit answer and finish/ }));
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/mocks/submit", expect.objectContaining({ mock_id: "m1" })));
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 300));
+    expect(useResumeStore.getState().snapshot).toBeNull();
+  });
+
+  it("opening a mock and leaving without answering anything saves nothing to resume", async () => {
+    await renderRun();
+    const { useResumeStore } = await import("@/stores/resume-store");
+    useResumeStore.getState().clearSnapshot();
+    expect(await screen.findByText("2+2?")).toBeInTheDocument();
+    document.dispatchEvent(new Event("visibilitychange"));
+    window.dispatchEvent(new Event("pagehide"));
+    cleanup();
+    expect(useResumeStore.getState().snapshot).toBeNull();
+  });
+
+  it("finishing with unanswered questions asks first, and Keep going does not submit", async () => {
+    await renderRun();
+    expect(await screen.findByText("2+2?")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("mock-next")); // skipped question 1
+    expect(await screen.findByText("What is 6 x 7?")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("mock-finish"));
+    expect(await screen.findByTestId("mock-confirm-finish")).toHaveTextContent("answered 0 of 2");
+    fireEvent.click(screen.getByText("Keep going"));
+    expect(screen.queryByTestId("mock-confirm-finish")).not.toBeInTheDocument();
+    expect(apiPost).not.toHaveBeenCalledWith("/mocks/submit", expect.anything());
+    fireEvent.click(screen.getByTestId("mock-finish"));
+    fireEvent.click(await screen.findByTestId("mock-confirm-submit"));
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith("/mocks/submit", expect.objectContaining({ mock_id: "m1" })));
   });
 });

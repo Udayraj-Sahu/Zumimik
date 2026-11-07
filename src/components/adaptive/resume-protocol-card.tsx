@@ -36,9 +36,11 @@ export function ResumeProtocolCard({
   const accentSecondary = shade(accent, -20);
   const { data: plan } = useTodayPlan(domain);
 
-  // A snapshot with every question answered is a finished session, never one to resume.
+  // Resumable = something answered and something left. Every question answered is a finished session; none answered is nothing to continue.
   const unfinished =
-    !!snapshot && snapshot.questions.some((q) => snapshot.answers[q.id] === undefined);
+    !!snapshot &&
+    Object.keys(snapshot.answers).length > 0 &&
+    snapshot.questions.some((q) => snapshot.answers[q.id] === undefined);
   const visibleSnapshot =
     snapshot &&
     unfinished &&
@@ -111,7 +113,7 @@ export function ResumeProtocolCard({
             <div className="mt-3.5 flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold text-foreground/75" style={{ background: GLASS_05 }}>
                 <Play size={9} style={{ color: accent }} />
-                {Math.min(Math.max(0, visibleSnapshot.currentIndex) + 1, visibleSnapshot.questions.length)}/{visibleSnapshot.questions.length}
+                {Object.keys(visibleSnapshot.answers).length}/{visibleSnapshot.questions.length} answered
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold font-mono text-foreground/75" style={{ background: GLASS_05 }}>
                 <Clock size={9} style={{ color: accent }} />
@@ -123,7 +125,7 @@ export function ResumeProtocolCard({
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${visibleSnapshot.questions.length > 0 ? (Math.min(visibleSnapshot.currentIndex + 1, visibleSnapshot.questions.length) / visibleSnapshot.questions.length) * 100 : 0}%`,
+                  width: `${visibleSnapshot.questions.length > 0 ? (Object.keys(visibleSnapshot.answers).length / visibleSnapshot.questions.length) * 100 : 0}%`,
                   background: `linear-gradient(to right, ${accent}, ${accentSecondary})`,
                 }}
               />

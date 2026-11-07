@@ -59,6 +59,7 @@ function MockRunContent() {
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [typedAnswer, setTypedAnswer] = useState("");
+  const [confirmFinish, setConfirmFinish] = useState(false);
   // Each question starts with its own saved answer (or empty), so jumping around never leaks text between questions.
   useEffect(() => {
     const q = activeQuestions[currentIndex];
@@ -74,6 +75,7 @@ function MockRunContent() {
   const finishedRef = useRef(false);
   const buildSnapshot = useCallback((): ResumeSnapshot | null => {
     if (finishedRef.current) return null;
+    if (Object.keys(useSprintStore.getState().answers).length === 0) return null; // nothing answered: nothing to resume
     if (activeQuestions.length === 0) return null;
     const s = useSprintStore.getState();
     return {
@@ -237,6 +239,13 @@ function MockRunContent() {
     };
   }, [status, buildSnapshot, saveSnapshot]);
 
+  /** Finishing with questions left unanswered asks first: stepping through with Next never counts as answering. */
+  const requestFinish = () => {
+    const answered = Object.keys(useSprintStore.getState().answers).length;
+    if (answered < activeQuestions.length) setConfirmFinish(true);
+    else void finishMock();
+  };
+
   // Moving to a question shows what was already typed for it, so Back / Next never loses or blanks an answer.
   useEffect(() => {
     const q = activeQuestions[currentIndex];
@@ -259,7 +268,7 @@ function MockRunContent() {
       autoAdvanceRef.current = setTimeout(() => {
         const isLast = currentIndex >= activeQuestions.length - 1;
         if (isLast) {
-          void finishMock();
+          requestFinish();
         } else {
           setSelectedIndex(null);
           nextQuestion();
@@ -302,7 +311,7 @@ function MockRunContent() {
       // Submit sends every answer again in bulk, so a lost single answer is recovered there.
     });
     setTypedAnswer("");
-    if (currentIndex >= activeQuestions.length - 1) void finishMock();
+    if (currentIndex >= activeQuestions.length - 1) requestFinish();
     else nextQuestion();
   };
 
@@ -504,7 +513,7 @@ function MockRunContent() {
                 {currentIndex + 1} / {activeQuestions.length}
               </span>
               {isLast ? (
-                <Button onClick={() => void finishMock()} aria-label="Finish and submit the exam" data-testid="mock-finish" className="min-h-11 gap-1 px-4">
+                <Button onClick={requestFinish} aria-label="Finish and submit the exam" data-testid="mock-finish" className="min-h-11 gap-1 px-4">
                   Finish <Check size={16} />
                 </Button>
               ) : (
@@ -526,6 +535,17 @@ function MockRunContent() {
           ) : undefined
         }
       >
+        {confirmFinish && (
+          <div role="alertdialog" aria-label="Submit with unanswered questions" data-testid="mock-confirm-finish" className="mb-4 rounded-xl border border-white/[0.12] bg-white/[0.05] px-3 py-3 text-[12px] text-foreground/85">
+            <p>
+              You have answered {Object.keys(answers).length} of {activeQuestions.length} questions. Unanswered questions score zero and cannot be changed after you submit.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button variant="glass" className="min-h-11 flex-1" onClick={() => setConfirmFinish(false)}>Keep going</Button>
+              <Button className="min-h-11 flex-1" data-testid="mock-confirm-submit" onClick={() => { setConfirmFinish(false); void finishMock(); }}>Submit anyway</Button>
+            </div>
+          </div>
+        )}
         {submitError && (
           <div role="alert" className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-[12px] font-medium text-destructive">
             <p>Couldn&apos;t submit your exam: {submitError}</p>

@@ -80,6 +80,7 @@ function SprintContent() {
   const buildSnapshot = useCallback((): ResumeSnapshot | null => {
     if (activeQuestions.length === 0 || finishedRef.current) return null;
     const s = useSprintStore.getState();
+    if (Object.keys(s.answers).length === 0) return null; // nothing answered: nothing to resume
     return {
       kind: "sprint",
       topic,
