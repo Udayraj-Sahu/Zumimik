@@ -902,7 +902,7 @@ function LearnPageContent() {
                         </p>
 
                         <div className="flex items-center justify-between mt-4 gap-3 max-[359px]:gap-1.5">
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex min-w-0 flex-wrap gap-1.5">
                             {paper.sections.map((s) => (
                               <span
                                 key={s.id}
@@ -925,9 +925,10 @@ function LearnPageContent() {
                                 `/learn/mock/run?paper=${paper.id}&domain=${mockExamDomain}`,
                               );
                             }}
-                            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-cta px-4 py-2 max-[359px]:px-3 whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-[var(--bg)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                            aria-label={`Take test: ${paper.title}`}
+                            className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-cta px-4 py-2 max-[419px]:size-9 max-[419px]:p-0 whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-[var(--bg)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
                           >
-                            <Play size={12} strokeWidth={2.5} /> Take Test
+                            <Play size={12} strokeWidth={2.5} /> <span className="max-[419px]:sr-only">Take Test</span>
                           </button>
                         </div>
                       </GlassCard>
