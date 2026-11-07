@@ -280,3 +280,32 @@ describe("practice items carry the subject the backend names, and nothing else",
     expect(session.questions.map((x) => x.subject)).toEqual(["quant", "di", undefined, undefined, undefined, undefined]);
   });
 });
+
+describe("mapMockResults keeps the correct answers the server reveals after submit", () => {
+  const questions = [
+    { id: "q1", text: "?", options: ["Alpha", "Beta"], optionIds: ["a", "b"], correctIndex: -1, timeLimit: 60 },
+    { id: "q2", text: "?", options: [], correctIndex: -1, answerType: "text" as const, timeLimit: 60 },
+  ];
+  it("turns a multiple-choice option id into the option text and keeps a typed value as is", async () => {
+    const { mapMockResults } = await import("./backend-adapters");
+    const out = mapMockResults(
+      {
+        mock_id: "m",
+        review: [
+          { question_id: "q1", your_answer: "a", correct_answer: "b", verdict: false, time_ms: 3000 },
+          { question_id: "q2", your_answer: "4", correct_answer: "5", verdict: false, time_ms: 2000 },
+        ],
+      },
+      questions,
+      0,
+      10,
+    );
+    expect(out.answers[0]).toMatchObject({ selectedIndex: 0, correctAnswer: "Beta", correct: false });
+    expect(out.answers[1]).toMatchObject({ answerText: "4", correctAnswer: "5", correct: false });
+  });
+  it("leaves correctAnswer unset when the server does not send one", async () => {
+    const { mapMockResults } = await import("./backend-adapters");
+    const out = mapMockResults({ mock_id: "m", review: [{ question_id: "q1", your_answer: null, verdict: null, time_ms: null }] }, questions, 0, 10);
+    expect(out.answers[0].correctAnswer).toBeUndefined();
+  });
+});

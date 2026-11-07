@@ -49,6 +49,8 @@ export type SprintAnswer = {
   questionId: string;
   selectedIndex: number;
   answerText?: string;
+  /** The correct answer as text, when the server reveals it with the result (server-graded mock exams). */
+  correctAnswer?: string;
   correct: boolean | null;
   timeSpent: number;
   /** Epoch ms at which the learner submitted this answer (the device clock at that moment). Absent on answers from before it was recorded. */

@@ -515,6 +515,8 @@ export type BackendMockResultsResponse = {
   review: Array<{
     question_id: string;
     your_answer: string | null;
+    /** The right answer, revealed after submit: an option id for multiple choice, the value for a typed answer. */
+    correct_answer?: string | number | null;
     verdict: boolean | null;
     time_ms: number | null;
   }>;
@@ -531,10 +533,14 @@ export function mapMockResults(
   const answers: SprintResult["answers"] = questions.map((q) => {
     const r = byId.get(q.id);
     const idx = r?.your_answer != null ? (q.optionIds ?? []).indexOf(r.your_answer) : -1;
+    const rightId = r?.correct_answer != null ? String(r.correct_answer) : null;
+    const rightIdx = rightId !== null ? (q.optionIds ?? []).indexOf(rightId) : -1;
+    const correctAnswer = rightId === null ? undefined : rightIdx >= 0 ? (q.options[rightIdx] ?? rightId) : rightId;
     return {
       questionId: q.id,
       selectedIndex: idx,
       ...(r?.your_answer != null && q.answerType === "text" ? { answerText: r.your_answer } : {}),
+      ...(correctAnswer !== undefined ? { correctAnswer } : {}),
       correct: r?.verdict ?? null,
       timeSpent: Math.round((r?.time_ms ?? 0) / 1000),
     };

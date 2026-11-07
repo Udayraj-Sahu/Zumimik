@@ -7,11 +7,19 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Check, X, TrendingUp, Lightbulb, BookOpen } from "lucide-react";
 import { useSprintStore } from "@/stores/sprint-store";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import type { SprintResult } from "@/lib/types/sprint-session";
+import type { Question, SprintAnswer, SprintResult } from "@/lib/types/sprint-session";
 import { GLASS_BG, RED_04, RED_06, RED_30 } from "@/lib/theme";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { SessionBreakdownCard } from "@/components/learn/session-breakdown-card";
+
+/** The right answer as text: the server's (server-graded mocks), else the choice marked correct, else the expected typed value. */
+function correctAnswerText(question: Question, answer: SprintAnswer): string {
+  if (answer.correctAnswer) return answer.correctAnswer;
+  if (question.correctIndex >= 0 && question.options[question.correctIndex] !== undefined) return question.options[question.correctIndex];
+  if (question.expectedAnswer !== undefined && question.expectedAnswer !== null) return String(question.expectedAnswer);
+  return "Not available";
+}
 
 export default function AnalysisPage() {
   usePageMeta("Analysis — Zuzumik");
@@ -129,7 +137,7 @@ export default function AnalysisPage() {
                   Your Answer
                 </p>
                 <p className="mt-1 text-[13px] font-black text-destructive">
-                  {question.options[answer.selectedIndex] ?? "(unanswered)"}
+                  {answer.answerText ?? question.options[answer.selectedIndex] ?? "(unanswered)"}
                 </p>
               </div>
               <div className="rounded-xl border p-3 max-[359px]:p-2.5 text-center" style={{ backgroundColor: "var(--accent-06)", borderColor: "var(--accent-30)" }}>
@@ -137,7 +145,7 @@ export default function AnalysisPage() {
                   Correct
                 </p>
                 <p className="mt-1 text-[13px] font-black text-primary">
-                  {question.options[question.correctIndex]}
+                  {correctAnswerText(question, answer)}
                 </p>
               </div>
             </div>
